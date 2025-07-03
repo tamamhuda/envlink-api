@@ -1,4 +1,4 @@
-# ENvLink-API (NestJS)
+# EnvLink-API (NestJS)
 
 A fast and reliable URL shortening service built with NestJS, enabling easy link generation, management, and usage tracking.
 
