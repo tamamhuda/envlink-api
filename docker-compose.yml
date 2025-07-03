@@ -1,0 +1,43 @@
+
+services:
+  postgresql:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    container_name: nest-postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${DB_PORT}:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "${DB_NAME}", "-U", "${DB_USERNAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    container_name: nest-redis
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
+    restart: always
+    networks:
+      - app-network
+    healthcheck:
+      test: [ 'CMD', 'redis-cli', 'ping' ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pgdata:
+
+networks:
+  app-network:
