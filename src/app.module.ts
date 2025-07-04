@@ -7,8 +7,9 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
 import {ConfigModule} from "@nestjs/config";
-import {getJwtConfig} from "./config/jwt.config";
-import {getDatabaseConfig} from "./config/database.config";
+import {APP_FILTER} from "@nestjs/core";
+import {HttpExceptionFilter} from "./common/http-exception.filter";
+import CatchEverythingFilter from "./common/catch-everything.filter";
 
 
 @Module({
@@ -35,6 +36,17 @@ import {getDatabaseConfig} from "./config/database.config";
     UserModule,
     DatabaseModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+      AppService,
+    {
+      provide: APP_FILTER,
+      useClass: CatchEverythingFilter,
+
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter
+    }
+  ],
 })
 export class AppModule {}
