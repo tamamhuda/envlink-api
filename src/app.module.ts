@@ -9,7 +9,8 @@ import { DatabaseModule } from './database/database.module';
 import {ConfigModule} from "@nestjs/config";
 import {APP_FILTER} from "@nestjs/core";
 import {HttpExceptionFilter} from "./common/http-exception.filter";
-import CatchEverythingFilter from "./common/catch-everything.filter";
+import CatchEverythingFilter from "./common/filters/catch-everything.filter";
+import {GlobalProviders} from "./common/providers/global.providers";
 
 
 @Module({
@@ -38,15 +39,7 @@ import CatchEverythingFilter from "./common/catch-everything.filter";
   controllers: [AppController],
   providers: [
       AppService,
-    {
-      provide: APP_FILTER,
-      useClass: CatchEverythingFilter,
-
-    },
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter
-    }
+      ...GlobalProviders
   ],
 })
 export class AppModule {}
