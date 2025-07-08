@@ -1,11 +1,15 @@
 import {ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus} from "@nestjs/common";
 import {HttpAdapterHost} from "@nestjs/core";
 import {Request, Response} from "express";
+import LoggerService from "../logger/logger.service";
 
 
 @Catch()
 export default class CatchEverythingFilter implements ExceptionFilter {
-    constructor (private readonly httpAdapterHost: HttpAdapterHost) {}
+    constructor (
+        private readonly httpAdapterHost: HttpAdapterHost,
+        private readonly logger: LoggerService,
+    ) {}
 
     catch(exception: any, host: ArgumentsHost): any {
         const ctx = host.switchToHttp();
@@ -14,17 +18,23 @@ export default class CatchEverythingFilter implements ExceptionFilter {
 
         const {httpAdapter} = this.httpAdapterHost
 
-        const httpStatus = exception instanceof HttpException ?
+        const status = exception instanceof HttpException ?
             exception.getStatus() :
             HttpStatus.INTERNAL_SERVER_ERROR;
 
+        const path = httpAdapter.getRequestUrl(request)
+        const message = exception instanceof Error ? exception.message : 'Internal Server Error';
+
         const responseBody = {
-            status: httpStatus,
+            status: status,
+            message: message,
             timestamp: new Date().toISOString(),
-            path : httpAdapter.getRequestUrl(request)
+            path : path
         }
 
-        httpAdapter.reply(response, responseBody, httpStatus);
+        this.logger.errorException(CatchEverythingFilter.name, request, message, status)
+
+        httpAdapter.reply(response, responseBody, status);
 
     }
 }

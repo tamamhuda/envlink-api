@@ -5,7 +5,8 @@ import {ClassConstructor, plainToInstance} from "class-transformer";
 
 @Injectable()
 export class GlobalValidationPipe implements PipeTransform {
-    constructor(private options: ValidatorOptions & {transform?: boolean} = {}) {}
+    constructor(
+        private options: ValidatorOptions & {transform?: boolean} = {}) {}
 
     async transform(value: any, {metatype}: ArgumentMetadata): Promise<any> {
         if (!metatype || !this.toValidate(metatype)) {

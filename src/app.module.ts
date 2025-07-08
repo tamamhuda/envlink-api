@@ -8,14 +8,17 @@ import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
 import {ConfigModule} from "@nestjs/config";
 import {APP_FILTER} from "@nestjs/core";
-import {HttpExceptionFilter} from "./common/http-exception.filter";
+import {HttpExceptionFilter} from "./common/filters/http-exception.filter";
 import CatchEverythingFilter from "./common/filters/catch-everything.filter";
 import {GlobalProviders} from "./common/providers/global.providers";
+import LoggerService from "./common/logger/logger.service";
+import {WinstonModule} from "nest-winston";
+import {WinstonConfigService} from "./config/winston-config.service";
 
 
 @Module({
   imports: [
-
+    // Environment setup for local, development and production
       ConfigModule.forRoot({
         isGlobal: true,
         envFilePath: [
@@ -31,6 +34,11 @@ import {GlobalProviders} from "./common/providers/global.providers";
     // JwtModule for access tokens
 
 
+    // Winston Logger
+      WinstonModule.forRootAsync({
+          useClass: WinstonConfigService
+      }),
+
     AccountModule,
     SessionModule,
     AuthModule,
@@ -39,7 +47,10 @@ import {GlobalProviders} from "./common/providers/global.providers";
   controllers: [AppController],
   providers: [
       AppService,
-      ...GlobalProviders
+      ...GlobalProviders,
+      LoggerService
+
   ],
+    exports: [LoggerService]
 })
 export class AppModule {}
