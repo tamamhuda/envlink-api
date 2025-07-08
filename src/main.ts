@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as process from "node:process";
 import {ValidationPipe} from "@nestjs/common";
-import {GlobalValidationPipe} from "./common/global-validation.pipe";
+import {GlobalValidationPipe} from "./common/filters/global-validation.pipe";
 
 
 async function bootstrap() {
