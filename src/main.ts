@@ -1,12 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as process from "node:process";
-import {ValidationPipe} from "@nestjs/common";
-import {GlobalValidationPipe} from "./common/filters/global-validation.pipe";
-
+import {GlobalValidationPipe} from "./common/global-validation.pipe";
+import LoggerService from "./common/logger/logger.service";
+import {WinstonModule} from "nest-winston";
+import {winstonLogger} from "./config/winston.logger";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger({
+      instance: winstonLogger
+    })
+  });
 
   app.useGlobalPipes(new GlobalValidationPipe({
     whitelist: true,
@@ -16,9 +21,8 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 
-
-  console.log(`Server running as ${process.env.NODE_ENV} on Port ${process.env.PORT}`);
-  console.log(`Database URL ${process.env.DATABASE_URL}`);
+  const logger = app.get(LoggerService);
+  logger.info(`Server running as ${process.env.NODE_ENV} on Port ${process.env.PORT}`)
 }
 
 bootstrap();
