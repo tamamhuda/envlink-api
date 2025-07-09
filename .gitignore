@@ -38,6 +38,9 @@ lerna-debug.log*
 # dotenv environment variable files
 .env.*
 
+# tree2docs exclude
+README.md.backup
+
 # temp directory
 .temp
 .tmp

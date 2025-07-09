@@ -18,134 +18,80 @@ A fast and reliable URL shortening service built with NestJS, enabling easy link
 
 ## 📁 Project Structure
 
-````
-src/
-├── main.ts
-├── app.module.ts
-│
-├── config/
-│ ├── app.config.ts
-│ ├── redis.config.ts
-│ ├── bullmq.config.ts
-│ ├── mail.config.ts // Mailtrap config
-│ ├── auth.config.ts
-│ ├── env.type.ts
-│ ├── env.validation.ts
-│ ├── database.config.ts
-│ ├── jwt.config.ts
-│ └── redis.config.ts
-│
-├── database/
-│   ├── database.module.ts
-│   ├── database.service.ts
-│   └── entities/
-│       └── url.entity.ts
-│
-├── redis/
-│   ├── redis.module.ts
-│   └── redis.service.ts
-│
-├── auth/
-│   ├── auth.module.ts
-│   ├── auth.controller.ts
-│   ├── auth.service.ts
-│   ├── dto/
-│   │   ├── login.dto.ts
-│   │   ├── register.dto.ts
-│   │   ├── refresh-token.dto.ts
-│   │   └── oauth.dto.ts
-│   ├── oauth/
-│   │   ├── google.strategy.ts
-│   │   └── github.strategy.ts
-│   └── strategies/
-│       ├── jwt.strategy.ts
-│       └── local.strategy.ts
-│
-├── users/
-│   ├── users.module.ts
-│   ├── users.controller.ts
-│   ├── users.service.ts
-│   └── dto/
-│       ├── update-user-response.dto.ts
-│       └── verify-email.dto.ts
-│
-├── urls/
-│   ├── urls.module.ts
-│   ├── urls.controller.ts
-│   ├── urls.service.ts
-│   ├── entities/
-│   │   └── url.entity.ts
-│   ├── dto/
-│   │   ├── create-url.dto.ts
-│   │   ├── update-url.dto.ts
-│   │   └── resolve-url.dto.ts
-│   ├── services/
-│   │   ├── url-generator.service.ts
-│   │   ├── url-expiration.service.ts
-│   │   └── qr-code.service.ts
-│   └── utils/
-│       └── short-code-generator.ts
-│
-├── metadata/
-│   ├── metadata.module.ts
-│   ├── metadata.service.ts
-│   └── jobs/
-│       └── fetch-url-metadata.job.ts
-│
-├── mail/
-│   ├── mail.module.ts
-│   ├── mail.service.ts
-│   └── templates/
-│       ├── verification-email.hbs
-│       └── password-reset.hbs
-│
-├── jobs/
-│   ├── metadata/
-│   │   └── fetch-url-metadata.job.ts
-│   ├── mail/
-│   │   └── send-email.job.ts
-│   ├── urls/
-│   │   └── cleanup-url.job.ts
-│   ├── job.processor.ts
-│   ├── queues.ts
-│   └── queue-types.enum.ts
-│
-├── bullboard/
-│   ├── bull-board.module.ts
-│   └── bull-board.controller.ts
-│
-├── analytics/
-│   ├── analytics.module.ts
-│   ├── analytics.service.ts
-│   └── dto/
-│       └── log-click.dto.ts
-│
-├── rate-limit/
-│   ├── rate-limit.module.ts
-│   └── rate-limit.guard.ts
-│
-├── common/
-│   ├── decorators/
-│   │   └── some.decorator.ts
-│   ├── guards/
-│   │   └── some.guard.ts
-│   ├── interceptors/
-│   │   └── some.interceptor.ts
-│   └── filters/
-│       └── some.filter.ts
-│
-├── enums/
-│   ├── role.enum.ts
-│   └── provider.enum.ts
-│
-├── interfaces/
-│   ├── user.interface.ts
-│   └── url.interface.ts
-│
-├── middleware/
-│   └── request-logger.middleware.ts
+```
+├── 📁 .jetclient
+│   ├── 📁 API
+│   │   ├── 📄 _folder.md
+│   │   └── 📄 healthz.md
+│   └── 📄 jetclient.md
+├── 📁 src
+│   ├── 📁 account
+│   │   ├── 📄 account.controller.ts
+│   │   ├── 📄 account.module.ts
+│   │   └── 📄 account.service.ts
+│   ├── 📁 auth
+│   │   ├── 📄 auth.controller.ts
+│   │   ├── 📄 auth.module.ts
+│   │   └── 📄 auth.service.ts
+│   ├── 📁 common
+│   │   ├── 📁 filters
+│   │   │   ├── 📄 catch-everything.filter.ts
+│   │   │   └── 📄 http-exception.filter.ts
+│   │   ├── 📁 interceptors
+│   │   │   └── 📄 logging.interceptor.ts
+│   │   ├── 📁 logger
+│   │   │   └── 📄 logger.service.ts
+│   │   ├── 📁 providers
+│   │   │   └── 📄 global.providers.ts
+│   │   └── 📄 global-validation.pipe.ts
+│   ├── 📁 config
+│   │   ├── 📄 database.config.ts
+│   │   ├── 📄 env.type.ts
+│   │   ├── 📄 env.validation.ts
+│   │   ├── 📄 jwt.config.ts
+│   │   ├── 📄 redis.config.ts
+│   │   ├── 📄 winston-config.service.ts
+│   │   └── 📄 winston.logger.ts
+│   ├── 📁 database
+│   │   ├── 📄 database.controller.ts
+│   │   ├── 📄 database.module.ts
+│   │   └── 📄 database.service.ts
+│   ├── 📁 session
+│   │   ├── 📄 session.controller.ts
+│   │   ├── 📄 session.module.ts
+│   │   └── 📄 session.service.ts
+│   ├── 📁 user
+│   │   ├── 📄 user.controller.ts
+│   │   ├── 📄 user.module.ts
+│   │   └── 📄 user.service.ts
+│   ├── 📄 app.controller.spec.ts
+│   ├── 📄 app.controller.ts
+│   ├── 📄 app.module.ts
+│   ├── 📄 app.service.ts
+│   └── 📄 main.ts
+├── 📁 test
+│   ├── 📄 app.e2e-spec.ts
+│   └── 📄 jest-e2e.json
+├── 📄 .gitignore
+├── 📄 .prettierrc
+├── 📄 docker-compose.dev.yml
+├── 📄 docker-compose.prod.yml
+├── 📄 docker-compose.yml
+├── 📄 Dockerfile
+├── 📄 Dockerfile.dev
+├── 📄 entrypoint.dev.sh
+├── 📄 entrypoint.sh
+├── 📄 eslint.config.mjs
+├── 📄 LICENSE
+├── 📄 nest-cli.json
+├── 📄 package-lock.json
+├── 📄 package.json
+├── 📄 README.md
+├── 📄 tsconfig.build.json
+└── 📄 tsconfig.json
+```
 
-````
+*Last updated: 2025-07-09T13:15:28.075Z*
 
 ---
 
