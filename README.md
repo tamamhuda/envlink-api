@@ -258,3 +258,86 @@ Feel free to open issues, submit pull requests, or reach out via email for colla
 ---
 
 © 2025 Tamam Huda. All rights reserved.
+
+## Project Structure
+<pre>
+<img src="https://logo.svgcdn.com/l/nestjs.svg" alt="NestJS" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding-bottom: 4px;" /> envlink-api
+├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> .jetclient
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> API
+│   │   ├── <img src="https://logo.svgcdn.com/l/markdown.svg" alt="Markdown" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> _folder.md
+│   │   └── <img src="https://logo.svgcdn.com/l/markdown.svg" alt="Markdown" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> healthz.md
+│   └── <img src="https://logo.svgcdn.com/l/markdown.svg" alt="Markdown" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> jetclient.md
+├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> src
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> account
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> account.controller.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> account.module.ts
+│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> account.service.ts
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> auth
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> auth.controller.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> auth.module.ts
+│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> auth.service.ts
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> common
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> filters
+│   │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> catch-everything.filter.ts
+│   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> http-exception.filter.ts
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> interceptors
+│   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> logging.interceptor.ts
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> logger
+│   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> logger.service.ts
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> providers
+│   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> global.providers.ts
+│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> global-validation.pipe.ts
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> config
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database.config.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> env.type.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> env.validation.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> jwt.config.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> redis.config.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> winston-config.service.ts
+│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> winston.logger.ts
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> entities
+│   │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> account.entity.ts
+│   │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> session.entity.ts
+│   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> user.entity.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database.controller.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database.module.ts
+│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database.service.ts
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> enums
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> provider.enum.ts
+│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> roles.enum.ts
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> session
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> session.controller.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> session.module.ts
+│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> session.service.ts
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> user
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> user.controller.ts
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> user.module.ts
+│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> user.service.ts
+│   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> app.controller.spec.ts
+│   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> app.controller.ts
+│   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> app.module.ts
+│   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> app.service.ts
+│   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> main.ts
+├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> test
+│   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> app.e2e-spec.ts
+│   └── <img src="https://cdn-icons-png.flaticon.com/512/11580/11580838.png" alt="JSON" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> jest-e2e.json
+├── <img src="https://logo.svgcdn.com/l/git-icon.svg" alt=".gitignore" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> .gitignore
+├── <img src="https://cdn-icons-png.flaticon.com/512/4194/4194717.png" alt="File" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> .prettierrc
+├── <img src="https://logo.svgcdn.com/l/yaml.svg" alt="YAML" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> docker-compose.dev.yml
+├── <img src="https://logo.svgcdn.com/l/yaml.svg" alt="YAML" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> docker-compose.prod.yml
+├── <img src="https://logo.svgcdn.com/l/yaml.svg" alt="YAML" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> docker-compose.yml
+├── <img src="https://logo.svgcdn.com/l/docker-icon.svg" alt="Dockerfile" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> Dockerfile
+├── <img src="https://cdn-icons-png.flaticon.com/512/4194/4194717.png" alt="File" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> Dockerfile.dev
+├── <img src="https://logo.svgcdn.com/l/bash-icon.svg" alt="Shell" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> entrypoint.dev.sh
+├── <img src="https://logo.svgcdn.com/l/bash-icon.svg" alt="Shell" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> entrypoint.sh
+├── <img src="https://logo.svgcdn.com/l/javascript.svg" alt="JavaScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> eslint.config.mjs
+├── <img src="https://logo.svgcdn.com/l/github.svg" alt="LICENSE" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> LICENSE
+├── <img src="https://cdn-icons-png.flaticon.com/512/11580/11580838.png" alt="JSON" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> nest-cli.json
+├── <img src="https://logo.svgcdn.com/l/nodejs-icon.svg" alt="Node.js" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> package-lock.json
+├── <img src="https://logo.svgcdn.com/l/nodejs-icon.svg" alt="Node.js" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> package.json
+├── <img src="https://logo.svgcdn.com/l/markdown.svg" alt="Markdown" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> README.md
+├── <img src="https://cdn-icons-png.flaticon.com/512/4194/4194717.png" alt="File" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> README.md.backup
+├── <img src="https://cdn-icons-png.flaticon.com/512/11580/11580838.png" alt="JSON" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> tsconfig.build.json
+└── <img src="https://cdn-icons-png.flaticon.com/512/11580/11580838.png" alt="JSON" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> tsconfig.json
+</pre>

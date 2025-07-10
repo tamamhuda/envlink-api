@@ -23,6 +23,7 @@ async function bootstrap() {
 
   const logger = app.get(LoggerService);
   logger.info(`Server running as ${process.env.NODE_ENV} on Port ${process.env.PORT}`)
+
 }
 
 bootstrap();
