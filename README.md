@@ -19,11 +19,6 @@ A fast and reliable URL shortening service built with NestJS, enabling easy link
 ## Project Structure
 <pre>
 <img src="https://logo.svgcdn.com/l/nestjs.svg" alt="NestJS" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding-bottom: 4px;" /> envlink-api
-├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> .jetclient
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> API
-│   │   ├── <img src="https://logo.svgcdn.com/l/markdown.svg" alt="Markdown" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> _folder.md
-│   │   └── <img src="https://logo.svgcdn.com/l/markdown.svg" alt="Markdown" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> healthz.md
-│   └── <img src="https://logo.svgcdn.com/l/markdown.svg" alt="Markdown" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> jetclient.md
 ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> src
 │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> account
 │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> account.controller.ts
@@ -98,9 +93,6 @@ A fast and reliable URL shortening service built with NestJS, enabling easy link
 ├── <img src="https://cdn-icons-png.flaticon.com/512/11580/11580838.png" alt="JSON" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> tsconfig.build.json
 └── <img src="https://cdn-icons-png.flaticon.com/512/11580/11580838.png" alt="JSON" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> tsconfig.json
 </pre>
-
----
-
 ## 🔐 Key Modules & Features
 
 ### ✅ Authentication
