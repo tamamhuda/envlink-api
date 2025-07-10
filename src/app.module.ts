@@ -6,18 +6,18 @@ import { SessionModule } from './session/session.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
-import {ConfigModule} from "@nestjs/config";
-import {APP_FILTER} from "@nestjs/core";
-import {HttpExceptionFilter} from "./common/filters/http-exception.filter";
-import CatchEverythingFilter from "./common/filters/catch-everything.filter";
+import {ConfigModule, ConfigService} from "@nestjs/config";
 import {GlobalProviders} from "./common/providers/global.providers";
 import LoggerService from "./common/logger/logger.service";
 import {WinstonModule} from "nest-winston";
 import {WinstonConfigService} from "./config/winston-config.service";
+import {TypeOrmModule} from "@nestjs/typeorm";
+import {getDatabaseConfig} from "./config/database.config";
 
 
 @Module({
   imports: [
+
     // Environment setup for local, development and production
       ConfigModule.forRoot({
         isGlobal: true,
@@ -28,8 +28,12 @@ import {WinstonConfigService} from "./config/winston-config.service";
         expandVariables: true,
       }),
 
-    // Database module using TypeOrmModule with async config
-
+    // TypeOrmModule with async config
+      TypeOrmModule.forRootAsync({
+          imports: [ConfigModule],
+          inject: [ConfigService],
+          useFactory: getDatabaseConfig
+      }),
 
     // JwtModule for access tokens
 

@@ -1,0 +1,571 @@
+# EnvLink-API (NestJS)
+
+A fast and reliable URL shortening service built with NestJS, enabling easy link generation, management, and usage tracking.
+
+<p align="center">
+  <a href="https://nestjs.com/" target="_blank"><img src="https://img.shields.io/badge/NestJS-8DA0F8?logo=nestjs&logoColor=white&style=flat-square" alt="NestJS" /></a>
+  <a href="https://typeorm.io/" target="_blank"><img src="https://img.shields.io/badge/TypeORM-3178C6?logo=typeorm&logoColor=white&style=flat-square" alt="TypeORM" /></a>
+  <a href="https://redis.io/" target="_blank"><img src="https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white&style=flat-square" alt="Redis" /></a>
+  <a href="https://bullmq.io/" target="_blank"><img src="https://img.shields.io/badge/BullMQ-00BFFF?logo=node.js&logoColor=white&style=flat-square" alt="BullMQ" /></a>
+  <a href="https://www.passportjs.org/" target="_blank"><img src="https://img.shields.io/badge/Passport.js-34495E?logo=passport&logoColor=white&style=flat-square" alt="Passport.js" /></a>
+  <a href="https://mailtrap.io/" target="_blank"><img src="https://img.shields.io/badge/Mailtrap-9F3EDD?logo=mailtrap&logoColor=white&style=flat-square" alt="Mailtrap" /></a>
+  <a href="https://handlebarsjs.com/" target="_blank"><img src="https://img.shields.io/badge/Handlebars-E34F26?logo=handlebarsdotjs&logoColor=white&style=flat-square" alt="Handlebars" /></a>
+  <a href="https://playwright.dev/" target="_blank"><img src="https://img.shields.io/badge/Playwright-000000?logo=playwright&logoColor=white&style=flat-square" alt="Playwright" /></a>
+  <a href="https://github.com/typestack/class-validator" target="_blank"><img src="https://img.shields.io/badge/class--validator-7B1FA2?logo=typescript&logoColor=white&style=flat-square" alt="class-validator" /></a>
+</p>
+
+---
+
+## 📁 Project Structure
+
+```
+├── 📁 .jetclient
+│   ├── 📁 API
+│   │   ├── 📄 _folder.md
+│   │   └── 📄 healthz.md
+│   └── 📄 jetclient.md
+├── 📁 src
+│   ├── 📁 account
+│   │   ├── 📄 account.controller.ts
+│   │   ├── 📄 account.module.ts
+│   │   └── 📄 account.service.ts
+│   ├── 📁 auth
+│   │   ├── 📄 auth.controller.ts
+│   │   ├── 📄 auth.module.ts
+│   │   └── 📄 auth.service.ts
+│   ├── 📁 common
+│   │   ├── 📁 filters
+│   │   │   ├── 📄 catch-everything.filter.ts
+│   │   │   └── 📄 http-exception.filter.ts
+│   │   ├── 📁 interceptors
+│   │   │   └── 📄 logging.interceptor.ts
+│   │   ├── 📁 logger
+│   │   │   └── 📄 logger.service.ts
+│   │   ├── 📁 providers
+│   │   │   └── 📄 global.providers.ts
+│   │   └── 📄 global-validation.pipe.ts
+│   ├── 📁 config
+│   │   ├── 📄 database.config.ts
+│   │   ├── 📄 env.type.ts
+│   │   ├── 📄 env.validation.ts
+│   │   ├── 📄 jwt.config.ts
+│   │   ├── 📄 redis.config.ts
+│   │   ├── 📄 winston-config.service.ts
+│   │   └── 📄 winston.logger.ts
+│   ├── 📁 database
+│   │   ├── 📄 database.controller.ts
+│   │   ├── 📄 database.module.ts
+│   │   └── 📄 database.service.ts
+│   ├── 📁 session
+│   │   ├── 📄 session.controller.ts
+│   │   ├── 📄 session.module.ts
+│   │   └── 📄 session.service.ts
+│   ├── 📁 user
+│   │   ├── 📄 user.controller.ts
+│   │   ├── 📄 user.module.ts
+│   │   └── 📄 user.service.ts
+│   ├── 📄 app.controller.spec.ts
+│   ├── 📄 app.controller.ts
+│   ├── 📄 app.module.ts
+│   ├── 📄 app.service.ts
+│   └── 📄 main.ts
+├── 📁 test
+│   ├── 📄 app.e2e-spec.ts
+│   └── 📄 jest-e2e.json
+├── 📄 .gitignore
+├── 📄 .prettierrc
+├── 📄 docker-compose.dev.yml
+├── 📄 docker-compose.prod.yml
+├── 📄 docker-compose.yml
+├── 📄 Dockerfile
+├── 📄 Dockerfile.dev
+├── 📄 entrypoint.dev.sh
+├── 📄 entrypoint.sh
+├── 📄 eslint.config.mjs
+├── 📄 LICENSE
+├── 📄 nest-cli.json
+├── 📄 package-lock.json
+├── 📄 package.json
+├── 📄 README.md
+├── 📄 tsconfig.build.json
+└── 📄 tsconfig.json
+```
+
+*Last updated: 2025-07-09T13:15:28.075Z*
+
+---
+
+## 🔐 Key Modules & Features
+
+### ✅ Authentication
+- JWT & refresh token strategy
+- Local login & OAuth (Google, GitHub)
+- Passport.js integration
+
+### 👤 Users
+- Profile management
+- Email verification logic
+
+### 🔗 URLs
+- URL shortening and resolution
+- QR code generation
+- Expiration and cleanup service
+- Metadata extraction via background job
+
+### 📄 Metadata
+- Extracts OpenGraph and Twitter metadata
+- Uses Playwright to render and scrape dynamic content
+
+### ✉️ Email (via Mailtrap)
+- Configured using `mail.config.ts`
+- Uses `@nestjs-modules/mailer` + Nodemailer
+- Handlebars template engine
+- Built-in support for verification & reset emails
+
+### ⚙️ Jobs
+- Background processing with BullMQ
+- Handles email, metadata, and cleanup tasks
+
+### 📊 Analytics
+- Track URL clicks and usage
+
+### 🛡️ Rate Limiting
+- Global request protection via guards
+
+---
+
+## ⚙️ Configuration
+
+All env config is validated and typed via `@nestjs/config` + `joi`.
+
+| File | Purpose |
+|------|---------|
+| `database.config.ts` | TypeORM connection |
+| `auth.config.ts` | JWT settings |
+| `mail.config.ts` | Mailtrap SMTP settings |
+| `redis.config.ts` | Redis host/port |
+| `bullmq.config.ts` | BullMQ setup |
+| `env.validation.ts` | Joi validation |
+| `env.type.ts` | Type-safe config contracts |
+
+---
+
+## 🛠️ Tech Stack
+
+- **NestJS** – backend framework
+- **TypeORM** – ORM with PostgreSQL/MySQL
+- **Redis** – for caching and job queue
+- **BullMQ** – background job processing
+- **Playwright** – for scraping page metadata
+- **Passport.js** – for authentication
+- **Mailtrap + Nodemailer** – for secure email testing
+- **Handlebars** – email templating
+- **class-validator** – for DTO validation
+
+---
+
+## 💡 Highlights
+
+- 🔄 **Async jobs** with BullMQ (metadata, email, cleanup)
+- 🧠 **Dynamic metadata** extraction with Playwright
+- ✉️ **Email** system is safely testable using **Mailtrap**
+- ✅ **Typed environment config** with `joi` + TypeScript
+- 📦 **Modular architecture** for easy scaling & testing
+
+
+## Credits
+
+This project was created and is maintained by **Tamam Huda**.
+
+Special thanks to the open-source community and the developers of the libraries and tools used in this project, including but not limited to:
+
+- [NestJS](https://nestjs.com/)
+- [TypeORM](https://typeorm.io/)
+- [Redis](https://redis.io/)
+- [BullMQ](https://bullmq.io/)
+- [Passport.js](https://www.passportjs.org/)
+- [Nodemailer](https://nodemailer.com/)
+- [Handlebars](https://handlebarsjs.com/)
+- [Playwright](https://playwright.dev/)
+- [class-validator](https://github.com/typestack/class-validator)
+
+---
+
+### Developer Contact
+
+- **Name:** Tamam Huda (Uta Dev)
+- **Email:** tamamhuda11@gmail.com
+- **GitHub:** [https://github.com/tamamhuda](https://github.com/tamamhuda)
+- **LinkedIn:** [https://linkedin.com/in/tamamhuda](https://linkedin.com/in/tamamhuda)
+- **Website:** -
+
+Feel free to open issues, submit pull requests, or reach out via email for collaboration and feedback!
+
+---
+
+© 2025 Tamam Huda. All rights reserved.
+
+## Project Structure
+<pre>
+📁 envlink-api
+├── 📁 .git
+│   ├── 📁 hooks
+│   │   ├── 📄 applypatch-msg.sample
+│   │   ├── 📄 commit-msg.sample
+│   │   ├── 📄 fsmonitor-watchman.sample
+│   │   ├── 📄 post-update.sample
+│   │   ├── 📄 pre-applypatch.sample
+│   │   ├── 📄 pre-commit.sample
+│   │   ├── 📄 pre-merge-commit.sample
+│   │   ├── 📄 pre-push.sample
+│   │   ├── 📄 pre-rebase.sample
+│   │   ├── 📄 pre-receive.sample
+│   │   ├── 📄 prepare-commit-msg.sample
+│   │   ├── 📄 push-to-checkout.sample
+│   │   └── 📄 update.sample
+│   ├── 📁 info
+│   │   └── 📄 exclude
+│   ├── 📁 objects
+│   │   ├── 📁 00
+│   │   │   └── 📄 0e3f41941dfd83339b8f05642f902543b661db
+│   │   ├── 📁 04
+│   │   │   └── 📄 86b3e6fd6ddf1f197d40ba39893b2a35c7504e
+│   │   ├── 📁 05
+│   │   │   └── 📄 6606a275a15a8a5019e532857322637f4f1795
+│   │   ├── 📁 07
+│   │   │   └── 📄 f53b402efaaae96962608c4b2e7dd6633f2282
+│   │   ├── 📁 08
+│   │   │   └── 📄 82c96d4fbbcb7ebe11ad9f21f81e1aa72ad2a8
+│   │   ├── 📁 0c
+│   │   │   └── 📄 852eb771d6de25a89105f42ab394b5f9082350
+│   │   ├── 📁 0d
+│   │   │   └── 📄 850d36ab4c33d4b9f371594374fdf5ccd1bf12
+│   │   ├── 📁 10
+│   │   │   ├── 📄 06eb9e407fbbf37d7e2ca89b7a865446be9826
+│   │   │   └── 📄 303a42c5871104eae9638acb0c9db1dee6ee31
+│   │   ├── 📁 12
+│   │   │   └── 📄 d4c61a9e60ca9f1ac50aacbd4df412fc3557cf
+│   │   ├── 📁 18
+│   │   │   ├── 📄 9acb6076c3cd6fe473c109b11c622584d51109
+│   │   │   └── 📄 c876eb60521f25e884a7ef02e69b544e8bc25e
+│   │   ├── 📁 19
+│   │   │   └── 📄 063921e8f89713762c5895548dd30254cd1899
+│   │   ├── 📁 1b
+│   │   │   ├── 📄 2b463de4bd25e9ce7f75ef07a37fb6c1ee4d2b
+│   │   │   └── 📄 4d345a47b7c87e26b93acb78da757e0d3f3a98
+│   │   ├── 📁 1c
+│   │   │   └── 📄 43672dce8c65cb7fb233490584c45f9414e1aa
+│   │   ├── 📁 1f
+│   │   │   └── 📄 ecadc2c96fcf280987835f0a422fc0b15f8f2d
+│   │   ├── 📁 21
+│   │   │   └── 📄 45230095e8c4e96452821242307d404b9f5ee4
+│   │   ├── 📁 22
+│   │   │   ├── 📄 c204c40b25dad1ebc9fdf28754293f071034bd
+│   │   │   └── 📄 db3b333ec74aa2ee9667672e365eeab6b3571a
+│   │   ├── 📁 25
+│   │   │   └── 📄 54a4c7119e894c75625cb5593d3df6599f978a
+│   │   ├── 📁 29
+│   │   │   └── 📄 a06a02368b3c32751961f18add1799fa50f8ab
+│   │   ├── 📁 2c
+│   │   │   └── 📄 a8be0910b14fb3d3e4c6f7928636b5e57e264d
+│   │   ├── 📁 2e
+│   │   │   └── 📄 3a01f87a3f5970adb9b37038a605561d934e3a
+│   │   ├── 📁 2f
+│   │   │   └── 📄 37f674b742498cd0691c4dade713bd834a2409
+│   │   ├── 📁 31
+│   │   │   └── 📄 71d4a1b3510ffdf134c3c4704c54b4b156bef7
+│   │   ├── 📁 32
+│   │   │   ├── 📄 1a22aead8a020af6441ee593acc6cc4c080ab5
+│   │   │   └── 📄 5f8a13e85e2bc0444c6009fe87f8342f2ce905
+│   │   ├── 📁 34
+│   │   │   └── 📄 e9e7ea51a5ce0f5882985939da9bcf5fa34a54
+│   │   ├── 📁 35
+│   │   │   └── 📄 05efd54bb89d5b26ecd0e2871bdb7bd0239471
+│   │   ├── 📁 39
+│   │   │   └── 📄 ff730d43b76ec55e0cb4c015f514b4f1e21b8e
+│   │   ├── 📁 3c
+│   │   │   └── 📄 3b0629fa12057cb13cd3a9e53c9169d784cec6
+│   │   ├── 📁 3d
+│   │   │   └── 📄 e46c23d83f4fc0c268f590ac92f574a2379914
+│   │   ├── 📁 3e
+│   │   │   └── 📄 6ebd3171dc1b3ff5b9b31a99bdded9ab98ce9c
+│   │   ├── 📁 3f
+│   │   │   ├── 📄 9343036b3e1760d876794cfdd2a1f8ce0e0240
+│   │   │   └── 📄 a9ce57921f5a3b52d77e0cf14bb358407207e8
+│   │   ├── 📁 42
+│   │   │   └── 📄 4dda0bf2a4b373bd33f0642fe5877c3e47d4a4
+│   │   ├── 📁 45
+│   │   │   └── 📄 af0551dd8b364c7e6c000e035966904883e8bf
+│   │   ├── 📁 46
+│   │   │   ├── 📄 9641f393490f3f788c323edeb8011ed5b42396
+│   │   │   └── 📄 e183a434b4e2d07e14ff80538bc7fff7e0ca8a
+│   │   ├── 📁 4b
+│   │   │   └── 📄 56acfbebf41e17d1ff0dd945bb4c545eae1db1
+│   │   ├── 📁 4d
+│   │   │   ├── 📄 6440930dc3a7feb89929d33855f844f29ccb3d
+│   │   │   ├── 📄 6a4d0324767f2c719122c077138220596242d7
+│   │   │   ├── 📄 dc1b87f4fc5e65098742e23c3c81a6cfbda20e
+│   │   │   └── 📄 f6580c782cc8cbb5c750e68f21de84c2e057be
+│   │   ├── 📁 4f
+│   │   │   ├── 📄 1b26d23eb75265b4166e308ee28635881e6d07
+│   │   │   ├── 📄 39b9ea110d5755c934daf8ac81358b81bb66d5
+│   │   │   └── 📄 e342f5b75644c54035ae87c5d266cb640e4b6d
+│   │   ├── 📁 51
+│   │   │   ├── 📄 15e4f27bb14951fa1be319d92808fbd5f6cd92
+│   │   │   ├── 📄 3ccf0e78b56d3c08ccd40ca900a6ca0e8676e3
+│   │   │   └── 📄 813a120b2468545ebbe5796a31a7de4ede67df
+│   │   ├── 📁 5a
+│   │   │   └── 📄 2b682e55fad08318132fdaf030733c33512c2d
+│   │   ├── 📁 5b
+│   │   │   └── 📄 14d6832105d3110d0b565f851fd32c36d7ecef
+│   │   ├── 📁 64
+│   │   │   └── 📄 f86c6bd2bb30e3d22e752295eb7c7923fc191e
+│   │   ├── 📁 65
+│   │   │   └── 📄 244f14d670d02c9bf5954a257b50db1fcc5e71
+│   │   ├── 📁 66
+│   │   │   ├── 📄 08d5919d4bcdad16f516585f205698ce16d490
+│   │   │   └── 📄 8a7d6b91ece2642112b6a24f61d926e9514340
+│   │   ├── 📁 68
+│   │   │   ├── 📄 066884f3cbcb52aeab491fc213c08990ef1417
+│   │   │   ├── 📄 2f9a453aa84a7f1910a70f18ead13cf77ee3fc
+│   │   │   ├── 📄 6ea4d2f8843d3ca69297bb5deabca92b80b748
+│   │   │   └── 📄 c159adafdf36447ac289059e49d93feafeb473
+│   │   ├── 📁 69
+│   │   │   └── 📄 e9a8b6cd3d4a1e86a7c6e890e29db09dc445d7
+│   │   ├── 📁 72
+│   │   │   └── 📄 cca8124bd7be0d527ec741064e3634388c25e4
+│   │   ├── 📁 74
+│   │   │   ├── 📄 261be467ac9427f0d28a4b8fe3ba19fde41554
+│   │   │   └── 📄 44dd39a6aa6925fe7ae3d0ee8f47910fd21577
+│   │   ├── 📁 77
+│   │   │   └── 📄 502dffbb58bbdb3312cd140268b07e8bb90b21
+│   │   ├── 📁 78
+│   │   │   └── 📄 f38a2180ff901c6110c3fd59f8809adc430973
+│   │   ├── 📁 79
+│   │   │   └── 📄 27816f87e7dd5d2204274a0b7ebb9ead7946fb
+│   │   ├── 📁 7c
+│   │   │   └── 📄 24e231ca0efd3dbc2ce86ca1975b345f7c4d4b
+│   │   ├── 📁 7f
+│   │   │   └── 📄 97340e6adf2b5fe57477ebed68324f10718101
+│   │   ├── 📁 86
+│   │   │   └── 📄 628031ca2a10fe172fe824f69d1720c44b43ce
+│   │   ├── 📁 87
+│   │   │   └── 📄 7601e8c35b7c3a1e1fc39777c126a4d609da77
+│   │   ├── 📁 89
+│   │   │   ├── 📄 2418e06719c4d174daa931f1cf49b9d2e1c61e
+│   │   │   └── 📄 e86f48ef406daafb8bcf5cba1a3d510cb28d7d
+│   │   ├── 📁 8a
+│   │   │   └── 📄 de2c889755f538bfb94e3c202166cbe6f31afa
+│   │   ├── 📁 8d
+│   │   │   ├── 📄 1be91757074fafff1d29282be352264cc61806
+│   │   │   └── 📄 7577d1f25fd4ada88848b79405008304a6ba82
+│   │   ├── 📁 8f
+│   │   │   └── 📄 0f65f7e7f7a77781af65d82501109530d444f4
+│   │   ├── 📁 92
+│   │   │   └── 📄 7d7cca0badb13577152bf8753ce3552358f53b
+│   │   ├── 📁 94
+│   │   │   ├── 📄 3c40b9e496cf51b56d626305c1cee7c224ecfa
+│   │   │   └── 📄 4ae32d1f2437608eaaa1854e5685cdeb6dc913
+│   │   ├── 📁 96
+│   │   │   └── 📄 0fb37887be11b1721699342d02d8f2ec7f58ac
+│   │   ├── 📁 9a
+│   │   │   └── 📄 7357934dbfa079413d6bab26d672e0bfe220a6
+│   │   ├── 📁 9d
+│   │   │   └── 📄 8ae8a76a6952451c691eb1885ca447d3fb5773
+│   │   ├── 📁 9e
+│   │   │   └── 📄 2429cf3c74090ed9293fbfa59c1b42749d5f1f
+│   │   ├── 📁 a2
+│   │   │   └── 📄 f7238b22decb7e94963c374ea8a0bfcd669790
+│   │   ├── 📁 a4
+│   │   │   └── 📄 1c649f9ed21c83210022a79a981e0c3b9f74b5
+│   │   ├── 📁 a7
+│   │   │   ├── 📄 9e536adfcaeecb6e929d185b7a97d5d42328b8
+│   │   │   └── 📄 b378ebeca772eeb2bd04cfe9a2e614f8ac9492
+│   │   ├── 📁 a9
+│   │   │   └── 📄 fbc99e3a3931d9dddbeb72a800ff3b749a14ef
+│   │   ├── 📁 ab
+│   │   │   └── 📄 904f4da19b29205ffca5531df232e503a3b782
+│   │   ├── 📁 b2
+│   │   │   └── 📄 d816259c11ff7a8f0a3e290f7627d441f25d3e
+│   │   ├── 📁 b3
+│   │   │   ├── 📄 3b53e4a8d21b671d013f957ae287fc3a4eb429
+│   │   │   └── 📄 7f1690900829c49272a01abf9f4f801acdb560
+│   │   ├── 📁 b9
+│   │   │   ├── 📄 5b2314be0e0a53d3b7b2c295a952477912803c
+│   │   │   └── 📄 ce53daef65d4a24815f3d266a829293e5f8dbc
+│   │   ├── 📁 bb
+│   │   │   ├── 📄 69c8030d46c0f93284a2548e0526acd87195da
+│   │   │   └── 📄 700d75c4818bad045aeb62835cb1b87e4d6157
+│   │   ├── 📁 bc
+│   │   │   ├── 📄 768083f411745644518a6f095e289d84386643
+│   │   │   └── 📄 ab18bf684782d1d72c37a8858fc846f902515b
+│   │   ├── 📁 bd
+│   │   │   ├── 📄 4c5fd6fb9aaa53bfa3044b190d190b24907008
+│   │   │   └── 📄 b677b2401f6c807513a96755482baaa0d24fb4
+│   │   ├── 📁 be
+│   │   │   └── 📄 a03c3d1081297da78aecc5edaf6ccc1c7de02a
+│   │   ├── 📁 c3
+│   │   │   └── 📄 ee88ca9f5a2024d060091edcbe29810f8ab895
+│   │   ├── 📁 c5
+│   │   │   └── 📄 f9c2b7addfae452be57496ad2438c0a7ad18be
+│   │   ├── 📁 ca
+│   │   │   └── 📄 ebf6e705497cb2bbb2d2a4f87cae52d6a60552
+│   │   ├── 📁 cc
+│   │   │   └── 📄 e879ee622146012901c9adb47ef40c0fd3a555
+│   │   ├── 📁 cd
+│   │   │   └── 📄 b87cf8b7b2af5ba733639007f050323eff7657
+│   │   ├── 📁 cf
+│   │   │   └── 📄 ee44c44020e18015aa6af45097f83834776309
+│   │   ├── 📁 d0
+│   │   │   └── 📄 6bee676100505848742bb0e6a2933040e63c15
+│   │   ├── 📁 d1
+│   │   │   ├── 📄 0dde59e253e694113eb4e0ee6e61878b6424d9
+│   │   │   └── 📄 74f208a6fd0601ad354239b162d452c5f95da8
+│   │   ├── 📁 d2
+│   │   │   ├── 📄 2f3890a380cea30641cfecc329b5c794ef5fb2
+│   │   │   └── 📄 c86591c0d3e9ba7d14c753e2cfa4066092a94e
+│   │   ├── 📁 d3
+│   │   │   └── 📄 a92d6462ff9f7fbd82b5543ba53a539087b737
+│   │   ├── 📁 d5
+│   │   │   └── 📄 da4ff108445495f443e297f836a849e82f18b1
+│   │   ├── 📁 d6
+│   │   │   └── 📄 f55cfdc05c80b0a1ca5b07d871a61797e03d88
+│   │   ├── 📁 d9
+│   │   │   └── 📄 832ead22bdd8a9f80b2bdf6831b902c2c14320
+│   │   ├── 📁 db
+│   │   │   ├── 📄 545033a5e14ab813b37f3f94f9e5944055cca8
+│   │   │   ├── 📄 a3663d1800c0315759a13b08d18dc114afcd7a
+│   │   │   └── 📄 d15058e326b6022df83f1b200bfbbe675aa942
+│   │   ├── 📁 dc
+│   │   │   ├── 📄 b72794f5300a3e0ccd2ad0669d802b62f3d370
+│   │   │   └── 📄 bcb80d1b23ee3e75a5e5975deb3cf6d2460be3
+│   │   ├── 📁 df
+│   │   │   └── 📄 1d60d9a1bf2504cf03af930944189f56266ae9
+│   │   ├── 📁 e0
+│   │   │   └── 📄 af3958f96c7705004bdeeca044a7bb41c935bf
+│   │   ├── 📁 e2
+│   │   │   └── 📄 1d51fa05b2bc837aeb4e7378bc01debc85a4f4
+│   │   ├── 📁 e4
+│   │   │   └── 📄 dbf2e6a6c60779a43d86d1f86610dbd809b9fe
+│   │   ├── 📁 e8
+│   │   │   └── 📄 e1fa2a9451d8c5cf037fa3f1da2f50cee942d3
+│   │   ├── 📁 e9
+│   │   │   └── 📄 d912f3e3cefc18505d3cd19b3a5a9f567f5de0
+│   │   ├── 📁 ec
+│   │   │   └── 📄 a39642d1640ec591dda673b4222be760937469
+│   │   ├── 📁 ee
+│   │   │   └── 📄 893b22b602ed03d19677cc86455277d09927e6
+│   │   ├── 📁 ef
+│   │   │   └── 📄 13fc38d0433b6754fa6c6882df9596e615ff2a
+│   │   ├── 📁 f0
+│   │   │   └── 📄 ff1df3aa7060a49c6753b067df62b0ec75204a
+│   │   ├── 📁 f4
+│   │   │   ├── 📄 3212e99a6c60707cdd2ee605de4f683365f882
+│   │   │   └── 📄 3c71f27c75824f2c8474186cffb2fbcbd01b86
+│   │   ├── 📁 f7
+│   │   │   ├── 📄 6bc8d977be694622d923320f3d08d0fbb66e12
+│   │   │   └── 📄 f8dcd9305505afa39f98df883ed735bbcacbac
+│   │   ├── 📁 f8
+│   │   │   └── 📄 ad1c44d62c8a789447de8c4c514718c389a73f
+│   │   ├── 📁 f9
+│   │   │   ├── 📄 aa683b1ad5cffc76da9ad4b77c562ac4c2b399
+│   │   │   └── 📄 d43483fcaba6072c5684d15bacd6d612243914
+│   │   ├── 📁 ff
+│   │   │   ├── 📄 7c3110d3fe649a716a090acf9366eeb49cc091
+│   │   │   ├── 📄 ebffc15f4b19cd8244311c9b005d09145e9f89
+│   │   │   └── 📄 ed9c869a91846e9bfaf4be38761706ab3c7266
+│   │   ├── 📁 info
+│   │   └── 📁 pack
+│   ├── 📁 refs
+│   │   ├── 📁 heads
+│   │   │   ├── 📁 setup
+│   │   │   │   └── 📄 initial
+│   │   │   ├── 📁 snapshot
+│   │   │   │   └── 📄 project-initial
+│   │   │   └── 📄 main
+│   │   ├── 📁 remotes
+│   │   │   └── 📁 origin
+│   │   │       ├── 📁 setup
+│   │   │       │   └── 📄 initial
+│   │   │       ├── 📁 snapshot
+│   │   │       │   └── 📄 project-initial
+│   │   │       └── 📄 main
+│   │   └── 📁 tags
+│   ├── 📄 COMMIT_EDITMSG
+│   ├── 📄 config
+│   ├── 📄 description
+│   ├── 📄 FETCH_HEAD
+│   ├── 📄 HEAD
+│   ├── 📄 index
+│   └── 📄 ORIG_HEAD
+├── 📁 .jetclient
+│   ├── 📁 API
+│   │   ├── 📄 _folder.md
+│   │   └── 📄 healthz.md
+│   └── 📄 jetclient.md
+├── 📁 src
+│   ├── 📁 account
+│   │   ├── 📄 account.controller.ts
+│   │   ├── 📄 account.module.ts
+│   │   └── 📄 account.service.ts
+│   ├── 📁 auth
+│   │   ├── 📄 auth.controller.ts
+│   │   ├── 📄 auth.module.ts
+│   │   └── 📄 auth.service.ts
+│   ├── 📁 common
+│   │   ├── 📁 filters
+│   │   │   ├── 📄 catch-everything.filter.ts
+│   │   │   └── 📄 http-exception.filter.ts
+│   │   ├── 📁 interceptors
+│   │   │   └── 📄 logging.interceptor.ts
+│   │   ├── 📁 logger
+│   │   │   └── 📄 logger.service.ts
+│   │   ├── 📁 providers
+│   │   │   └── 📄 global.providers.ts
+│   │   └── 📄 global-validation.pipe.ts
+│   ├── 📁 config
+│   │   ├── 📄 database.config.ts
+│   │   ├── 📄 env.type.ts
+│   │   ├── 📄 env.validation.ts
+│   │   ├── 📄 jwt.config.ts
+│   │   ├── 📄 redis.config.ts
+│   │   ├── 📄 winston-config.service.ts
+│   │   └── 📄 winston.logger.ts
+│   ├── 📁 database
+│   │   ├── 📄 database.controller.ts
+│   │   ├── 📄 database.module.ts
+│   │   └── 📄 database.service.ts
+│   ├── 📁 session
+│   │   ├── 📄 session.controller.ts
+│   │   ├── 📄 session.module.ts
+│   │   └── 📄 session.service.ts
+│   ├── 📁 user
+│   │   ├── 📄 user.controller.ts
+│   │   ├── 📄 user.module.ts
+│   │   └── 📄 user.service.ts
+│   ├── 📄 app.controller.spec.ts
+│   ├── 📄 app.controller.ts
+│   ├── 📄 app.module.ts
+│   ├── 📄 app.service.ts
+│   └── 📄 main.ts
+├── 📁 test
+│   ├── 📄 app.e2e-spec.ts
+│   └── 📄 jest-e2e.json
+├── 📄 .gitignore
+├── 📄 .prettierrc
+├── 📄 docker-compose.dev.yml
+├── 📄 docker-compose.prod.yml
+├── 📄 docker-compose.yml
+├── 📄 Dockerfile
+├── 📄 Dockerfile.dev
+├── 📄 entrypoint.dev.sh
+├── 📄 entrypoint.sh
+├── 📄 eslint.config.mjs
+├── 📄 LICENSE
+├── 📄 nest-cli.json
+├── 📄 package-lock.json
+├── 📄 package.json
+├── 📄 README.md
+├── 📄 tsconfig.build.json
+└── 📄 tsconfig.json
+</pre>
