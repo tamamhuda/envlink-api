@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as process from "node:process";
-import {GlobalValidationPipe} from "./common/global-validation.pipe";
+import {GlobalValidationPipe} from "./common/pipes/global-validation.pipe";
 import LoggerService from "./common/logger/logger.service";
 import {WinstonModule} from "nest-winston";
 import {winstonLogger} from "./config/winston.logger";

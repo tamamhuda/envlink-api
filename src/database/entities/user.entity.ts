@@ -1,5 +1,5 @@
 import {Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
-import {RolesEnum} from "../../enums/roles.enum";
+import {RolesEnum} from "../../common/enums/roles.enum";
 import {Account} from "./account.entity";
 import Session from "./session.entity";
 

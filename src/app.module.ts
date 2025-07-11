@@ -13,12 +13,16 @@ import {WinstonModule} from "nest-winston";
 import {WinstonConfigService} from "./config/winston-config.service";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {getDatabaseConfig} from "./config/database.config";
+import {RedisModule as NestRedisModule} from "@nestjs-modules/ioredis";
+import {getRedisConfig} from "./config/redis.config";
+import {RedisService} from "./redis/redis.service";
+import {RedisModule} from "./redis/redis.module";
 
 
 @Module({
   imports: [
 
-    // Environment setup for local, development and production
+      // Environment setup for local, development and production
       ConfigModule.forRoot({
         isGlobal: true,
         envFilePath: [
@@ -28,17 +32,25 @@ import {getDatabaseConfig} from "./config/database.config";
         expandVariables: true,
       }),
 
-    // TypeOrmModule with async config
+      // TypeOrmModule with async config
       TypeOrmModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
           useFactory: getDatabaseConfig
       }),
 
-    // JwtModule for access tokens
+      // Nest Redis Module with async config
+      NestRedisModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: getRedisConfig
+        },
+        ),
+
+      // JwtModule for access tokens
 
 
-    // Winston Logger
+      // Winston Logger
       WinstonModule.forRootAsync({
           useClass: WinstonConfigService
       }),
@@ -47,14 +59,18 @@ import {getDatabaseConfig} from "./config/database.config";
     SessionModule,
     AuthModule,
     UserModule,
-    DatabaseModule],
+    DatabaseModule,
+    RedisModule
+  ],
+
   controllers: [AppController],
   providers: [
       AppService,
       ...GlobalProviders,
-      LoggerService
-
+      LoggerService,
   ],
-    exports: [LoggerService]
+    exports: [
+        LoggerService,
+    ],
 })
 export class AppModule {}

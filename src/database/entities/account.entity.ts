@@ -7,7 +7,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
-import {ProviderEnum} from "../../enums/provider.enum";
+import {ProviderEnum} from "../../common/enums/provider.enum";
 import {User} from "./user.entity";
 
 

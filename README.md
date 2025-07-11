@@ -29,16 +29,22 @@ A fast and reliable URL shortening service built with NestJS, enabling easy link
 │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> auth.module.ts
 │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> auth.service.ts
 │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> common
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> enums
+│   │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> provider.enum.ts
+│   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> roles.enum.ts
 │   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> filters
 │   │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> catch-everything.filter.ts
 │   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> http-exception.filter.ts
 │   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> interceptors
 │   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> logging.interceptor.ts
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> interfaces
+│   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> healthz.interface.ts
 │   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> logger
 │   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> logger.service.ts
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> providers
-│   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> global.providers.ts
-│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> global-validation.pipe.ts
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> pipes
+│   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> global-validation.pipe.ts
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> providers
+│   │       └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> global.providers.ts
 │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> config
 │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database.config.ts
 │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> env.type.ts
@@ -52,12 +58,11 @@ A fast and reliable URL shortening service built with NestJS, enabling easy link
 │   │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> account.entity.ts
 │   │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> session.entity.ts
 │   │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> user.entity.ts
-│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database.controller.ts
 │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database.module.ts
 │   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database.service.ts
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> enums
-│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> provider.enum.ts
-│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> roles.enum.ts
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> redis
+│   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> redis.module.ts
+│   │   └── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> redis.service.ts
 │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> session
 │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> session.controller.ts
 │   │   ├── <img src="https://logo.svgcdn.com/l/typescript-icon.svg" alt="TypeScript" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> session.module.ts
@@ -89,7 +94,6 @@ A fast and reliable URL shortening service built with NestJS, enabling easy link
 ├── <img src="https://logo.svgcdn.com/l/nodejs-icon.svg" alt="Node.js" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> package-lock.json
 ├── <img src="https://logo.svgcdn.com/l/nodejs-icon.svg" alt="Node.js" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> package.json
 ├── <img src="https://logo.svgcdn.com/l/markdown.svg" alt="Markdown" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> README.md
-├── <img src="https://cdn-icons-png.flaticon.com/512/4194/4194717.png" alt="File" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> README.md.backup
 ├── <img src="https://cdn-icons-png.flaticon.com/512/11580/11580838.png" alt="JSON" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> tsconfig.build.json
 └── <img src="https://cdn-icons-png.flaticon.com/512/11580/11580838.png" alt="JSON" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> tsconfig.json
 </pre>

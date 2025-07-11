@@ -2,6 +2,7 @@ import {BadRequestException, Controller, Get, HttpStatus, NotFoundException, Pos
 import { AppService } from './app.service';
 import LoggerService from "./common/logger/logger.service";
 import {delay} from "rxjs";
+import {IHealthz} from "./common/interfaces/healthz.interface";
 
 @Controller()
 export class AppController {
@@ -13,7 +14,7 @@ export class AppController {
 
 
   @Get("/healthz")
-  async healthz(): Promise<{ "status": string }> {
+  async healthz(): Promise<IHealthz> {
     await new Promise(resolve => setTimeout(resolve, 500));
     // throw new BadRequestException('Healthz Exception');
     return await this.appService.healthz();

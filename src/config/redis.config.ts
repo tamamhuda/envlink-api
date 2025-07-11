@@ -1,11 +1,14 @@
 import {ConfigService} from "@nestjs/config";
 import {EnvVars} from "./env.type";
-import {RedisOptions} from "ioredis";
+import {RedisModuleOptions} from "@nestjs-modules/ioredis";
 
 
-export const getRedisConfig =  (config: ConfigService<EnvVars>): RedisOptions => {
+export const getRedisConfig =  (config: ConfigService<EnvVars>): RedisModuleOptions => {
     return {
-        port: config.get('REDIS_PORT', { infer: true }),
-        host: config.get('REDIS_HOST', { infer: true }),
+        type: "single",
+        options: {
+            port: config.get('REDIS_PORT', { infer: true }),
+            host: config.get('REDIS_HOST', { infer: true }),
+        }
     }
 }
