@@ -19,4 +19,5 @@ export interface EnvVars {
     JWT_REFRESH_SECRET: string,
     JWT_REFRESH_EXPIRES_IN: string,
 
+    CACHE_TTL: string
 }

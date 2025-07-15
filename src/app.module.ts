@@ -15,8 +15,11 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import {getDatabaseConfig} from "./config/database.config";
 import {RedisModule as NestRedisModule} from "@nestjs-modules/ioredis";
 import {getRedisConfig} from "./config/redis.config";
-import {RedisService} from "./redis/redis.service";
 import {RedisModule} from "./redis/redis.module";
+import {CacheModule} from "@nestjs/cache-manager";
+import {getCacheConfig} from "./config/cache.config";
+import {envValidationSchema} from "./config/env.validation";
+import {CacheInvalidateService} from "./common/cache/cache-invalidate.service";
 
 
 @Module({
@@ -24,12 +27,13 @@ import {RedisModule} from "./redis/redis.module";
 
       // Environment setup for local, development and production
       ConfigModule.forRoot({
-        isGlobal: true,
-        envFilePath: [
+          isGlobal: true,
+          validationSchema: envValidationSchema,
+          envFilePath: [
           `.env.${process.env.NODE_ENV}`,
           `.env.development.local`,
-        ],
-        expandVariables: true,
+          ],
+          expandVariables: true,
       }),
 
       // TypeOrmModule with async config
@@ -41,11 +45,18 @@ import {RedisModule} from "./redis/redis.module";
 
       // Nest Redis Module with async config
       NestRedisModule.forRootAsync({
-            imports: [ConfigModule],
-            inject: [ConfigService],
-            useFactory: getRedisConfig
+              imports: [ConfigModule],
+              inject: [ConfigService],
+              useFactory: getRedisConfig
         },
         ),
+
+      // Cache Manager with Redis as Cache Store
+      CacheModule.registerAsync({
+          imports: [ConfigModule],
+          inject: [ConfigService],
+          useFactory: getCacheConfig
+      }),
 
       // JwtModule for access tokens
 
@@ -66,11 +77,13 @@ import {RedisModule} from "./redis/redis.module";
   controllers: [AppController],
   providers: [
       AppService,
-      ...GlobalProviders,
       LoggerService,
+      CacheInvalidateService,
+      ...GlobalProviders,
   ],
     exports: [
         LoggerService,
+        CacheInvalidateService
     ],
 })
 export class AppModule {}

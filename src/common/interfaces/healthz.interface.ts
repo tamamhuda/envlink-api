@@ -5,6 +5,7 @@ export interface IHealthz {
     timestamp: string,
     db: string,
     redis:  'UP' | 'DOWN',
+    cache:  'UP' | 'DOWN',
     uptime: string,
     memory: {
         rss: number,
