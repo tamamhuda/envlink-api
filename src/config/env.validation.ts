@@ -5,6 +5,10 @@ export const envValidationSchema = z.object({
 
     PORT: z.coerce.number().default(3000), // `coerce` if value comes from process.env
 
+    APP_NAME: z.string().nonempty().default('nestjs-app'),
+    APP_DESCRIPTION: z.string().default('restful api develop using nest-js'),
+    APP_VERSION: z.string().default('v1.0.0'),
+
     DB_HOST: z.string().default('localhost'),
     DB_PORT: z.coerce.number().default(5432),
     DB_USERNAME: z.string(),
@@ -23,7 +27,7 @@ export const envValidationSchema = z.object({
 
     CACHE_TTL: z.string().default('5m')
 
-})
+}).required()
 
 
 

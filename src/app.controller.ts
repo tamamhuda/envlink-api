@@ -1,13 +1,11 @@
 import {
   Controller,
   Get, Put,
-  UseInterceptors
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import LoggerService from "./common/logger/logger.service";
 import {IHealthz} from "./common/interfaces/healthz.interface";
 import {Cached} from "./common/decorators/cached.decorator";
-import {CacheInterceptor} from "./common/interceptors/cache.interceptor";
 import {CachePrefix} from "./common/enums/cache-prefix.enum";
 
 @Controller()

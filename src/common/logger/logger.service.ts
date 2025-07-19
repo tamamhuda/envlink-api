@@ -1,6 +1,7 @@
 import {ExecutionContext, HttpException, Injectable, LoggerService as NestLoggerService} from "@nestjs/common";
 import {winstonLogger as logger} from "../../config/winston.logger";
 import {Request, Response} from "express";
+import {ZodError} from "zod";
 
 @Injectable()
 export default class LoggerService implements NestLoggerService {
@@ -38,6 +39,7 @@ export default class LoggerService implements NestLoggerService {
 
     httpException(handlerName: string, request: Request, exception: HttpException): void {
         const ip = this.getIp(request);
+
         const format = `${ip} - [${request.method} - ${exception.getStatus()}] ${request.originalUrl} - [${handlerName}] - ${exception.message}`
         this.error(format)
     }
