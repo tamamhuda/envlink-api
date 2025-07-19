@@ -28,7 +28,7 @@ import {CacheInvalidateService} from "./common/cache/cache-invalidate.service";
       // Environment setup for local, development and production
       ConfigModule.forRoot({
           isGlobal: true,
-          validationSchema: envValidationSchema,
+          validate: (env) =>  envValidationSchema.parse(env),
           envFilePath: [
           `.env.${process.env.NODE_ENV}`,
           `.env.development.local`,

@@ -4,7 +4,7 @@ import {from, Observable, of, switchMap, tap} from "rxjs";
 import {Reflector} from "@nestjs/core";
 import {CACHE_KEY, CACHE_PREFIX, CACHE_TTL} from "../decorators/cached.decorator";
 import {ConfigService} from "@nestjs/config";
-import {EnvVars} from "../../config/env.type";
+import {EnvVars} from "../../config/env.validation";
 import * as ms from "ms";
 import {StringValue} from "ms"
 import {CACHE_MANAGER, Cache} from "@nestjs/cache-manager";

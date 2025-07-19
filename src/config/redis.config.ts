@@ -1,5 +1,5 @@
 import {ConfigService} from "@nestjs/config";
-import {EnvVars} from "./env.type";
+import {EnvVars} from "./env.validation";
 import {RedisModuleOptions} from "@nestjs-modules/ioredis";
 import {RedisOptions} from "ioredis";
 

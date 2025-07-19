@@ -1,6 +1,6 @@
 import {ConfigService} from "@nestjs/config";
-import {EnvVars} from "./env.type";
 import {JwtSignOptions} from "@nestjs/jwt";
+import {EnvVars} from "./env.validation";
 
 
 export const getJwtConfig =  (config: ConfigService<EnvVars>) : Record<"accessToken" | "refreshToken", JwtSignOptions> => {

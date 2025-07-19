@@ -1,7 +1,7 @@
 import {ConfigService} from "@nestjs/config";
-import {EnvVars} from "./env.type";
 import {PostgresConnectionOptions} from "typeorm/driver/postgres/PostgresConnectionOptions";
 import * as path from "path"
+import {EnvVars} from "./env.validation";
 
 
 export const getDatabaseConfig = (
