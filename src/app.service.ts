@@ -69,9 +69,5 @@ export class AppService {
     };
   }
 
-  async updateHealthz(): Promise<IHealthz> {
-    await this.invalidateCache.invalidateKeys(CachePrefix.APP, ['healthz'])
-    return await this.healthz();
-  }
 
 }

@@ -24,9 +24,11 @@ async function bootstrap() {
 
   const documentConfig = await getSwaggerDocumentConfig(config);
   const documentFactory = () => SwaggerModule.createDocument(app, documentConfig);
-  SwaggerModule.setup('api', app, documentFactory);
+  SwaggerModule.setup('api/docs', app, documentFactory);
 
   await app.listen(config.get('PORT', {infer: true}) ?? 3000);
+
+  app.setGlobalPrefix(`api`)
 
   const logger = app.get(LoggerService);
   logger.info(`Server running as ${config.get('NODE_ENV', {infer: true})} on Port ${config.get('PORT', {infer: true})}`);
