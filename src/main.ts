@@ -1,40 +1,37 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as process from "node:process";
-import {GlobalValidationPipe} from "./common/pipes/global-validation.pipe";
-import LoggerService from "./common/logger/logger.service";
-import {WinstonModule} from "nest-winston";
-import {winstonLogger} from "./config/winston.logger";
-import {ConfigService} from "@nestjs/config";
-import {EnvVars} from "./config/env.validation";
-import {getSwaggerDocumentConfig} from "./config/swagger.config";
-import {SwaggerModule} from "@nestjs/swagger";
-import {ZodValidationPipe} from "./common/pipes/zod-validation.pipe";
+import LoggerService from './common/logger/logger.service';
+import { WinstonModule } from 'nest-winston';
+import { winstonLogger } from './config/winston.logger';
+import { ConfigService } from '@nestjs/config';
+import { Env } from './config/env.config';
+import { getSwaggerDocumentConfig } from './config/swagger.config';
+import { SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: WinstonModule.createLogger({
-      instance: winstonLogger
-    })
+      instance: winstonLogger,
+    }),
   });
 
-  app.useGlobalPipes(new ZodValidationPipe())
+  const config = app.get(ConfigService<Env>);
 
-  const config = app.get(ConfigService<EnvVars>)
+  const PORT = config.get<Env['PORT']>('PORT') || 3000;
+  const NODE_ENV = config.get<Env['NODE_ENV']>('NODE_ENV') || 'local';
 
-  const documentConfig = await getSwaggerDocumentConfig(config);
-  const documentFactory = () => SwaggerModule.createDocument(app, documentConfig);
+  const documentConfig = getSwaggerDocumentConfig(config);
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, documentConfig);
   SwaggerModule.setup('api/docs', app, documentFactory);
 
-  await app.listen(config.get('PORT', {infer: true}) ?? 3000);
-
-  app.setGlobalPrefix(`api`)
-
   const logger = app.get(LoggerService);
-  logger.info(`Server running as ${config.get('NODE_ENV', {infer: true})} on Port ${config.get('PORT', {infer: true})}`);
 
+  await app.listen(PORT, () => {
+    logger.log(`Server is running on port ${PORT} with env ${NODE_ENV}`);
+  });
+
+  app.setGlobalPrefix(`api`);
 }
 
 bootstrap();
-
-

@@ -1,6 +1,9 @@
-import * as z from 'zod'
+import * as z from 'zod';
 
-export const envValidationSchema = z.object({
+import * as dotenv from 'dotenv';
+
+const envSchema = z
+  .object({
     NODE_ENV: z.enum(['development', 'production', 'local']).default('local'),
 
     PORT: z.coerce.number().default(3000), // `coerce` if value comes from process.env
@@ -25,10 +28,23 @@ export const envValidationSchema = z.object({
     JWT_REFRESH_SECRET: z.string(),
     JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
-    CACHE_TTL: z.string().default('5m')
+    CACHE_TTL: z.string().default('5m'),
+  })
+  .required();
 
-}).required()
+export type Env = z.infer<typeof envSchema>;
 
+const NODE_ENV: Env['NODE_ENV'] =
+  (process.env.NODE_ENV as Env['NODE_ENV']) || 'local';
 
+export const ENV_PATH = `.env.${NODE_ENV}`;
 
-export type EnvVars = z.infer<typeof envValidationSchema>
+export function envValidate(env: Record<string, unknown>) {
+  return envSchema.parse(env);
+}
+
+export const config: Env = envSchema.parse(
+  dotenv.config({
+    path: ENV_PATH,
+  }).parsed,
+);

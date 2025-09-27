@@ -1,15 +1,14 @@
-import {ConfigService} from "@nestjs/config";
-import {PostgresConnectionOptions} from "typeorm/driver/postgres/PostgresConnectionOptions";
-import * as path from "path"
-import {EnvVars} from "./env.validation";
-
+import { ConfigService } from '@nestjs/config';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+import * as path from 'path';
+import { Env } from './env.config';
 
 export const getDatabaseConfig = (
-    config: ConfigService<EnvVars>
+  config: ConfigService<Env>,
 ): PostgresConnectionOptions => ({
-    type: 'postgres',
-    url: config.get('DATABASE_URL', { infer: true }),
-    port: config.get('DB_PORT', { infer: true }),
-    entities: [path.resolve(__dirname, '..', '**', '*.entity.{ts,js}')],
-    synchronize: config.get('NODE_ENV', { infer: true }) !== 'production',
+  type: 'postgres',
+  url: config.get<Env['DATABASE_URL']>('DATABASE_URL'),
+  port: config.get<Env['DB_PORT']>('DB_PORT'),
+  entities: [path.resolve(__dirname, '..', '**', '*.entity.{ts,js}')],
+  synchronize: config.get<Env['NODE_ENV']>('NODE_ENV') !== 'production',
 });

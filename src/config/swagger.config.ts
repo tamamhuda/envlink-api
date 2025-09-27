@@ -1,13 +1,18 @@
-import {ConfigService} from "@nestjs/config";
-import {EnvVars} from "./env.validation";
-import {DocumentBuilder, OpenAPIObject, SwaggerCustomOptions} from "@nestjs/swagger";
+import { ConfigService } from '@nestjs/config';
+import { Env } from './env.config';
+import { DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 
-
-export const getSwaggerDocumentConfig = async (config: ConfigService<EnvVars>): Promise<Omit<OpenAPIObject, "paths">> => {
-    return new DocumentBuilder()
-        .setTitle(config.get("APP_NAME", { infer: true }) ?? "nest-app")
-        .setDescription(config.get("APP_DESCRIPTION", { infer: true }) ?? "nest-js application")
-        .setVersion(config.get("APP_VERSION", { infer: true }) ?? "v1.0.0")
-        .build()
-}
-
+export const getSwaggerDocumentConfig = (
+  config: ConfigService<Env>,
+): Omit<OpenAPIObject, 'paths'> => {
+  const APP_NAME = config.get<Env['APP_NAME']>('APP_NAME') ?? 'nest-app';
+  const APP_DESCRIPTION =
+    config.get<Env['APP_DESCRIPTION']>('APP_DESCRIPTION') ??
+    'nest-js application';
+  const APP_VERSION = config.get<Env['APP_VERSION']>('APP_VERSION') ?? 'v1.0.0';
+  return new DocumentBuilder()
+    .setTitle(APP_NAME)
+    .setDescription(APP_DESCRIPTION)
+    .setVersion(APP_VERSION)
+    .build();
+};
