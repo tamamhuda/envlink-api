@@ -2,7 +2,7 @@ import { createKeyv } from '@keyv/redis';
 import { ConfigService } from '@nestjs/config';
 import { CacheManagerOptions } from '@nestjs/cache-manager';
 import { getRedisClientConfig } from './redis.config';
-import * as ms from 'ms';
+import ms from 'ms';
 import { StringValue } from 'ms';
 import { CachePrefix } from '../common/enums/cache-prefix.enum';
 import { Env } from './env.config';

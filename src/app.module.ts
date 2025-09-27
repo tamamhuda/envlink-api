@@ -1,4 +1,6 @@
-import { Logger, Module } from '@nestjs/common';
+import { ZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
+import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AccountModule } from './account/account.module';
@@ -7,7 +9,6 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GlobalProviders } from './common/providers/global.providers';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDatabaseConfig } from './config/database.config';
 import { RedisModule as NestRedisModule } from '@nestjs-modules/ioredis';
@@ -18,6 +19,10 @@ import { getCacheConfig } from './config/cache.config';
 import { ENV_PATH, envValidate } from './config/env.config';
 import { CacheInvalidateService } from './common/cache/cache-invalidate.service';
 import { LoggerModule } from './logger/logger.module';
+import CatchEverythingFilter from './common/filters/catch-everything.filter';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import LoggingInterceptor from './common/interceptors/logging.interceptor';
+import { CacheInterceptor } from './common/interceptors/cache.interceptor';
 
 @Module({
   imports: [
@@ -33,14 +38,14 @@ import { LoggerModule } from './logger/logger.module';
       },
     }),
 
-    // TypeOrmModule with async config
+    // TypeOrmModule
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: getDatabaseConfig,
     }),
 
-    // Nest Redis Module with async config
+    // Nest Redis Module
     NestRedisModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -66,7 +71,34 @@ import { LoggerModule } from './logger/logger.module';
   ],
 
   controllers: [AppController],
-  providers: [AppService, Logger, CacheInvalidateService, ...GlobalProviders],
-  exports: [Logger, CacheInvalidateService],
+  providers: [
+    AppService,
+    CacheInvalidateService,
+    {
+      provide: APP_FILTER,
+      useClass: CatchEverythingFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
+    },
+    {
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ZodSerializerInterceptor,
+    },
+  ],
+  exports: [CacheInvalidateService],
 })
 export class AppModule {}

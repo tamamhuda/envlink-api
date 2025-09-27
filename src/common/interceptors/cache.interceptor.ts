@@ -15,7 +15,7 @@ import {
 } from '../decorators/cached.decorator';
 import { ConfigService } from '@nestjs/config';
 import { Env } from '../../config/env.config';
-import * as ms from 'ms';
+import ms from 'ms';
 import { StringValue } from 'ms';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { CachePrefix } from '../enums/cache-prefix.enum';

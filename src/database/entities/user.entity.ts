@@ -1,66 +1,71 @@
-import {Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
-import {RolesEnum} from "../../common/enums/roles.enum";
-import {Account} from "./account.entity";
-import Session from "./session.entity";
-
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { RolesEnum } from '../../common/enums/roles.enum';
+import { Account } from './account.entity';
+import Session from './session.entity';
 
 @Entity()
-@Index(["username", "email"], {unique: true})
+@Index(['username', 'email'], { unique: true })
 export class User {
-    @PrimaryGeneratedColumn("uuid")
-    id: string
+  @PrimaryGeneratedColumn('uuid')
+  id!: string; // ✅ definite assignment
 
-    @Column({
-        type: "varchar",
-        length: 25,
-        unique: true,
-    })
-    username: string
+  @Column({
+    type: 'varchar',
+    length: 25,
+    unique: true,
+  })
+  username!: string;
 
-    @Column({
-        type: "varchar",
-        length: 50
-    })
-    fullName: string
+  @Column({
+    type: 'varchar',
+    length: 50,
+  })
+  fullName!: string;
 
+  @Column({
+    type: 'varchar',
+    length: 50,
+    unique: true,
+  })
+  email!: string;
 
-    @Column({
-        type: "varchar",
-        length: 50,
-        unique: true
-    })
-    email: string
+  @Column({
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
+  phoneNumber?: string;
 
-    @Column({
-        type: "varchar",
-        length: 50,
-        nullable: true,
-    })
-    phoneNumber?: string
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  avatar?: string;
 
-    @Column({
-        type: "text",
-        nullable: true,
-    })
-    avatar?: string
+  @Column({
+    type: 'enum',
+    enum: RolesEnum,
+    default: RolesEnum.USER,
+  })
+  role!: RolesEnum;
 
-    @Column({
-        type: "enum",
-        enum: RolesEnum,
-        default: RolesEnum.USER
-    })
-    role : string
+  @CreateDateColumn()
+  createdAt!: Date;
 
-    @CreateDateColumn()
-    createdAt: Date
+  @UpdateDateColumn()
+  updatedAt!: Date;
 
-    @UpdateDateColumn()
-    updatedAt: Date
+  @OneToMany(() => Account, (account) => account.user)
+  accounts!: Account[];
 
-    @OneToMany(() => Account, (account) => account.user)
-    accounts: Account[]
-
-    @OneToMany(() => Session, (session) => session.user)
-    sessions: Session[]
-
+  @OneToMany(() => Session, (session) => session.user)
+  sessions!: Session[];
 }
