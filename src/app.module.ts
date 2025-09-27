@@ -1,8 +1,6 @@
 import { ZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
 import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AccountModule } from './account/account.module';
 import { SessionModule } from './session/session.module';
 import { AuthModule } from './auth/auth.module';
@@ -23,6 +21,7 @@ import CatchEverythingFilter from './common/filters/catch-everything.filter';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import LoggingInterceptor from './common/interceptors/logging.interceptor';
 import { CacheInterceptor } from './common/interceptors/cache.interceptor';
+import { HealthModule } from 'src/health/health.module';
 
 @Module({
   imports: [
@@ -68,11 +67,10 @@ import { CacheInterceptor } from './common/interceptors/cache.interceptor';
     DatabaseModule,
     RedisModule,
     LoggerModule,
+    HealthModule,
   ],
 
-  controllers: [AppController],
   providers: [
-    AppService,
     CacheInvalidateService,
     {
       provide: APP_FILTER,
