@@ -1,15 +1,12 @@
 import { format, LoggerOptions, transports } from 'winston';
-import * as process from 'node:process';
 import chalk from 'chalk';
-import dotenv from 'dotenv';
 import {
   ConsoleTransportOptions,
   FileTransportOptions,
 } from 'winston/lib/winston/transports';
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
-
-dotenv.config();
+import { config } from './env.config';
 
 type LoggerType = 'console' | 'file';
 type FileLevelTransportOptions = Record<
@@ -30,7 +27,7 @@ const levelColors: Record<string, (txt: string) => string> = {
 const formattedLogger = format.printf(
   ({ stack, message, level, timestamp }) => {
     const appName = chalk.white.bold(
-      String(process.env.APP_NAME ?? 'NEST').toUpperCase(),
+      String(config.APP_NAME ?? 'NEST').toUpperCase(),
     );
 
     const time = chalk.gray(timestamp as string);
@@ -43,8 +40,8 @@ const formattedLogger = format.printf(
   },
 );
 
-const logtail = new Logtail(process.env.SOURCE_TOKEN || '', {
-  endpoint: `https://${process.env.NGEST_HOST || ''}`,
+const logtail = new Logtail(config.SOURCE_TOKEN || '', {
+  endpoint: `https://${config.NGEST_HOST || ''}`,
 });
 
 const transportsOptions: Record<

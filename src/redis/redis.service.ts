@@ -1,42 +1,44 @@
-import {Injectable, OnModuleInit} from '@nestjs/common';
-import Redis from "ioredis";
-import LoggerService from "../common/logger/logger.service";
-import {InjectRedis} from "@nestjs-modules/ioredis";
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import Redis from 'ioredis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import LoggerService from 'src/logger/logger.service';
 
 @Injectable()
 export class RedisService implements OnModuleInit {
-    private readonly DEFAULT_TTL = 60 * 60 ;
+  private readonly DEFAULT_TTL = 60 * 60;
 
-    constructor(
-        @InjectRedis() private readonly redis: Redis,
-        private readonly logger: LoggerService
-    ) {}
+  constructor(
+    @InjectRedis() private readonly redis: Redis,
+    private readonly logger: LoggerService,
+  ) {}
 
-    async onModuleInit(): Promise<void> {
-        try {
-            const pong = await this.redis.ping()
-            this.logger.info(`Redis service initialized: ${pong}`);
-        } catch (error) {
-            this.logger.error(`Redis connection failed`, error);
-        }
+  async onModuleInit(): Promise<void> {
+    try {
+      const pong = await this.redis.ping();
+      this.logger.log(`Redis service initialized: ${pong}`);
+    } catch (error) {
+      this.logger.error(`Redis connection failed`, error);
     }
+  }
 
-    async client(): Promise<Redis> {
-        return this.redis
-    }
+  async client(): Promise<Redis> {
+    return this.redis;
+  }
 
-    async set(key: string, value: any, ttl: number = this.DEFAULT_TTL ): Promise<void | "OK"> {
-        return this.redis.set(key, JSON.stringify(value), 'EX', ttl);
-    }
+  async set(
+    key: string,
+    value: any,
+    ttl: number = this.DEFAULT_TTL,
+  ): Promise<void | 'OK'> {
+    return this.redis.set(key, JSON.stringify(value), 'EX', ttl);
+  }
 
-    async get<T>(key: string): Promise<T | null> {
-        const data = await this.redis.get(key);
-        return data ? JSON.parse(data) : null;
-    }
+  async get<T>(key: string): Promise<T | null> {
+    const data = await this.redis.get(key);
+    return data ? JSON.parse(data) : null;
+  }
 
-    async del(key: string): Promise<number> {
-        return this.redis.del(key);
-    }
-
-
+  async del(key: string): Promise<number> {
+    return this.redis.del(key);
+  }
 }

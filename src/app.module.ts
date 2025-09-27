@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AccountModule } from './account/account.module';
@@ -8,9 +8,6 @@ import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GlobalProviders } from './common/providers/global.providers';
-import LoggerService from './common/logger/logger.service';
-import { WinstonModule } from 'nest-winston';
-import { WinstonConfigService } from './config/winston-config.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDatabaseConfig } from './config/database.config';
 import { RedisModule as NestRedisModule } from '@nestjs-modules/ioredis';
@@ -20,6 +17,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { getCacheConfig } from './config/cache.config';
 import { ENV_PATH, envValidate } from './config/env.config';
 import { CacheInvalidateService } from './common/cache/cache-invalidate.service';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -58,26 +56,17 @@ import { CacheInvalidateService } from './common/cache/cache-invalidate.service'
 
     // JwtModule for access tokens
 
-    // Winston Logger
-    WinstonModule.forRootAsync({
-      useClass: WinstonConfigService,
-    }),
-
     AccountModule,
     SessionModule,
     AuthModule,
     UserModule,
     DatabaseModule,
     RedisModule,
+    LoggerModule,
   ],
 
   controllers: [AppController],
-  providers: [
-    AppService,
-    LoggerService,
-    CacheInvalidateService,
-    ...GlobalProviders,
-  ],
-  exports: [LoggerService, CacheInvalidateService],
+  providers: [AppService, Logger, CacheInvalidateService, ...GlobalProviders],
+  exports: [Logger, CacheInvalidateService],
 })
 export class AppModule {}

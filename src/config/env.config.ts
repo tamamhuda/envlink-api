@@ -29,6 +29,8 @@ const envSchema = z
     JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
     CACHE_TTL: z.string().default('5m'),
+    NGEST_HOST: z.string().default(''),
+    SOURCE_TOKEN: z.string().default(''),
   })
   .required();
 
