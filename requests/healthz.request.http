@@ -1,3 +1,0 @@
-GET /healthz
-HOST: localhost:3000
-Accept: application/json

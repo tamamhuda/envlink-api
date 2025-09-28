@@ -1,0 +1,6 @@
+# @import .env.http
+# @ref dev
+
+GET /api/v1/health
+HOST: {{host}}
+Accept: application/json
