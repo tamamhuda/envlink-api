@@ -9,19 +9,19 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDatabaseConfig } from './config/database.config';
-import { RedisModule as NestRedisModule } from '@nestjs-modules/ioredis';
-import { getRedisConfig } from './config/redis.config';
-import { RedisModule } from './redis/redis.module';
-import { CacheModule } from '@nestjs/cache-manager';
-import { getCacheConfig } from './config/cache.config';
+
 import { ENV_PATH, envValidate } from './config/env.config';
-import { CacheInvalidateService } from './common/cache/cache-invalidate.service';
 import { LoggerModule } from './logger/logger.module';
 import CatchEverythingFilter from './common/filters/catch-everything.filter';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import LoggingInterceptor from './common/interceptors/logging.interceptor';
 import { CacheInterceptor } from './common/interceptors/cache.interceptor';
 import { HealthModule } from 'src/health/health.module';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { InvalidateCacheInterceptor } from './common/interceptors/invalidate-cache.interceptor';
+import { UrlGeneratorModule } from 'nestjs-url-generator';
+import { getUrlGeneratorConfig } from './config/url-generator.config';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -44,34 +44,24 @@ import { HealthModule } from 'src/health/health.module';
       useFactory: getDatabaseConfig,
     }),
 
-    // Nest Redis Module
-    NestRedisModule.forRootAsync({
+    // Url Generator Module
+    UrlGeneratorModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: getRedisConfig,
+      useFactory: getUrlGeneratorConfig,
     }),
-
-    // Cache Manager with Redis as Cache Store
-    CacheModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: getCacheConfig,
-    }),
-
-    // JwtModule for access tokens
 
     AccountModule,
     SessionModule,
     AuthModule,
     UserModule,
     DatabaseModule,
-    RedisModule,
     LoggerModule,
     HealthModule,
+    CacheModule,
   ],
 
   providers: [
-    CacheInvalidateService,
     {
       provide: APP_FILTER,
       useClass: CatchEverythingFilter,
@@ -81,22 +71,30 @@ import { HealthModule } from 'src/health/health.module';
       useClass: HttpExceptionFilter,
     },
     {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-    },
-    {
       provide: APP_PIPE,
       useClass: ZodValidationPipe,
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: ZodSerializerInterceptor,
+      useClass: TransformInterceptor, // runs last
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ZodSerializerInterceptor, // after invalidation
+    },
+
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor, // wraps everything
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: InvalidateCacheInterceptor, // after controller, before serialization
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor, // before controller
     },
   ],
-  exports: [CacheInvalidateService],
 })
 export class AppModule {}

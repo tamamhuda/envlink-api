@@ -5,9 +5,8 @@ import {
   Logger,
   LoggerService as NestLoggerService,
 } from '@nestjs/common';
-``;
 import { Request, Response } from 'express';
-import { getClientIp } from 'src/utils/client-ip.util';
+import { getClientIp } from 'src/common/utils/client-ip.util';
 
 @Injectable()
 export default class LoggerService extends Logger implements NestLoggerService {

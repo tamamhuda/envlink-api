@@ -5,7 +5,9 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ZodSerializationException } from 'nestjs-zod';
 import LoggerService from 'src/logger/logger.service';
+import { ZodError } from 'zod/v3';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -18,6 +20,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
 
     const error = exception.getResponse();
+
+    if (exception instanceof ZodSerializationException) {
+      this.logger.error(exception.getZodError());
+    }
 
     this.logger.httpException(HttpExceptionFilter.name, request, exception);
 

@@ -15,7 +15,7 @@ import Session from './session.entity';
 @Index(['username', 'email'], { unique: true })
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id!: string; // ✅ definite assignment
+  id!: string;
 
   @Column({
     type: 'varchar',

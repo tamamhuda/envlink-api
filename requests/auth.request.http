@@ -1,0 +1,62 @@
+# @import .env.http
+# @ref dev
+
+{{
+const fs = require('fs');
+const path = './.state/auth.json';
+let state = {};
+
+if (fs.existsSync(path)) state = JSON.parse(fs.readFileSync(path, 'utf8'));
+
+exports.state = state.data
+
+}}
+
+###
+# 1. USER REGISTRATION
+POST /api/v1/auth/register
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "fullName": "John Doe",
+  "username": "johndoe{{$timestamp}}",
+  "email": "johndoe{{$timestamp}}@example.com",
+  "password": "password123",
+  "confirmPassword": "password123",
+  "redirectUrl": "https://tamamhuda.dev"
+}
+
+>>! ./.state/auth.json
+
+
+###
+# 2. USER LOGIN
+POST /api/v1/auth/login
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "{{state.user?.email}}",
+  "password": "password123"
+}
+
+>>! ./.state/auth.json
+
+###
+# 3. REFRESH TOKEN
+POST /api/v1/auth/refresh
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{state.tokens?.refreshToken}}
+
+###
+# 4. LOGOUT
+POST /api/v1/auth/logout
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{state.tokens?.accessToken}}

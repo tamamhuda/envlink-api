@@ -1,7 +1,11 @@
-import { Module } from '@nestjs/common';
-import { DatabaseService } from './database.service';
+import { Global, Module } from '@nestjs/common';
+import { UserRepository } from './repositories/user.repository';
+import { AccountRepository } from './repositories/account.repository';
+import { SessionRepository } from './repositories/session.repository';
 
+@Global()
 @Module({
-  providers: [DatabaseService],
+  providers: [UserRepository, AccountRepository, SessionRepository],
+  exports: [UserRepository, AccountRepository, SessionRepository],
 })
 export class DatabaseModule {}

@@ -8,26 +8,26 @@ import { instance } from './logger/logger.instance';
 import { ConfigService } from '@nestjs/config';
 import { Env } from './config/env.config';
 import { getSwaggerDocumentConfig } from './config/swagger.config';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import './common/database/repository.extension';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: WinstonModule.createLogger({
       instance,
     }),
   });
 
   app.setGlobalPrefix(`api/v1`);
+  app.set('trust proxy', true);
 
   const config = app.get(ConfigService<Env>);
-
   const PORT = config.get<Env['PORT']>('PORT') || 3000;
   const NODE_ENV = config.get<Env['NODE_ENV']>('NODE_ENV') || 'local';
 
   const swaggerConfig = getSwaggerDocumentConfig(config);
-
   const openApiDoc = SwaggerModule.createDocument(app, swaggerConfig);
-
-  SwaggerModule.setup('api/docs', app, cleanupOpenApiDoc(openApiDoc));
+  SwaggerModule.setup('api/v1/docs', app, cleanupOpenApiDoc(openApiDoc));
 
   const logger = app.get(LoggerService);
 
