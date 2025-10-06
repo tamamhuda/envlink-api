@@ -22,6 +22,8 @@ import { InvalidateCacheInterceptor } from './common/interceptors/invalidate-cac
 import { UrlGeneratorModule } from 'nestjs-url-generator';
 import { getUrlGeneratorConfig } from './config/url-generator.config';
 import { CacheModule } from './cache/cache.module';
+import { getRedisConfig } from './config/cache.config';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 @Module({
   imports: [
@@ -49,6 +51,12 @@ import { CacheModule } from './cache/cache.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: getUrlGeneratorConfig,
+    }),
+
+    RedisModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: getRedisConfig,
     }),
 
     AccountModule,

@@ -161,7 +161,7 @@ export class SessionService {
         isRevoked: true,
         revokedAt: new Date(),
       },
-      true,
+      false,
     );
   }
 

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { JWT_ACCESS_STRATEGY } from 'src/config/jwt.config';
@@ -11,7 +11,6 @@ import { Request } from 'express';
 import LoggerService from 'src/logger/logger.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { SessionInfoDto } from 'src/session/dto/session.dto';
-import { StoredDataNoRaw } from 'keyv';
 import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
@@ -37,17 +36,21 @@ export class JwtStrategy extends PassportStrategy(
   private async setSessionCache(
     sessionInfo: SessionInfoDto,
     payload: JwtPayload,
+    key: string,
   ) {
-    const { jti, exp } = payload;
+    const { exp } = payload;
     const now = Date.now();
     const ttl = exp * 1000 - now;
-    await this.cache.set(CachePrefix.SESSION, jti, sessionInfo, ttl);
+    await this.cache.set(CachePrefix.SESSION, key, sessionInfo, ttl);
   }
 
   async validate(req: Request, payload: JwtPayload): Promise<UserInfoDto> {
+    const { sub, sessionId } = payload;
+    const key = `${sub}:${sessionId}`;
+
     const sessionCached = await this.cache.getCache<SessionInfoDto>(
       CachePrefix.SESSION,
-      payload.jti,
+      key,
     );
 
     if (sessionCached) {
@@ -60,7 +63,7 @@ export class JwtStrategy extends PassportStrategy(
       'access',
     );
 
-    await this.setSessionCache(sessionInfo, payload);
+    await this.setSessionCache(sessionInfo, payload, key);
 
     return sessionInfo.user;
   }

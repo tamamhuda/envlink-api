@@ -10,13 +10,17 @@ import { ConfigService } from '@nestjs/config';
 import LoggerService from 'src/logger/logger.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { StoredDataNoRaw } from 'keyv';
+import Redis from 'ioredis';
+import { Env } from 'src/config/env.config';
+import { InjectRedis } from '@nestjs-modules/ioredis';
 
 @Injectable()
 export class CacheService {
   constructor(
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
-    private readonly configService: ConfigService,
+    private readonly config: ConfigService<Env>,
     private readonly logger: LoggerService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async getStore(cachePrefix: CachePrefix, next?: CallHandler): Promise<Keyv> {
@@ -61,7 +65,30 @@ export class CacheService {
     });
   }
 
+  async invalidateBatch(prefix: string, key: string) {
+    const pattern = `${prefix}:${key}`;
+    let cursor = '0';
+    const keys: string[] = [];
+
+    do {
+      const [next, batch] = await this.redis.scan(cursor, 'MATCH', pattern);
+      cursor = next;
+      if (batch.length) keys.push(...batch);
+    } while (cursor !== '0');
+
+    if (keys.length) {
+      await this.redis.del(...keys);
+      this.logger.debug(
+        `[CACHE-INVALIDATE] ${keys.length} keys invalidated for "${pattern}"`,
+      );
+    }
+  }
+
   async invalidateCache<T>(store: Keyv, key: string): Promise<void> {
+    if (store.namespace && key.includes('*')) {
+      await this.invalidateBatch(store.namespace, key);
+    }
+
     const exists = await store.get<T>(key);
     if (!exists) return;
 

@@ -10,18 +10,20 @@ import { StringValue } from 'ms';
 import { CachePrefix } from '../common/enums/cache-prefix.enum';
 import { Env } from './env.config';
 import { RedisOptions } from 'ioredis';
+import { RedisSingleOptions } from '@nestjs-modules/ioredis';
 
 export const getRedisConfig = (
   config: ConfigService<Env>,
   db: number = 0,
-): RedisClientOptions => {
+): RedisSingleOptions => {
   const options: RedisOptions = {
     port: config.getOrThrow('REDIS_PORT'),
     host: config.getOrThrow('REDIS_HOST'),
     db: db,
   };
   return {
-    url: `redis://${options.host}:${options.port}/${options.db}`,
+    type: 'single',
+    options,
   };
 };
 

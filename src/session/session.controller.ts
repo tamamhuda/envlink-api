@@ -24,6 +24,9 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import LoggerService from 'src/logger/logger.service';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
+import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
+import { Cached } from 'src/common/decorators/cached.decorator';
 
 @Controller('session')
 export class SessionController {
@@ -41,6 +44,7 @@ export class SessionController {
     description: 'Returns session by id',
   })
   @HttpCode(HttpStatus.OK)
+  @Cached(CachePrefix.SESSION, ({ user, params }) => `${user?.id}:${params.id}`)
   @ZodSerializerDto(SessionInfoDto)
   async getSessionById(
     @Param('id', ParseUUIDPipe) id: string,
@@ -78,6 +82,10 @@ export class SessionController {
     description: 'No content',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
+  @InvalidateCache(
+    CachePrefix.SESSION,
+    (ctx) => `${ctx.user?.id}:${ctx.params.id}`,
+  )
   async revokeSessionById(@Param('id', ParseUUIDPipe) id: string) {
     return this.sessionService.revokeSessionById(id);
   }
@@ -90,6 +98,7 @@ export class SessionController {
     description: 'No content',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
+  @InvalidateCache(CachePrefix.SESSION, (ctx) => `${ctx.user?.id}:*`)
   async revokeAllSessions(@Req() req: Request) {
     return this.sessionService.revokeAllSessions(req);
   }

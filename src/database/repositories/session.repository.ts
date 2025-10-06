@@ -25,15 +25,15 @@ export class SessionRepository extends Repository<Session> {
   async updateManyByUserId(
     userId: string,
     data: Partial<Session>,
-    isRevoke?: boolean,
+    isRevoked?: boolean,
   ) {
     const qb = this.createQueryBuilder()
       .update(Session)
       .set(data)
       .where('userId = :userId', { userId });
 
-    if (typeof isRevoke !== 'undefined') {
-      qb.andWhere('isRevoke = :isRevoke', { isRevoke });
+    if (typeof isRevoked !== 'undefined') {
+      qb.andWhere('isRevoked = :isRevoked', { isRevoked });
     }
 
     return qb.execute();

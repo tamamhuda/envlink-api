@@ -1,3 +1,4 @@
+import { RedisHealthIndicator } from '@nestjs-modules/ioredis';
 import { Controller, Get } from '@nestjs/common';
 import {
   HealthCheck,
@@ -12,6 +13,7 @@ export class HealthController {
     private health: HealthCheckService,
     private db: TypeOrmHealthIndicator,
     private cache: CacheHealthIndicator,
+    private redis: RedisHealthIndicator,
   ) {}
 
   @Get()
@@ -19,7 +21,8 @@ export class HealthController {
   check() {
     return this.health.check([
       async () => this.db.pingCheck('database'),
-      async () => this.cache.isHealthy('redis'),
+      async () => this.cache.isHealthy('cache'),
+      async () => this.redis.isHealthy('redis'),
     ]);
   }
 }
