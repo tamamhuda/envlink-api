@@ -24,12 +24,6 @@ export default class Session {
   refreshTokenHash?: string;
 
   @Column({
-    type: 'varchar',
-    nullable: true,
-  })
-  accessToken?: string;
-
-  @Column({
     type: 'text',
     nullable: true,
   })

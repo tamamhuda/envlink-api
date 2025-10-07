@@ -68,3 +68,18 @@ Host: {{host}}
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{state.tokens?.accessToken}}
+
+
+###
+# CHANGE PASSWORD
+POST /api/v1/auth/change-password
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{state.tokens?.accessToken}}
+
+{
+  "oldPassword": "password123",
+  "newPassword": "newpassword123",
+  "confirmPassword": "newpassword123"
+}

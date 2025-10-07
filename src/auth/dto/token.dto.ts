@@ -4,7 +4,7 @@ import * as z from 'zod';
 
 export const tokensSchema = z.object({
   accessToken: z.string(),
-  refreshToken: z.string().nullable().optional(),
+  refreshToken: z.string(),
 });
 
 export class TokensDto extends createZodDto(tokensSchema) {}

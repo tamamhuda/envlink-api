@@ -20,6 +20,7 @@ import { MailUtil } from 'src/common/utils/mail.util';
 import { UrlGeneratorService } from 'nestjs-url-generator';
 import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
 import { SessionInfoDto } from 'src/session/dto/session.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -76,7 +77,6 @@ export class AuthService {
     const refreshTokenHash = await this.bcryptUtil.hashToken(refreshToken);
     const expiresAt = await this.jwtUtil.extractRefreshExpiresAt(refreshToken);
     await this.sessionService.updateSession(session, {
-      accessToken,
       refreshTokenHash,
       expiresAt,
       ipLocation: getClientIp(req),
@@ -90,20 +90,12 @@ export class AuthService {
     usernameOrEmail: string,
     password: string,
   ): Promise<UserInfoDto> {
-    const account =
-      await this.accountService.findOneByProviderUsernameOrEmail(
-        usernameOrEmail,
-      );
-
-    const isPasswordValid = await this.bcryptUtil.comparePassword(
+    const account = await this.accountService.validateAccountCredentials(
+      usernameOrEmail,
       password,
-      account.passwordHash as string,
     );
 
-    if (!isPasswordValid)
-      throw new UnauthorizedException('Invalid credentials');
-
-    return this.userService.mapToUserInfoDto(account, account.user);
+    return await this.userService.mapToUserInfoDto(account, account.user);
   }
 
   async validateJwtPayload(
@@ -125,6 +117,7 @@ export class AuthService {
     const account = await this.accountService.findOneByProviderAccountId(
       req.user.id,
     );
+
     const { session, tokens } =
       await this.sessionService.createSessionWithTokens(account, req);
     const userInfo = await this.userService.mapToUserInfoDto(
@@ -132,8 +125,6 @@ export class AuthService {
       session.user,
     );
 
-    if (req.user.lastLoginAt === userInfo.lastLoginAt)
-      this.logger.log('User last login not updated');
     return { tokens, user: userInfo };
   }
 
@@ -145,19 +136,18 @@ export class AuthService {
 
     const session = await this.sessionService.findSessionById(sessionId);
 
-    const accessToken = await this.jwtUtil.assignAccessToken(
+    const { accessToken, refreshToken } = await this.jwtUtil.signTokens(
       user.id,
       user.role,
       sessionId,
     );
+    const refreshTokenHash = await this.bcryptUtil.hashToken(refreshToken);
 
     await this.sessionService.updateSession(session, {
-      accessToken,
-      ipLocation: getClientIp(req),
-      userAgent: req.headers['user-agent'],
+      refreshTokenHash,
     });
 
-    return { accessToken };
+    return { accessToken, refreshToken };
   }
 
   async logout(req: Request) {
@@ -210,5 +200,21 @@ export class AuthService {
     await this.mailUtil.sendVerifyEmail(email, fullName, verify_link);
 
     return 'OK';
+  }
+
+  async changePassword(req: Request, body: ChangePasswordDto) {
+    const { oldPassword, newPassword } = body;
+
+    const { email } = req.user;
+    const existingAccount =
+      await this.accountService.validateAccountCredentials(email, oldPassword);
+
+    const passwordHash = await this.bcryptUtil.hashPassword(newPassword);
+
+    const account = await this.accountService.update(existingAccount, {
+      passwordHash,
+    });
+
+    return this.userService.mapToUserInfoDto(account, account.user);
   }
 }

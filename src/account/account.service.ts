@@ -1,10 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Account } from 'src/database/entities/account.entity';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
 import { AccountRepository } from 'src/database/repositories/account.repository';
+import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 
 @Injectable()
 export class AccountService {
+  private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
   constructor(private readonly accountRepository: AccountRepository) {}
 
   async findOneByProviderUsernameOrEmail(
@@ -76,5 +82,20 @@ export class AccountService {
       return 'Local account already exists for this user';
     }
     return null;
+  }
+
+  async validateAccountCredentials(emailOrUsername: string, passowrd: string) {
+    const account =
+      await this.findOneByProviderUsernameOrEmail(emailOrUsername);
+
+    const isPasswordValid = await this.bcryptUtil.comparePassword(
+      passowrd,
+      account.passwordHash as string,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return account;
   }
 }

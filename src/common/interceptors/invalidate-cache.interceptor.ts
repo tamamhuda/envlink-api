@@ -50,6 +50,7 @@ export class InvalidateCacheInterceptor<T> implements NestInterceptor<T, T> {
       query: request.query,
       body: request.body as CacheKeyContext['body'],
       user: request.user,
+      session: request.session,
     };
 
     return next.handle().pipe(

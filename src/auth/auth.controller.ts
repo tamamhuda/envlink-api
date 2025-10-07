@@ -19,6 +19,7 @@ import {
   ApiNoContentResponse,
   ApiPermanentRedirectResponse,
   ApiConflictResponse,
+  ApiBody,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import {
@@ -32,10 +33,11 @@ import { JwtGuard } from './guards/jwt.guard';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { UserInfoDto } from './dto/user-info.dto';
+import { UserInfoDto, UserInfoResponse } from './dto/user-info.dto';
 import LoggerService from 'src/logger/logger.service';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import { ZodString } from 'zod';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -94,6 +96,10 @@ export class AuthController {
     description: 'Logout successful',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
+  @InvalidateCache(
+    CachePrefix.SESSION,
+    ({ session, user }) => `${user?.id}:${session?.id}`,
+  )
   async logout(@Req() req: Request): Promise<void> {
     await this.authService.logout(req);
   }
@@ -113,7 +119,6 @@ export class AuthController {
     redirectUrl: string,
   ): Promise<UserInfoDto | string> {
     const userInfo = await this.authService.verify(token);
-    this.logger.log(redirectUrl);
     if (redirectUrl)
       res.status(HttpStatus.PERMANENT_REDIRECT).redirect(redirectUrl);
     return userInfo;
@@ -148,5 +153,25 @@ export class AuthController {
     redirectUrl: string,
   ): Promise<string> {
     return await this.authService.resendVerifyEmail(req, redirectUrl);
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth(JWT_SECURITY)
+  @ApiOkResponse({
+    type: UserInfoResponse,
+    description: 'Change password successful',
+  })
+  @ApiBody({
+    type: ChangePasswordDto,
+    required: true,
+  })
+  @HttpCode(HttpStatus.OK)
+  @InvalidateCache(
+    CachePrefix.SESSION,
+    ({ session, user }) => `${user?.id}:${session?.id}`,
+  )
+  async changePassword(@Req() req: Request, @Body() body: ChangePasswordDto) {
+    return await this.authService.changePassword(req, body);
   }
 }

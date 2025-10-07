@@ -60,14 +60,10 @@ export class SessionService {
     req: Request,
     type: 'refresh' | 'access',
   ) {
-    const authorizationToken = this.jwtUtil.extractAuthorizationHeader(req);
-
-    if (type === 'access') {
-      if (authorizationToken !== session.accessToken)
-        throw new UnauthorizedException('Invalid session');
-    }
+    if (type === 'access') return;
 
     if (type === 'refresh') {
+      const authorizationToken = this.jwtUtil.extractAuthorizationHeader(req);
       const { refreshTokenHash } = session;
 
       if (!refreshTokenHash) throw new UnauthorizedException('Invalid session');
@@ -105,7 +101,11 @@ export class SessionService {
     req: Request,
   ): Promise<{ session: Session; tokens: TokensDto }> {
     return this.sessionRepository.manager.transaction(async (manager) => {
-      // Step 1: Create session (tokens null for now)
+      // Step 1: Update account last login
+      account.lastLoginAt = new Date();
+      await manager.save(account);
+
+      // Step 2: Create session (tokens null for now)
       let session = manager.create(Session, {
         user: account.user,
         account,
@@ -113,26 +113,22 @@ export class SessionService {
         parsedUa: req.headers['user-agent'],
       });
       session = await manager.save(session);
-      // Step 2: Sign tokens with session.id
+
+      // Step 3: Sign tokens with session.id
       const tokens = await this.jwtUtil.signTokens(
         account.user.id,
         account.user.role,
         session.id,
       );
-      const { accessToken, refreshToken } = tokens;
+      const { refreshToken } = tokens;
 
-      // Step 3: Update session with refresh token
+      // Step 4: Update session with refresh token
       const refreshTokenHash = await this.bcryptUtil.hashToken(refreshToken);
       const expiresAt =
         await this.jwtUtil.extractRefreshExpiresAt(refreshToken);
       session.refreshTokenHash = refreshTokenHash;
       session.expiresAt = expiresAt;
-      session.accessToken = accessToken;
       await manager.save(session);
-
-      // Step 4: Update account last login
-      account.lastLoginAt = new Date();
-      await manager.save(account);
 
       return { session, tokens };
     });

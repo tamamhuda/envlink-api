@@ -54,6 +54,7 @@ export class JwtStrategy extends PassportStrategy(
     );
 
     if (sessionCached) {
+      req.session = sessionCached;
       return sessionCached.user;
     }
 
@@ -65,6 +66,7 @@ export class JwtStrategy extends PassportStrategy(
 
     await this.setSessionCache(sessionInfo, payload, key);
 
+    req.session = sessionInfo;
     return sessionInfo.user;
   }
 }

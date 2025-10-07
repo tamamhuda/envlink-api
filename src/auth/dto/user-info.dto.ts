@@ -12,6 +12,7 @@ export const providerSchema = z.object({
 
 export const userInfoSchema = baseSchema.extend({
   email: z.string().email().nonempty(),
+  username: z.string().min(2).max(100).nonempty(),
   fullName: z.string().min(2).max(100).nonempty(),
   avatar: z.string().url().optional().nullable(),
   phoneNumber: z.string().optional().nullable(),
