@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { AccountService } from 'src/account/account.service';
 import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
@@ -21,6 +17,10 @@ import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
 import { SessionInfoDto } from 'src/session/dto/session.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { IpUtil } from 'src/common/utils/ip.util';
+import { InjectQueue } from '@nestjs/bullmq';
+import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
+import { Queue } from 'bullmq';
+import { SendMailVerifyType } from 'src/queue/workers/mail/mail.dto';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +35,8 @@ export class AuthService {
     private readonly mailUtil: MailUtil,
     private readonly logger: LoggerService,
     private readonly urlGeratorService: UrlGeneratorService,
+    @InjectQueue(SEND_MAIL_VERIFY_QUEUE)
+    private readonly mailVerifyQueue: Queue<SendMailVerifyType>,
   ) {}
 
   async register(
@@ -59,7 +61,7 @@ export class AuthService {
       role,
       session.id,
     );
-    const verify_link = this.urlGeratorService.generateUrlFromPath({
+    const verifyLink = this.urlGeratorService.generateUrlFromPath({
       relativePath: 'auth/verify',
       query: {
         token: emailVerificationToken,
@@ -67,7 +69,11 @@ export class AuthService {
       },
     });
 
-    await this.mailUtil.sendVerifyEmail(email, fullName, verify_link);
+    await this.mailVerifyQueue.add('EmailVerification', {
+      email,
+      firstName: fullName,
+      verifyLink,
+    });
 
     const { accessToken, refreshToken } = await this.jwtUtil.signTokens(
       id,
@@ -191,7 +197,7 @@ export class AuthService {
       sessionId,
     );
 
-    const verify_link = this.urlGeratorService.generateUrlFromPath({
+    const verifyLink = this.urlGeratorService.generateUrlFromPath({
       relativePath: 'auth/verify',
       query: {
         token,
@@ -199,7 +205,11 @@ export class AuthService {
       },
     });
 
-    await this.mailUtil.sendVerifyEmail(email, fullName, verify_link);
+    await this.mailVerifyQueue.add('EmailVerification', {
+      email,
+      firstName: fullName,
+      verifyLink,
+    });
 
     return 'OK';
   }

@@ -7,8 +7,9 @@ import {
   MailtrapMailOptions,
   MailtrapTransporter,
 } from 'mailtrap/dist/types/transport';
-import { SendMailVerify } from '../dto/mail.dto';
 import LoggerService from 'src/logger/logger.service';
+import { TemplateVariableType } from '../dto/mail-util.dto';
+
 @Injectable()
 export class MailUtil {
   private readonly SENDER: string;
@@ -32,13 +33,39 @@ export class MailUtil {
     );
   }
 
+  async sendTemplateEmail(
+    to: string,
+    templateUuid: string,
+    templateVariables: TemplateVariableType,
+    subject?: string,
+  ) {
+    try {
+      const params: MailtrapMailOptions = {
+        from: this.SENDER,
+        to,
+        templateUuid,
+        templateVariables,
+        subject,
+      };
+
+      await this.transport.sendMail(params);
+
+      this.logger.debug(
+        `[MAIL] Sent template email successfully to ${to} using template ${templateUuid}`,
+      );
+    } catch (error) {
+      this.logger.error('[MAIL] Failed to send template email', error);
+      throw error;
+    }
+  }
+
   async sendVerifyEmail(
     email: string,
     first_name: string,
     verify_link: string,
   ) {
     try {
-      const templateVariables: SendMailVerify = {
+      const templateVariables: TemplateVariableType = {
         APP_NAME: this.APP_NAME,
         FIRST_NAME: first_name,
         VERIFY_LINK: verify_link,

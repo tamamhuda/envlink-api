@@ -25,6 +25,7 @@ import { CacheModule } from './cache/cache.module';
 import { getRedisConfig } from './config/cache.config';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { UrlsModule } from './urls/urls.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { UrlsModule } from './urls/urls.module';
     HealthModule,
     CacheModule,
     UrlsModule,
+    QueueModule,
   ],
 
   providers: [
