@@ -43,4 +43,25 @@ export class BcryptUtil {
       throw new Error('Failed to verify token');
     }
   }
+
+  async hashAccessCode(accessCode: string): Promise<string> {
+    try {
+      return await bcrypt.hash(accessCode, 5);
+    } catch (error) {
+      this.logger.error('Failed to hash access code', error);
+      throw new Error('Failed to hash access code');
+    }
+  }
+
+  async verifyAccessCode(
+    accessCode: string,
+    hashedAccessCode: string,
+  ): Promise<boolean> {
+    try {
+      return await bcrypt.compare(accessCode, hashedAccessCode);
+    } catch (error) {
+      this.logger.error('Failed to verify access code', error);
+      throw new Error('Failed to verify access code');
+    }
+  }
 }

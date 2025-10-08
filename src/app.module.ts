@@ -24,6 +24,7 @@ import { getUrlGeneratorConfig } from './config/url-generator.config';
 import { CacheModule } from './cache/cache.module';
 import { getRedisConfig } from './config/cache.config';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { UrlsModule } from './urls/urls.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     LoggerModule,
     HealthModule,
     CacheModule,
+    UrlsModule,
   ],
 
   providers: [

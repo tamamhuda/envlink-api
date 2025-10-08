@@ -4,7 +4,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { getClientIp } from 'src/common/utils/client-ip.util';
 import { Account } from 'src/database/entities/account.entity';
 import Session from 'src/database/entities/session.entity';
 import { SessionRepository } from 'src/database/repositories/session.repository';
@@ -15,11 +14,12 @@ import { SessionInfoDto, sessionInfoSchema } from './dto/session.dto';
 import { UserService } from 'src/user/user.service';
 import { TokensDto } from 'src/auth/dto/token.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { IpUtil } from 'src/common/utils/ip.util';
 
 @Injectable()
 export class SessionService {
   private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
-
+  private readonly ipUtil: IpUtil = new IpUtil();
   constructor(
     private readonly sessionRepository: SessionRepository,
     private readonly jwtUtil: JwtUtil,
@@ -106,10 +106,11 @@ export class SessionService {
       await manager.save(account);
 
       // Step 2: Create session (tokens null for now)
+      const ipLocation = await this.ipUtil.getFormattedLocation(req);
       let session = manager.create(Session, {
         user: account.user,
         account,
-        ipLocation: getClientIp(req),
+        ipLocation,
         parsedUa: req.headers['user-agent'],
       });
       session = await manager.save(session);

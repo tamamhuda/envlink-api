@@ -6,16 +6,18 @@ import {
   LoggerService as NestLoggerService,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { getClientIp } from 'src/common/utils/client-ip.util';
+import { IpUtil } from 'src/common/utils/ip.util';
 
 @Injectable()
 export default class LoggerService extends Logger implements NestLoggerService {
+  private readonly ipUtil: IpUtil = new IpUtil();
+
   httpException(
     handlerName: string,
     request: Request,
     exception: HttpException,
   ): void {
-    const ip = getClientIp(request);
+    const ip = this.ipUtil.getClientIp(request);
 
     const format = `${ip} - [${request.method} - ${exception.getStatus()}] ${request.originalUrl} - [${handlerName}] - ${exception.message}`;
     this.error(format);
@@ -27,7 +29,7 @@ export default class LoggerService extends Logger implements NestLoggerService {
     message: string,
     status: number,
   ) {
-    const ip = getClientIp(request);
+    const ip = this.ipUtil.getClientIp(request);
     const format = `[${request.method} - ${status}] ${request.originalUrl} - [${handlerName}] - ${message} - ${ip}`;
     this.error(format);
   }
@@ -38,7 +40,7 @@ export default class LoggerService extends Logger implements NestLoggerService {
     const response = ctx.getResponse<Response>();
     const controller = context.getClass().name;
     const handler = context.getHandler().name;
-    const ip = getClientIp(request);
+    const ip = this.ipUtil.getClientIp(request);
 
     const format = `[${request.method} - ${response.statusCode}] ${request.originalUrl} - ${responseTime}ms - [${controller}/${handler}] - ${ip}`;
     this.log(format);

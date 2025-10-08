@@ -5,7 +5,6 @@ import {
 } from '@nestjs/terminus';
 
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
-import { CacheService } from 'src/cache/cache.service';
 import { HealthIndicatorSession } from '@nestjs/terminus/dist/health-indicator/health-indicator.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 

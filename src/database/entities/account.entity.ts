@@ -1,23 +1,12 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 import { ProviderEnum } from '../../common/enums/provider.enum';
 import { User } from './user.entity';
 import Session from './session.entity';
+import { BaseEntity } from './base.entity';
 
-@Entity()
+@Entity({ name: 'accounts' })
 @Index(['provider', 'providerAccountId'], { unique: true })
-export class Account {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class Account extends BaseEntity {
   @Column({ type: 'enum', enum: ProviderEnum, default: ProviderEnum.LOCAL })
   provider!: ProviderEnum;
 
@@ -58,7 +47,6 @@ export class Account {
   @Column({ type: 'timestamp', nullable: true })
   accessTokenExpiresAt?: Date;
 
-  // Metadata
   @Column({ type: 'varchar', nullable: true })
   providerEmail?: string;
 
@@ -67,12 +55,6 @@ export class Account {
 
   @Column({ type: 'timestamp', nullable: true })
   lastLoginAt?: Date;
-
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
 
   @ManyToOne(() => User, (user) => user.accounts, { onDelete: 'CASCADE' })
   user!: User;

@@ -1,22 +1,13 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { RolesEnum } from '../../common/enums/roles.enum';
 import { Account } from './account.entity';
 import Session from './session.entity';
+import { BaseEntity } from './base.entity';
+import { Url } from './url.entity';
 
-@Entity()
+@Entity({ name: 'users' })
 @Index(['username', 'email'], { unique: true })
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class User extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 25,
@@ -57,15 +48,12 @@ export class User {
   })
   role!: RolesEnum;
 
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
-
   @OneToMany(() => Account, (account) => account.user)
   accounts!: Account[];
 
   @OneToMany(() => Session, (session) => session.user)
   sessions!: Session[];
+
+  @OneToMany(() => Url, (url) => url.user)
+  urls!: Url[];
 }

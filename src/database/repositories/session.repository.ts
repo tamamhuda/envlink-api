@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DataSource,
-  FindManyOptions,
-  FindOptionsWhere,
-  Repository,
-} from 'typeorm';
+import { DataSource, FindOptionsWhere, Repository } from 'typeorm';
 import Session from '../entities/session.entity';
 
 @Injectable()

@@ -1,0 +1,21 @@
+# @import .env.http
+# @ref dev
+
+
+{{
+const fs = require('fs');
+const path = './.state/auth.json';
+let state = {};
+
+if (fs.existsSync(path)) state = JSON.parse(fs.readFileSync(path, 'utf8'));
+
+exports.state = state.data
+
+}}
+
+###
+GET /api/v1/shorten
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{state.tokens.accessToken}}

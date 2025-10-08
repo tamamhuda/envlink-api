@@ -1,0 +1,97 @@
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { UrlRepository } from 'src/database/repositories/url.repository';
+import LoggerService from 'src/logger/logger.service';
+import { ShortenUrlDto } from './dto/shorten.dto';
+import { UnlockUrlDto, UpdateUrlDto, UrlDto } from './dto/url.dto';
+import { UserInfo } from 'src/auth/dto/user-info.dto';
+import { UserService } from 'src/user/user.service';
+import { Url } from 'src/database/entities/url.entity';
+import { Request } from 'express';
+import { BcryptUtil } from 'src/common/utils/bcrypt.util';
+import { ShortCodeUtil } from 'src/common/utils/short-code.util';
+
+@Injectable()
+export class UrlsService {
+  private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
+  private readonly shortCodeUtil: ShortCodeUtil = new ShortCodeUtil();
+  constructor(
+    private readonly urlRepository: UrlRepository,
+    private readonly logger: LoggerService,
+    private readonly userService: UserService,
+  ) {}
+
+  async findUrlByIdOrCode(id?: string, code?: string): Promise<Url> {
+    const url = await this.urlRepository.findOneByIdOrCode(id, code);
+    if (!url) throw new NotFoundException('Url not found');
+    return url;
+  }
+
+  async getUrlById(id: string): Promise<UrlDto> {
+    return await this.findUrlByIdOrCode(id);
+  }
+
+  async getUserUrls(req: Request): Promise<UrlDto[]> {
+    const { id } = req.user;
+    return await this.urlRepository.findManyByUserId(id);
+  }
+
+  async getUrlByCode(code: string): Promise<UrlDto> {
+    return await this.findUrlByIdOrCode(undefined, code);
+  }
+
+  async validateCode(code: string): Promise<void> {
+    const url = await this.urlRepository.findOneByCode(code);
+    if (url) throw new ConflictException('Code already exists');
+  }
+
+  async createUrl(body: ShortenUrlDto, userInfo?: UserInfo): Promise<UrlDto> {
+    const { code, isProtected, accessCode, ...restOfBody } = body;
+    const alias = code ?? this.shortCodeUtil.generate(6);
+    await this.validateCode(alias);
+
+    const user = userInfo
+      ? await this.userService.findUserById(userInfo.id)
+      : undefined;
+
+    const accessCodeHash =
+      isProtected && accessCode
+        ? await this.bcryptUtil.hashAccessCode(accessCode)
+        : undefined;
+
+    const url = await this.urlRepository.createOne({
+      ...restOfBody,
+      code: alias,
+      isProtected,
+      isAnonymous: user ? false : true,
+      user,
+      accessCode: accessCodeHash,
+    });
+
+    return url;
+  }
+
+  async updateUrl(id: string, body: UpdateUrlDto): Promise<UrlDto> {
+    const existingUrl = await this.findUrlByIdOrCode(id);
+    const { code } = body;
+    if (code) await this.validateCode(code);
+    return await this.urlRepository.updateOne(existingUrl, body);
+  }
+
+  async deleteUrl(id: string): Promise<void> {
+    const result = await this.urlRepository.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Url not found');
+  }
+
+  async unlockUrlByCode(code: string, body: UnlockUrlDto): Promise<UrlDto> {
+    const url = await this.findUrlByIdOrCode(code);
+    const isValidate =
+      url.accessCode &&
+      (await this.bcryptUtil.verifyAccessCode(body.accessCode, url.accessCode));
+    if (!isValidate) throw new ConflictException('Invalid code');
+    return url;
+  }
+}

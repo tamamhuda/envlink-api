@@ -22,7 +22,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const error = exception.getResponse();
 
     if (exception instanceof ZodSerializationException) {
-      this.logger.error(exception.getZodError());
+      this.logger.error(
+        `Zod Serialization Error ${JSON.stringify(exception.getZodError())}`,
+      );
     }
 
     this.logger.httpException(HttpExceptionFilter.name, request, exception);

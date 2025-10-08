@@ -1,21 +1,11 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, Index, ManyToOne } from 'typeorm';
 import { User } from './user.entity';
 import { Account } from './account.entity';
+import { BaseEntity } from './base.entity';
 
-@Entity()
+@Entity({ name: 'sessions' })
 @Index(['refreshTokenHash'], { unique: true })
-export default class Session {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export default class Session extends BaseEntity {
   @Column({
     type: 'varchar',
     unique: true,
@@ -53,12 +43,6 @@ export default class Session {
     nullable: true,
   })
   revokedAt!: Date;
-
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
 
   @ManyToOne(() => User, (user) => user.sessions, {
     nullable: false,

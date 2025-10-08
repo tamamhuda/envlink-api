@@ -15,16 +15,17 @@ import { AuthenticatedDto } from './dto/authResponse.dto';
 import { RegisterDto } from './dto/register.dto';
 import { TokensDto } from './dto/token.dto';
 import { UserInfoDto } from './dto/user-info.dto';
-import { getClientIp } from 'src/common/utils/client-ip.util';
 import { MailUtil } from 'src/common/utils/mail.util';
 import { UrlGeneratorService } from 'nestjs-url-generator';
 import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
 import { SessionInfoDto } from 'src/session/dto/session.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { IpUtil } from 'src/common/utils/ip.util';
 
 @Injectable()
 export class AuthService {
   private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
+  private readonly ipUtil: IpUtil = new IpUtil();
 
   constructor(
     private readonly userService: UserService,
@@ -76,10 +77,11 @@ export class AuthService {
 
     const refreshTokenHash = await this.bcryptUtil.hashToken(refreshToken);
     const expiresAt = await this.jwtUtil.extractRefreshExpiresAt(refreshToken);
+    const ipLocation = await this.ipUtil.getFormattedLocation(req);
     await this.sessionService.updateSession(session, {
       refreshTokenHash,
       expiresAt,
-      ipLocation: getClientIp(req),
+      ipLocation,
       userAgent: req.headers['user-agent'],
     });
 
