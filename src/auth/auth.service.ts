@@ -11,7 +11,6 @@ import { AuthenticatedDto } from './dto/authResponse.dto';
 import { RegisterDto } from './dto/register.dto';
 import { TokensDto } from './dto/token.dto';
 import { UserInfoDto } from './dto/user-info.dto';
-import { MailUtil } from 'src/common/utils/mail.util';
 import { UrlGeneratorService } from 'nestjs-url-generator';
 import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
 import { SessionInfoDto } from 'src/session/dto/session.dto';
@@ -20,7 +19,7 @@ import { IpUtil } from 'src/common/utils/ip.util';
 import { InjectQueue } from '@nestjs/bullmq';
 import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
 import { Queue } from 'bullmq';
-import { SendMailVerifyType } from 'src/queue/workers/mail/mail.dto';
+import { SendMailVerifyType } from 'src/queue/dto/mail.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +31,6 @@ export class AuthService {
     private readonly accountService: AccountService,
     private readonly sessionService: SessionService,
     private readonly jwtUtil: JwtUtil,
-    private readonly mailUtil: MailUtil,
     private readonly logger: LoggerService,
     private readonly urlGeratorService: UrlGeneratorService,
     @InjectQueue(SEND_MAIL_VERIFY_QUEUE)

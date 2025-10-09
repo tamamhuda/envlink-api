@@ -31,7 +31,7 @@ export class UrlRepository extends Repository<Url> {
 
     if (where.length === 0) return null;
 
-    return this.findOne({ where });
+    return this.findOne({ where, relations: ['channel', 'user'] });
   }
 
   async findManyByUserId(

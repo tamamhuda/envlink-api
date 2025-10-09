@@ -12,7 +12,8 @@ export const shortenUrlSchema = z
   })
   .refine(
     (data) => {
-      if (data.isProtected && !data.accessCode) return false;
+      const { isProtected, accessCode } = data;
+      if (isProtected && isProtected == true && !accessCode) return false;
       return true;
     },
     {

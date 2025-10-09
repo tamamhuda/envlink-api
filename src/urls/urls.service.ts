@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -40,7 +41,14 @@ export class UrlsService {
   }
 
   async getUrlByCode(code: string): Promise<UrlDto> {
-    return await this.findUrlByIdOrCode(undefined, code);
+    const url = await this.findUrlByIdOrCode(undefined, code);
+    if (url.isProtected)
+      throw new ForbiddenException(
+        'Access denied. This link is protected. Please provide a access code to continue.',
+      );
+    if (url.expiresAt && url.expiresAt < new Date())
+      throw new ForbiddenException('Access denied. This link has expired.');
+    return url;
   }
 
   async validateCode(code: string): Promise<void> {

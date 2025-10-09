@@ -6,13 +6,20 @@ import {
   HttpStatus,
   Param,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
 import LoggerService from 'src/logger/logger.service';
 import { ShortenUrlDto } from './dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { PublicUrlDto, PublicUrlResponse, UnlockUrlDto } from './dto/url.dto';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
+import { UrlAnalyticInterceptor } from 'src/common/interceptors/url-analytic.interceptor';
+import { ForbiddenResponse } from 'src/common/dto/error-response.dto';
 
 @Controller('public/urls')
 export class PublicUrlsController {
@@ -32,9 +39,14 @@ export class PublicUrlsController {
   }
 
   @Get(':code')
+  @UseInterceptors(UrlAnalyticInterceptor)
   @ApiOkResponse({
     type: PublicUrlResponse,
     description: 'Get a short URL for a public access',
+  })
+  @ApiForbiddenResponse({
+    type: ForbiddenResponse,
+    description: 'Forbidden access to the URL',
   })
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(PublicUrlDto)

@@ -5,9 +5,11 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ZodSerializationException } from 'nestjs-zod';
+import { ZodSerializationException, ZodValidationException } from 'nestjs-zod';
 import LoggerService from 'src/logger/logger.service';
-import { ZodError } from 'zod/v3';
+import { ErrorResponse } from '../interfaces/api-response.intercace';
+import { getReasonPhrase } from 'http-status-codes';
+import { ZodError } from 'zod';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -18,23 +20,33 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-
-    const error = exception.getResponse();
+    const errorException = exception.getResponse();
+    let error: object | string = errorException;
+    let message: string = getReasonPhrase(status);
 
     if (exception instanceof ZodSerializationException) {
-      this.logger.error(
-        `Zod Serialization Error ${JSON.stringify(exception.getZodError())}`,
-      );
+      const zodError = exception.getZodError() as ZodError;
+      error = zodError.issues;
+      message = exception.message;
+    }
+
+    if (exception instanceof ZodValidationException) {
+      const zodError = exception.getZodError() as ZodError;
+      error = zodError.issues;
+      message = exception.message;
     }
 
     this.logger.httpException(HttpExceptionFilter.name, request, exception);
 
-    response.status(status).json({
-      path: request.originalUrl,
-      method: request.method,
-      statusCode: status,
-      ...(typeof error === 'object' ? error : { message: error }),
+    const errorResponse: ErrorResponse = {
+      success: false,
+      status,
+      message,
+      error,
       timestamp: new Date().toISOString(),
-    });
+      path: request.originalUrl,
+    };
+
+    response.status(status).json(errorResponse);
   }
 }

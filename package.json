@@ -50,6 +50,7 @@
     "chalk": "^5.6.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "http-status-codes": "^2.3.0",
     "ioredis": "^5.8.1",
     "ipapi.co": "^0.3.0",
     "mailtrap": "^3.4.0",
@@ -67,6 +68,7 @@
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.25",
     "typescript-eslint": "^8.44.1",
+    "ua-parser-js": "^2.0.5",
     "winston": "^3.17.0",
     "zod": "^3.23.8"
   },

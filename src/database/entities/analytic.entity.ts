@@ -1,10 +1,14 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Url } from './url.entity';
 import { Channel } from './channel.entity';
 
 @Entity({ name: 'analytics' })
+@Index(['url', 'identityHash'], { unique: true })
 export class Analytic extends BaseEntity {
+  @Column({ type: 'varchar', length: 128, nullable: false })
+  identityHash!: string;
+
   @Column({
     type: 'varchar',
     length: 64,
@@ -14,7 +18,6 @@ export class Analytic extends BaseEntity {
 
   @Column({
     type: 'varchar',
-    length: 64,
   })
   userAgent!: string;
 
@@ -49,11 +52,23 @@ export class Analytic extends BaseEntity {
   os!: string;
 
   @Column({
+    type: 'boolean',
+    default: false,
+  })
+  isUnique!: boolean;
+
+  @Column({
     type: 'varchar',
     length: 64,
     nullable: false,
   })
   browser!: string;
+
+  @Column({
+    type: 'integer',
+    default: 1,
+  })
+  visitorCount!: number;
 
   @ManyToOne(() => Url, (url) => url.id, {
     onDelete: 'CASCADE',

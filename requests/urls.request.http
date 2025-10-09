@@ -14,8 +14,21 @@ exports.state = state.data
 }}
 
 ###
-GET /api/v1/shorten
+POST /api/v1/public/urls/shorten
 Host: {{host}}
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{state.tokens.accessToken}}
+{
+  "originalUrl": "https://tamamhuda.dev"
+}
+
+###
+GET /api/v1/public/urls/shorten
+Host: {{host}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{state.tokens.accessToken}}
+{
+  "originalUrl": "https://tamamhuda.dev"
+}

@@ -1,14 +1,22 @@
 import { Logger } from '@nestjs/common';
 import { Request } from 'express';
-import * as ipapi from 'ipapi.co';
+import ipapi from 'ipapi.co';
 import { IpApiLocation } from 'ipapi.co';
 
 export class IpUtil {
   private readonly logger: Logger = new Logger(IpUtil.name);
 
-  async getIpLocation(ipAddr: string): Promise<IpApiLocation> {
+  async getIpLocation(ipAddr: string): Promise<IpApiLocation | undefined> {
     try {
-      return await ipapi.location((res) => res, ipAddr);
+      if (ipAddr === '127.0.0.1') return undefined;
+
+      const result = await new Promise<IpApiLocation | undefined>((resolve) => {
+        void ipapi.location((res: IpApiLocation) => {
+          resolve(res);
+        }, ipAddr);
+      });
+
+      return result;
     } catch (error) {
       this.logger.error(error);
       throw new Error('Failed to fetch IP location');
@@ -27,13 +35,11 @@ export class IpUtil {
       const location = await this.getIpLocation(ipAddr);
 
       // Safely build readable string
-      const parts = [
-        location.city,
-        location.region,
-        location.country_name,
-      ].filter(Boolean);
+      const parts =
+        location &&
+        [location.city, location.region, location.country_name].filter(Boolean);
 
-      return parts.length ? parts.join(', ') : 'Unknown location';
+      return parts && parts.length ? parts.join(', ') : 'Unknown location';
     } catch (error) {
       this.logger.error('Failed to fetch IP location', error);
       return 'Unknown location';

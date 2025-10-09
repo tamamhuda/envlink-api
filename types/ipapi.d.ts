@@ -12,7 +12,7 @@ declare module 'ipapi.co' {
     org?: string;
   }
   // ipapi.co supports both callback and promise usage
-  function location(
+  async function location(
     callback?: (response: IpApiLocation) => void,
     ip?: string,
   ): Promise<IpApiLocation>;

@@ -3,4 +3,5 @@ export enum CachePrefix {
   USER = 'user',
   SESSION = 'session',
   ACCOUNT = 'account',
+  ANALYTICS = 'analytics',
 }

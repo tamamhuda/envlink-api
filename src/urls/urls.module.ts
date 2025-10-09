@@ -8,5 +8,6 @@ import { PublicUrlsController } from './public-urls.controller';
   imports: [UserModule],
   controllers: [UrlsController, PublicUrlsController],
   providers: [UrlsService],
+  exports: [UrlsService],
 })
 export class UrlsModule {}

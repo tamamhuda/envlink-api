@@ -12,7 +12,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtUtil } from 'src/common/utils/jwt.util';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
-import { MailUtil } from 'src/common/utils/mail.util';
 
 @Module({
   imports: [
@@ -34,7 +33,6 @@ import { MailUtil } from 'src/common/utils/mail.util';
     JwtStrategy,
     JwtRefreshStrategy,
     JwtUtil,
-    MailUtil,
   ],
 })
 export class AuthModule {}

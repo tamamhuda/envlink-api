@@ -2,7 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job, Worker } from 'bullmq';
 import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
 import { MailService } from './mail.service';
-import { SendMailVerifyType } from './mail.dto';
+import { SendMailVerifyType } from '../../dto/mail.dto';
 
 @Processor(SEND_MAIL_VERIFY_QUEUE, {
   concurrency: 5,
