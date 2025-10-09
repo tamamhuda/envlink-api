@@ -25,6 +25,13 @@ export const getSwaggerDocumentConfig = (
       JWT_SECURITY,
     )
     .setTitle(APP_NAME)
+    .addServer('http://localhost:3000')
+    .addServer(
+      'https://local-nest.utadev.app',
+      'Local Development (Cloudflare Tunnel)',
+    )
+    .addServer('https://staging.enlink.app', 'Staging Environment')
+    .addServer('https://api.envlink.one', 'Production API')
     .setDescription(APP_DESCRIPTION)
     .setVersion(APP_VERSION)
     .build();

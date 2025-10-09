@@ -1,7 +1,8 @@
 export enum CachePrefix {
-  APP = 'app',
-  USER = 'user',
-  SESSION = 'session',
-  ACCOUNT = 'account',
-  ANALYTICS = 'analytics',
+  APP = 'APP',
+  USER = 'USER',
+  SESSION = 'SESSION',
+  ACCOUNT = 'ACCOUNT',
+  URL_ANALYTICS = 'URL_ANALYTICS',
+  IP_GEOLOCATION = 'IP_GEOLOCATION',
 }

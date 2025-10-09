@@ -1,26 +1,75 @@
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import ipapi from 'ipapi.co';
-import { IpApiLocation } from 'ipapi.co';
+import { Env } from 'src/config/env.config';
+import ip2Location, {
+  IPGeolocation,
+  IpGeolocationResponse,
+} from 'ip2location-io-nodejs';
+import { CacheService } from 'src/cache/cache.service';
+import { CachePrefix } from '../enums/cache-prefix.enum';
+import ms from 'ms';
 
+@Injectable()
 export class IpUtil {
-  private readonly logger: Logger = new Logger(IpUtil.name);
+  private readonly ip2Client: IPGeolocation;
 
-  async getIpLocation(ipAddr: string): Promise<IpApiLocation | undefined> {
+  constructor(
+    private readonly logger: Logger,
+    private readonly config: ConfigService<Env>,
+    private readonly cache: CacheService,
+  ) {
+    const apiKey = this.config.getOrThrow('IP2_API_KEY');
+    const ip2Config = new ip2Location.Configuration(apiKey);
+    this.ip2Client = new ip2Location.IPGeolocation(ip2Config);
+  }
+
+  async getIpGeolocation(
+    ipAddr: string,
+  ): Promise<IpGeolocationResponse | undefined> {
     try {
       if (ipAddr === '127.0.0.1') return undefined;
 
-      const result = await new Promise<IpApiLocation | undefined>((resolve) => {
-        void ipapi.location((res: IpApiLocation) => {
-          resolve(res);
-        }, ipAddr);
-      });
+      const cached = await this.cache.getCache<IpGeolocationResponse>(
+        CachePrefix.IP_GEOLOCATION,
+        ipAddr,
+      );
+
+      if (cached) return cached;
+
+      const result = await this.ip2Client
+        .lookup(ipAddr, 'en')
+        .catch((error) => {
+          this.logger.error(error);
+          return undefined;
+        })
+        .then(async (data) => {
+          const ttl = ms('1d');
+          await this.cache.set(CachePrefix.IP_GEOLOCATION, ipAddr, data, ttl);
+          return data;
+        });
 
       return result;
     } catch (error) {
       this.logger.error(error);
       throw new Error('Failed to fetch IP location');
     }
+  }
+
+  async getIpLocation(ip: string): Promise<{
+    city: string;
+    country: string;
+    region: string;
+    language: string;
+  }> {
+    const location = await this.getIpGeolocation(ip);
+
+    return {
+      city: location?.city_name || 'Unknown',
+      country: location?.country_name || 'Unknown',
+      region: location?.region_name || 'Unknown',
+      language: location?.country?.language.code || 'Unknown',
+    };
   }
 
   async getFormattedLocation(req: Request): Promise<string> {
@@ -32,14 +81,30 @@ export class IpUtil {
         return 'Localhost';
       }
 
-      const location = await this.getIpLocation(ipAddr);
+      const { city, region, country } = await this.getIpLocation(ipAddr);
 
-      // Safely build readable string
-      const parts =
-        location &&
-        [location.city, location.region, location.country_name].filter(Boolean);
+      // If all values are 'Unknown', return a fallback
+      const isAllUnknown = [city, region, country].every(
+        (val) => !val || val === 'Unknown',
+      );
+      if (isAllUnknown) return 'Unknown location';
 
-      return parts && parts.length ? parts.join(', ') : 'Unknown location';
+      // If only country is known
+      if (
+        (!city || city === 'Unknown') &&
+        (!region || region === 'Unknown') &&
+        country &&
+        country !== 'Unknown'
+      ) {
+        return `Somewhere in ${country}`;
+      }
+
+      // Filter out 'Unknown' values before joining
+      const parts = [city, region, country].filter(
+        (val) => val && val !== 'Unknown',
+      );
+
+      return parts.length ? parts.join(', ') : 'Unknown location';
     } catch (error) {
       this.logger.error('Failed to fetch IP location', error);
       return 'Unknown location';

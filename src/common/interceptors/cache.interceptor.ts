@@ -1,7 +1,6 @@
 import {
   CallHandler,
   ExecutionContext,
-  Inject,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
@@ -16,10 +15,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Env } from '../../config/env.config';
 import ms, { StringValue } from 'ms';
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { CachePrefix } from '../enums/cache-prefix.enum';
 import { Request } from 'express';
-import Keyv from 'keyv';
 import { CacheKeyContext } from '../interfaces/cache-context.interface';
 import { CacheService } from 'src/cache/cache.service';
 

@@ -2,7 +2,7 @@ import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { URL_ANALYTIC_QUEUE } from 'src/queue/queue.constans';
 import { AnalyticDto, CreateAnalyticDto } from 'src/urls/dto/analytic.dto';
-import { AnalyticService } from './analytic.service';
+import { UrlAnalyticService } from './url-analytic.service';
 import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic-job.interface';
 import { UrlsService } from 'src/urls/urls.service';
 import { IpUtil } from 'src/common/utils/ip.util';
@@ -16,12 +16,11 @@ import { createHash } from 'crypto';
 @Processor(URL_ANALYTIC_QUEUE, {
   concurrency: 10,
 })
-export class AnalyticProcessor extends WorkerHost {
-  private readonly ipUtil: IpUtil = new IpUtil();
-
+export class UrlAnalyticProcessor extends WorkerHost {
   constructor(
+    private readonly ipUtil: IpUtil,
     private readonly urlService: UrlsService,
-    private readonly analyticsService: AnalyticService,
+    private readonly analyticsService: UrlAnalyticService,
     private readonly logger: LoggerService,
     private readonly cache: CacheService,
   ) {
@@ -75,7 +74,7 @@ export class AnalyticProcessor extends WorkerHost {
         .digest('hex');
 
       const cachedVisitor = await this.cache.getCache<string>(
-        CachePrefix.ANALYTICS,
+        CachePrefix.URL_ANALYTICS,
         `visitor:${identityHash}`,
       );
 
@@ -89,7 +88,7 @@ export class AnalyticProcessor extends WorkerHost {
         await this.analyticsService.incrementVisitorCount(nonUniqueExist);
         const ttl = ms('24h');
         await this.cache.set(
-          CachePrefix.ANALYTICS,
+          CachePrefix.URL_ANALYTICS,
           `visitor:${nonUniqueExist.identityHash}`,
           identityHash,
           ttl,
@@ -125,10 +124,7 @@ export class AnalyticProcessor extends WorkerHost {
     try {
       const { ipAddress, userAgent, referrer, urlCode } = job.data;
       const url = await this.urlService.findUrlByIdOrCode(undefined, urlCode);
-      const ipLocation = await this.ipUtil.getIpLocation(ipAddress);
-
       const { browser, os, deviceType } = this.parseUserAgent(userAgent);
-
       const { identityHash, isUnique } = await this.parseIdentityVisitor(
         url.code,
         ipAddress,
@@ -138,16 +134,21 @@ export class AnalyticProcessor extends WorkerHost {
       );
 
       if (identityHash) {
+        const { city, region, country, language } =
+          await this.ipUtil.getIpLocation(ipAddress);
+
         const createAnalytic: CreateAnalyticDto = {
           identityHash,
           ipAddress,
           userAgent,
-          city: ipLocation?.city || 'unknown',
-          country: ipLocation?.country_name || 'unknown',
           referrer,
           deviceType,
           os,
           browser,
+          city,
+          region,
+          country,
+          language,
           isUnique,
         };
         const analytic = await this.analyticsService.recordVisit(
@@ -158,7 +159,7 @@ export class AnalyticProcessor extends WorkerHost {
         if (analytic && !isUnique) {
           const ttl = ms('24h');
           await this.cache.set(
-            CachePrefix.ANALYTICS,
+            CachePrefix.URL_ANALYTICS,
             `visitor:${identityHash}`,
             identityHash,
             ttl,

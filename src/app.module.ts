@@ -26,6 +26,7 @@ import { getRedisConfig } from './config/cache.config';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { UrlsModule } from './urls/urls.module';
 import { QueueModule } from './queue/queue.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -55,12 +56,6 @@ import { QueueModule } from './queue/queue.module';
       useFactory: getUrlGeneratorConfig,
     }),
 
-    RedisModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: getRedisConfig,
-    }),
-
     AccountModule,
     SessionModule,
     AuthModule,
@@ -71,6 +66,7 @@ import { QueueModule } from './queue/queue.module';
     CacheModule,
     UrlsModule,
     QueueModule,
+    CommonModule,
   ],
 
   providers: [

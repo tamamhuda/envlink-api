@@ -3,23 +3,20 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Keyv } from '@keyv/redis';
-import { ConfigService } from '@nestjs/config';
-import LoggerService from 'src/logger/logger.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { StoredDataNoRaw } from 'keyv';
 import Redis from 'ioredis';
-import { Env } from 'src/config/env.config';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 
 @Injectable()
 export class CacheService {
   constructor(
+    private readonly logger: Logger,
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
-    private readonly config: ConfigService<Env>,
-    private readonly logger: LoggerService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 

@@ -3,7 +3,6 @@ import {
   CallHandler,
   ExecutionContext,
   Injectable,
-  Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import { Queue } from 'bullmq';
@@ -11,17 +10,19 @@ import { Request } from 'express';
 import { Observable, tap } from 'rxjs';
 import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic-job.interface';
 import { URL_ANALYTIC_QUEUE } from 'src/queue/queue.constans';
-import { CreateAnalyticDto } from 'src/urls/dto/analytic.dto';
 import { UrlDto } from 'src/urls/dto/url.dto';
 import { IpUtil } from '../utils/ip.util';
+import LoggerService from 'src/logger/logger.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UrlAnalyticInterceptor<T extends UrlDto>
   implements NestInterceptor<T, T>
 {
-  private readonly logger = new Logger(UrlAnalyticInterceptor.name);
-  private readonly ipUtil: IpUtil = new IpUtil();
   constructor(
+    private readonly ipUtil: IpUtil,
+    private readonly logger: LoggerService,
+    private readonly configService: ConfigService,
     @InjectQueue(URL_ANALYTIC_QUEUE)
     private readonly urlAnalyticQueue: Queue<UrlAnalyticJob>,
   ) {}

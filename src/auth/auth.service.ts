@@ -24,13 +24,13 @@ import { SendMailVerifyType } from 'src/queue/dto/mail.dto';
 @Injectable()
 export class AuthService {
   private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
-  private readonly ipUtil: IpUtil = new IpUtil();
 
   constructor(
     private readonly userService: UserService,
     private readonly accountService: AccountService,
     private readonly sessionService: SessionService,
     private readonly jwtUtil: JwtUtil,
+    private readonly ipUtil: IpUtil,
     private readonly logger: LoggerService,
     private readonly urlGeratorService: UrlGeneratorService,
     @InjectQueue(SEND_MAIL_VERIFY_QUEUE)

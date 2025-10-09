@@ -30,13 +30,19 @@ export class Analytic extends BaseEntity {
     type: 'varchar',
     length: 64,
   })
-  country!: string;
+  region!: string;
 
   @Column({
     type: 'varchar',
     length: 64,
   })
   city!: string;
+
+  @Column({
+    type: 'varchar',
+    length: 64,
+  })
+  country!: string;
 
   @Column({
     type: 'varchar',
@@ -50,6 +56,13 @@ export class Analytic extends BaseEntity {
     nullable: false,
   })
   os!: string;
+
+  @Column({
+    type: 'varchar',
+    length: 64,
+    nullable: false,
+  })
+  language!: string;
 
   @Column({
     type: 'boolean',

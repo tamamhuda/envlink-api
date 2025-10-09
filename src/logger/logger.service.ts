@@ -10,7 +10,9 @@ import { IpUtil } from 'src/common/utils/ip.util';
 
 @Injectable()
 export default class LoggerService extends Logger implements NestLoggerService {
-  private readonly ipUtil: IpUtil = new IpUtil();
+  constructor(private readonly ipUtil: IpUtil) {
+    super();
+  }
 
   httpException(
     handlerName: string,

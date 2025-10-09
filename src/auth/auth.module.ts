@@ -12,6 +12,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtUtil } from 'src/common/utils/jwt.util';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { IpUtil } from 'src/common/utils/ip.util';
 
 @Module({
   imports: [
@@ -32,7 +33,6 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
     LocalStrategy,
     JwtStrategy,
     JwtRefreshStrategy,
-    JwtUtil,
   ],
 })
 export class AuthModule {}

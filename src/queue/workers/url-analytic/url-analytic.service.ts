@@ -5,7 +5,7 @@ import { AnalyticRepository } from 'src/database/repositories/analytic.repositor
 import { AnalyticDto, CreateAnalyticDto } from 'src/urls/dto/analytic.dto';
 
 @Injectable()
-export class AnalyticService {
+export class UrlAnalyticService {
   constructor(private readonly analyticRepository: AnalyticRepository) {}
 
   async recordVisit(data: CreateAnalyticDto, url: Url): Promise<AnalyticDto> {

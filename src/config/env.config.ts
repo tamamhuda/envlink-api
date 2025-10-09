@@ -42,6 +42,8 @@ const envSchema = z
     MAILTRAP_TOKEN: z.string().nonempty(),
     TEMPLATE_ID_VERIFY_EMAIL: z.string().nonempty(),
     MAIL_SENDER: z.string().nonempty('no-reply@envlink.one'),
+
+    IP2_API_KEY: z.string().nonempty(),
   })
   .required();
 

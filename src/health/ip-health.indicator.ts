@@ -12,9 +12,9 @@ import LoggerService from 'src/logger/logger.service';
 export class IpHealthIndicator {
   private readonly key = 'ip';
   private readonly indicator: HealthIndicatorSession;
-  private readonly ipUtil: IpUtil = new IpUtil();
 
   constructor(
+    private readonly ipUtil: IpUtil,
     private readonly healthIndicatorService: HealthIndicatorService,
     private readonly logger: LoggerService,
   ) {
@@ -24,8 +24,8 @@ export class IpHealthIndicator {
   async isHealthy(key = 'ip', ipAddr: string): Promise<HealthIndicatorResult> {
     try {
       if (!ipAddr && key !== this.key) this.indicator.down();
-      const ipLocation = await this.ipUtil.getIpLocation(ipAddr);
-      return this.indicator.up({ ...ipLocation });
+      await this.ipUtil.getIpGeolocation(ipAddr);
+      return this.indicator.up();
     } catch (error) {
       return this.indicator.down(error);
     }

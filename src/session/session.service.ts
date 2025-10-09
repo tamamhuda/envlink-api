@@ -19,11 +19,13 @@ import { IpUtil } from 'src/common/utils/ip.util';
 @Injectable()
 export class SessionService {
   private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
-  private readonly ipUtil: IpUtil = new IpUtil();
+
   constructor(
+    private readonly ipUtil: IpUtil,
     private readonly sessionRepository: SessionRepository,
     private readonly jwtUtil: JwtUtil,
     private readonly userService: UserService,
+
     private readonly logger: LoggerService,
   ) {}
 

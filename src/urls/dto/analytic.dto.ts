@@ -9,12 +9,14 @@ export const createAnalyticSchema = z.object({
   identityHash: z.string(),
   ipAddress: z.string(),
   userAgent: z.string(),
-  referrer: z.string().optional(),
-  country: z.string().optional(),
-  city: z.string().optional(),
-  deviceType: z.string().optional(),
-  os: z.string().optional(),
-  browser: z.string().optional(),
+  referrer: z.string(),
+  country: z.string(),
+  region: z.string(),
+  city: z.string(),
+  deviceType: z.string(),
+  os: z.string(),
+  browser: z.string(),
+  language: z.string(),
   isUnique: z.boolean().default(false),
 });
 
@@ -27,6 +29,7 @@ export const analyticSchema = baseSchema
   .omit({
     identityHash: true,
   });
+
 export class CreateAnalyticDto extends createZodDto(createAnalyticSchema) {}
 
 export class AnalyticDto extends createZodDto(analyticSchema) {}
