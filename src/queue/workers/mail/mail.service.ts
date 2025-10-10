@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TemplateVariableType } from 'src/common/dto/mail-util.dto';
+import { MailVerifyTemplateVariable } from 'src/common/interfaces/mail.interface';
 import { MailUtil } from 'src/common/utils/mail.util';
 import { Env } from 'src/config/env.config';
 import LoggerService from 'src/logger/logger.service';
@@ -22,7 +22,7 @@ export class MailService {
   }
 
   async sendVerifyEmail(email: string, firstName: string, verifyLink: string) {
-    const templateVariables: TemplateVariableType = {
+    const templateVariables: MailVerifyTemplateVariable = {
       APP_NAME: this.APP_NAME,
       FIRST_NAME: firstName,
       VERIFY_LINK: verifyLink,

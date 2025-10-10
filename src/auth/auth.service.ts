@@ -19,7 +19,7 @@ import { IpUtil } from 'src/common/utils/ip.util';
 import { InjectQueue } from '@nestjs/bullmq';
 import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
 import { Queue } from 'bullmq';
-import { SendMailVerifyType } from 'src/queue/dto/mail.dto';
+import { SendMailVerifyJob } from 'src/queue/interfaces/mail-verify.interface';
 
 @Injectable()
 export class AuthService {
@@ -34,7 +34,7 @@ export class AuthService {
     private readonly logger: LoggerService,
     private readonly urlGeratorService: UrlGeneratorService,
     @InjectQueue(SEND_MAIL_VERIFY_QUEUE)
-    private readonly mailVerifyQueue: Queue<SendMailVerifyType>,
+    private readonly mailVerifyQueue: Queue<SendMailVerifyJob>,
   ) {}
 
   async register(

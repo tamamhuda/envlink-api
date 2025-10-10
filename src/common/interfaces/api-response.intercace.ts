@@ -1,5 +1,3 @@
-import { HttpException, UnauthorizedException } from '@nestjs/common';
-
 export interface ApiResponse<T> {
   success: boolean;
   status: number;
@@ -17,17 +15,3 @@ export interface ErrorResponse {
   timestamp: string;
   [key: string]: any;
 }
-
-// export function createErrorResponse<T extends HttpException>(
-//   error: T,
-// ): ErrorResponse {
-//   const { status, path, message, error } = error;
-//   return {
-//     success: false,
-//     status,
-//     path,
-//     message,
-//     error,
-//     timestamp: new Date().toISOString(),
-//   };
-// }

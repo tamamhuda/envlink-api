@@ -8,7 +8,7 @@ import {
 import { Queue } from 'bullmq';
 import { Request } from 'express';
 import { Observable, tap } from 'rxjs';
-import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic-job.interface';
+import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic.interface';
 import { URL_ANALYTIC_QUEUE } from 'src/queue/queue.constans';
 import { UrlDto } from 'src/urls/dto/url.dto';
 import { IpUtil } from '../utils/ip.util';

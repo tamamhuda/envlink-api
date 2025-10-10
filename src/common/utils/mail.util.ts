@@ -8,7 +8,7 @@ import {
   MailtrapTransporter,
 } from 'mailtrap/dist/types/transport';
 import LoggerService from 'src/logger/logger.service';
-import { TemplateVariableType } from '../dto/mail-util.dto';
+import { MailVerifyTemplateVariable } from '../interfaces/mail.interface';
 
 @Injectable()
 export class MailUtil {
@@ -36,7 +36,7 @@ export class MailUtil {
   async sendTemplateEmail(
     to: string,
     templateUuid: string,
-    templateVariables: TemplateVariableType,
+    templateVariables: MailVerifyTemplateVariable,
     subject?: string,
   ) {
     try {
@@ -65,7 +65,7 @@ export class MailUtil {
     verify_link: string,
   ) {
     try {
-      const templateVariables: TemplateVariableType = {
+      const templateVariables: MailVerifyTemplateVariable = {
         APP_NAME: this.APP_NAME,
         FIRST_NAME: first_name,
         VERIFY_LINK: verify_link,

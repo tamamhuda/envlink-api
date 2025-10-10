@@ -3,7 +3,7 @@ import { Job } from 'bullmq';
 import { URL_ANALYTIC_QUEUE } from 'src/queue/queue.constans';
 import { AnalyticDto, CreateAnalyticDto } from 'src/urls/dto/analytic.dto';
 import { UrlAnalyticService } from './url-analytic.service';
-import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic-job.interface';
+import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic.interface';
 import { UrlsService } from 'src/urls/urls.service';
 import { IpUtil } from 'src/common/utils/ip.util';
 import LoggerService from 'src/logger/logger.service';
@@ -177,7 +177,7 @@ export class UrlAnalyticProcessor extends WorkerHost {
   @OnWorkerEvent('completed')
   async onCompleted(job: Job<UrlAnalyticJob>): Promise<void> {
     const jobIsCompleted = await job.isCompleted();
-    this.logger.log(
+    this.logger.debug(
       `[${job.queueName}:${job.id}]: ${jobIsCompleted ? 'COMPLETED' : 'FAILED'}`,
     );
   }
