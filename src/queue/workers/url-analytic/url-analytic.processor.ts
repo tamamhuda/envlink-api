@@ -12,6 +12,7 @@ import { CacheService } from 'src/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import ms from 'ms';
 import { createHash } from 'crypto';
+import { Analytic } from 'src/database/entities/analytic.entity';
 
 @Processor(URL_ANALYTIC_QUEUE, {
   concurrency: 10,
@@ -47,6 +48,23 @@ export class UrlAnalyticProcessor extends WorkerHost {
     );
   }
 
+  private parseUserAgent(userAgent: string): {
+    browser: string;
+    os: string;
+    deviceType: string;
+  } {
+    const parser = new UAParser(userAgent);
+    const { browser, os, device } = parser.getResult();
+    const deviceType =
+      device.type ||
+      (/Windows|Mac\s?OS|Linux/i.test(os.name ?? '') ? 'desktop' : 'Unknown');
+    return {
+      browser: browser.name || 'Unknown',
+      os: os.name || 'Unknown',
+      deviceType,
+    };
+  }
+
   async parseIdentityVisitor(
     urlCode: string,
     ipAddress: string,
@@ -72,51 +90,11 @@ export class UrlAnalyticProcessor extends WorkerHost {
       identityHash = createHash('sha256')
         .update(`${urlCode}:${ipAddress}:${browser}:${os}:${deviceType}`)
         .digest('hex');
-
-      const cachedVisitor = await this.cache.getCache<string>(
-        CachePrefix.URL_ANALYTICS,
-        `visitor:${identityHash}`,
-      );
-
-      const nonUniqueExist = cachedVisitor
-        ? null
-        : await this.analyticsService.findAnalyticByIdentityHash(identityHash);
-
-      if (cachedVisitor) identityHash = null;
-
-      if (nonUniqueExist) {
-        await this.analyticsService.incrementVisitorCount(nonUniqueExist);
-        const ttl = ms('24h');
-        await this.cache.set(
-          CachePrefix.URL_ANALYTICS,
-          `visitor:${nonUniqueExist.identityHash}`,
-          identityHash,
-          ttl,
-        );
-        identityHash = null;
-      }
     }
 
     return {
       identityHash,
       isUnique: !uniqueExist,
-    };
-  }
-
-  private parseUserAgent(userAgent: string): {
-    browser: string;
-    os: string;
-    deviceType: string;
-  } {
-    const parser = new UAParser(userAgent);
-    const { browser, os, device } = parser.getResult();
-    const deviceType =
-      device.type ||
-      (/Windows|Mac\s?OS|Linux/i.test(os.name ?? '') ? 'desktop' : 'unknown');
-    return {
-      browser: browser.name || 'unknown',
-      os: os.name || 'unknown',
-      deviceType,
     };
   }
 
@@ -133,42 +111,63 @@ export class UrlAnalyticProcessor extends WorkerHost {
         deviceType,
       );
 
-      if (identityHash) {
-        const { city, region, country, language } =
-          await this.ipUtil.getIpLocation(ipAddress);
+      if (!identityHash) return null;
 
-        const createAnalytic: CreateAnalyticDto = {
-          identityHash,
-          ipAddress,
-          userAgent,
-          referrer,
-          deviceType,
-          os,
-          browser,
-          city,
-          region,
-          country,
-          language,
-          isUnique,
-        };
-        const analytic = await this.analyticsService.recordVisit(
-          createAnalytic,
-          url,
+      const cached = await this.cache.getCache<Analytic>(
+        CachePrefix.URL_ANALYTICS,
+        `visitor:${identityHash}`,
+      );
+
+      if (cached) return cached;
+
+      const nonUniqueExist = !isUnique
+        ? await this.analyticsService.findAnalyticByIdentityHash(identityHash)
+        : null;
+
+      if (nonUniqueExist) {
+        await this.analyticsService.incrementVisitorCount(nonUniqueExist);
+        const ttl = ms('24h');
+        await this.cache.set(
+          CachePrefix.URL_ANALYTICS,
+          `visitor:${nonUniqueExist.identityHash}`,
+          nonUniqueExist,
+          ttl,
         );
-
-        if (analytic && !isUnique) {
-          const ttl = ms('24h');
-          await this.cache.set(
-            CachePrefix.URL_ANALYTICS,
-            `visitor:${identityHash}`,
-            identityHash,
-            ttl,
-          );
-        }
-        return analytic;
+        return nonUniqueExist;
       }
-      this.logger.warn(`[SKIPPED] Visitor already counted`);
-      return null;
+
+      const { city, region, country, language } =
+        await this.ipUtil.getIpLocation(ipAddress);
+
+      const createAnalytic: CreateAnalyticDto = {
+        identityHash,
+        ipAddress,
+        userAgent,
+        referrer,
+        deviceType,
+        os,
+        browser,
+        city,
+        region,
+        country,
+        language,
+        isUnique,
+      };
+      const analytic = await this.analyticsService.recordVisit(
+        createAnalytic,
+        url,
+      );
+
+      if (analytic && !isUnique) {
+        const ttl = ms('24h');
+        await this.cache.set(
+          CachePrefix.URL_ANALYTICS,
+          `visitor:${identityHash}`,
+          identityHash,
+          ttl,
+        );
+      }
+      return analytic;
     } catch (error) {
       this.logger.error(`[SKIPPED] Failed to process job ${job.id}: ${error}`);
       return null;
@@ -176,7 +175,10 @@ export class UrlAnalyticProcessor extends WorkerHost {
   }
 
   @OnWorkerEvent('completed')
-  onCompleted(job: Job<UrlAnalyticJob>) {
-    this.logger.log(`Job completed for URL: ${job.data.urlCode}`);
+  async onCompleted(job: Job<UrlAnalyticJob>): Promise<void> {
+    const jobIsCompleted = await job.isCompleted();
+    this.logger.log(
+      `[${job.queueName}:${job.id}]: ${jobIsCompleted ? 'COMPLETED' : 'FAILED'}`,
+    );
   }
 }

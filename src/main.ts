@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from './config/env.config';
 import { getSwaggerDocumentConfig } from './config/swagger.config';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import './common/database/repository.extension';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
