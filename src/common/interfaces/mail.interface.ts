@@ -3,5 +3,5 @@ export interface MailVerifyTemplateVariable {
   FIRST_NAME: string;
   VERIFY_LINK: string;
   EXPIRY: string;
-  [key: string]: any;
+  [key: string]: string;
 }

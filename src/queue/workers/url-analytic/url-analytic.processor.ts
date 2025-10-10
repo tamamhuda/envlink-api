@@ -175,10 +175,15 @@ export class UrlAnalyticProcessor extends WorkerHost {
   }
 
   @OnWorkerEvent('completed')
-  async onCompleted(job: Job<UrlAnalyticJob>): Promise<void> {
+  async onCompleted(
+    job: Job<UrlAnalyticJob, AnalyticDto | null>,
+  ): Promise<void> {
+    const duration = Date.now() - job.timestamp;
+    const data = job.returnvalue;
     const jobIsCompleted = await job.isCompleted();
+    const result = data ? JSON.stringify(data, null, 2) : 'SKIPPED';
     this.logger.debug(
-      `[${job.queueName}:${job.id}]: ${jobIsCompleted ? 'COMPLETED' : 'FAILED'}`,
+      `[${job.queueName}:${job.id}]: ${jobIsCompleted ? 'COMPLETED' : 'FAILED'} ${duration}ms : ${result}`,
     );
   }
 }

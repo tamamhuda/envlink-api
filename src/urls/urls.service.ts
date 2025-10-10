@@ -14,6 +14,10 @@ import { Url } from 'src/database/entities/url.entity';
 import { Request } from 'express';
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { ShortCodeUtil } from 'src/common/utils/short-code.util';
+import { InjectQueue } from '@nestjs/bullmq';
+import { URL_METADATA_QUEUE } from 'src/queue/queue.constans';
+import { Queue } from 'bullmq';
+import { UrlMetadataJob } from 'src/queue/interfaces/url-metadata.interface';
 
 @Injectable()
 export class UrlsService {
@@ -22,6 +26,8 @@ export class UrlsService {
   constructor(
     private readonly urlRepository: UrlRepository,
     private readonly logger: LoggerService,
+    @InjectQueue(URL_METADATA_QUEUE)
+    private readonly queue: Queue<UrlMetadataJob>,
     private readonly userService: UserService,
   ) {}
 
@@ -70,16 +76,21 @@ export class UrlsService {
         ? await this.bcryptUtil.hashAccessCode(accessCode)
         : undefined;
 
-    const url = await this.urlRepository.createOne({
-      ...restOfBody,
-      code: alias,
-      isProtected,
-      isAnonymous: user ? false : true,
-      user,
-      accessCode: accessCodeHash,
-    });
-
-    return url;
+    return await this.urlRepository
+      .createOne({
+        ...restOfBody,
+        code: alias,
+        isProtected,
+        isAnonymous: user ? false : true,
+        user,
+        accessCode: accessCodeHash,
+      })
+      .then((url) => {
+        void this.queue.add('url-metadata', {
+          urlId: url.id,
+        });
+        return url;
+      });
   }
 
   async updateUrl(id: string, body: UpdateUrlDto): Promise<UrlDto> {

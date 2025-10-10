@@ -11,19 +11,33 @@ import { getSwaggerDocumentConfig } from './config/swagger.config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
+  const isWorker = process.env.WORKER === 'true';
+
+  if (isWorker) {
+    // DON'T start app.listen()
+    const appContext = await NestFactory.createApplicationContext(AppModule, {
+      logger: WinstonModule.createLogger({ instance }),
+    });
+    const logger = appContext.get(LoggerService);
+    logger.log(
+      `Worker process started: ${process.env.WORKER_NAME || 'default'}`,
+    );
+    return;
+  }
+
+  // HTTP server context
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: WinstonModule.createLogger({
-      instance,
-    }),
+    logger: WinstonModule.createLogger({ instance }),
   });
 
-  app.setGlobalPrefix(`api/v1`);
+  app.setGlobalPrefix('api/v1');
   app.set('trust proxy', true);
 
   const config = app.get(ConfigService<Env>);
   const PORT = config.get<Env['PORT']>('PORT') || 3000;
   const NODE_ENV = config.get<Env['NODE_ENV']>('NODE_ENV') || 'local';
 
+  // Swagger / OpenAPI
   const swaggerConfig = getSwaggerDocumentConfig(config);
   const openApiDoc = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/v1/docs', app, cleanupOpenApiDoc(openApiDoc));

@@ -51,10 +51,15 @@ export class Url extends BaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   metadata!: {
     title?: string;
+    url?: string;
     description?: string;
     image?: string;
     favicon?: string;
-    siteName?: string;
+    site_name?: string;
+    keywords?: string;
+    type?: string;
+    robots?: string;
+    author?: string;
   } | null;
 
   @ManyToOne(() => User, (user) => user.urls, {
