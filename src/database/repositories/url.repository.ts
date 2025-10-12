@@ -10,11 +10,11 @@ export class UrlRepository extends Repository<Url> {
   }
 
   findOneById(id: string): Promise<Url | null> {
-    return this.findOne({ where: { id } });
+    return this.findOne({ where: { id }, relations: ['channels', 'user'] });
   }
 
   findOneByCode(code: string): Promise<Url | null> {
-    return this.findOne({ where: { code } });
+    return this.findOne({ where: { code }, relations: ['channels', 'user'] });
   }
 
   async createOne(data: Partial<Url>): Promise<Url> {
@@ -23,7 +23,7 @@ export class UrlRepository extends Repository<Url> {
   }
 
   async findOneByIdOrCode(id?: string, code?: string): Promise<Url | null> {
-    const where: any[] = [];
+    const where: FindOptionsWhere<Url>[] = [];
 
     if (id) where.push({ id });
 
@@ -31,7 +31,7 @@ export class UrlRepository extends Repository<Url> {
 
     if (where.length === 0) return null;
 
-    return this.findOne({ where, relations: ['channel', 'user'] });
+    return this.findOne({ where, relations: ['channels', 'user'] });
   }
 
   async findManyByUserId(

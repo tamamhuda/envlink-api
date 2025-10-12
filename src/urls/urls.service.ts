@@ -18,6 +18,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { URL_METADATA_QUEUE } from 'src/queue/queue.constans';
 import { Queue } from 'bullmq';
 import { UrlMetadataJob } from 'src/queue/interfaces/url-metadata.interface';
+import { Channel } from 'src/database/entities/channel.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 export class UrlsService {
@@ -63,34 +65,55 @@ export class UrlsService {
   }
 
   async createUrl(body: ShortenUrlDto, userInfo?: UserInfo): Promise<UrlDto> {
-    const { code, isProtected, accessCode, ...restOfBody } = body;
-    const alias = code ?? this.shortCodeUtil.generate(6);
-    await this.validateCode(alias);
+    return this.urlRepository.manager.transaction(async (manager) => {
+      const { code, isProtected, accessCode, channelIds, ...restOfBody } = body;
+      const alias = code ?? this.shortCodeUtil.generate(6);
+      await this.validateCode(alias);
 
-    const user = userInfo
-      ? await this.userService.findUserById(userInfo.id)
-      : undefined;
-
-    const accessCodeHash =
-      isProtected && accessCode
-        ? await this.bcryptUtil.hashAccessCode(accessCode)
+      const user = userInfo
+        ? await this.userService.findUserById(userInfo.id)
         : undefined;
 
-    return await this.urlRepository
-      .createOne({
+      const accessCodeHash =
+        isProtected && accessCode
+          ? await this.bcryptUtil.hashAccessCode(accessCode)
+          : undefined;
+
+      let channels: Channel[] = [];
+      if (channelIds && user) {
+        channels = await manager.find(Channel, {
+          where: { id: In(channelIds) },
+        });
+        this.logger.debug(
+          `Found ${channels.length} channels for user ${user.id}`,
+        );
+      }
+
+      const url = manager.create(Url, {
         ...restOfBody,
         code: alias,
         isProtected,
         isAnonymous: user ? false : true,
         user,
         accessCode: accessCodeHash,
-      })
-      .then((url) => {
-        void this.queue.add('url-metadata', {
-          urlId: url.id,
-        });
-        return url;
+        channels,
       });
+
+      return await manager
+        .save(url, {
+          reload: true,
+        })
+        .then(async ({ id, code }) => {
+          const url = await manager.findOneOrFail(Url, {
+            where: { id },
+            relations: ['channels'],
+          });
+          void this.queue.add(`url-metadata-${code}`, {
+            urlId: id,
+          });
+          return url;
+        });
+    });
   }
 
   async updateUrl(id: string, body: UpdateUrlDto): Promise<UrlDto> {

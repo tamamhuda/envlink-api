@@ -12,11 +12,10 @@ import { CacheService } from 'src/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import ms from 'ms';
 import { createHash } from 'crypto';
-import { Analytic } from 'src/database/entities/analytic.entity';
+import { Url } from 'src/database/entities/url.entity';
+import { Channel } from 'src/database/entities/channel.entity';
 
-@Processor(URL_ANALYTIC_QUEUE, {
-  concurrency: 10,
-})
+@Processor(URL_ANALYTIC_QUEUE, { concurrency: 10 })
 export class UrlAnalyticProcessor extends WorkerHost {
   constructor(
     private readonly ipUtil: IpUtil,
@@ -28,162 +27,186 @@ export class UrlAnalyticProcessor extends WorkerHost {
     super();
   }
 
-  private validateIsHuman(
-    os: string,
-    browser: string,
-    deviceType: string,
-  ): boolean {
-    function isValidIdentityPart(value: string): boolean {
-      return (
-        typeof value === 'string' &&
-        value.trim() !== '' &&
-        value.toLowerCase() !== 'unknown'
-      );
-    }
-
-    return (
-      isValidIdentityPart(os) &&
-      isValidIdentityPart(browser) &&
-      isValidIdentityPart(deviceType)
-    );
-  }
-
-  private parseUserAgent(userAgent: string): {
-    browser: string;
-    os: string;
-    deviceType: string;
-  } {
-    const parser = new UAParser(userAgent);
-    const { browser, os, device } = parser.getResult();
+  /** ────────────────────────────────
+   *  Utility: Hash + UA parsing
+   *  ────────────────────────────────
+   */
+  private parseUserAgent(userAgent: string) {
+    const { browser, os, device } = new UAParser(userAgent).getResult();
     const deviceType =
       device.type ||
-      (/Windows|Mac\s?OS|Linux/i.test(os.name ?? '') ? 'desktop' : 'Unknown');
+      (/Windows|Mac\s?OS|Linux/i.test(os.name ?? '') ? 'desktop' : 'unknown');
+
     return {
-      browser: browser.name || 'Unknown',
-      os: os.name || 'Unknown',
+      browser: browser.name || 'unknown',
+      os: os.name || 'unknown',
       deviceType,
     };
   }
 
-  async parseIdentityVisitor(
+  private generateHashes(
     urlCode: string,
-    ipAddress: string,
+    ip: string,
     os: string,
     browser: string,
     deviceType: string,
-  ): Promise<{ identityHash: string | null; isUnique: boolean }> {
-    let identityHash: string | null = null;
-    const isHuman = this.validateIsHuman(os, browser, deviceType);
-
-    if (!isHuman) {
-      return { identityHash: null, isUnique: false };
-    }
-
-    identityHash = createHash('sha256')
-      .update(`${urlCode}:${ipAddress}:${os}:${browser}:${deviceType}`)
+  ) {
+    // Stable identity hash
+    const identityHash = createHash('sha256')
+      .update(`${urlCode}:${os}:${browser}:${deviceType}`)
       .digest('hex');
 
-    const uniqueExist =
-      await this.analyticsService.findAnalyticByIdentityHash(identityHash);
+    // Dynamic visit hash (captures IP changes)
+    const visitHash = createHash('sha256')
+      .update(`${identityHash}:${ip}`)
+      .digest('hex');
 
-    if (uniqueExist) {
-      identityHash = createHash('sha256')
-        .update(`${urlCode}:${ipAddress}:${browser}:${os}:${deviceType}`)
-        .digest('hex');
-    }
-
-    return {
-      identityHash,
-      isUnique: !uniqueExist,
-    };
+    return { identityHash, visitHash };
   }
 
-  async process(job: Job<UrlAnalyticJob>): Promise<AnalyticDto | null> {
+  private async cacheAnalytic(identityHash: string, analytic: AnalyticDto) {
+    await this.cache.set(
+      CachePrefix.URL_ANALYTICS,
+      `visitor:${identityHash}`,
+      analytic,
+      ms('24h'),
+    );
+  }
+
+  private async getCachedAnalytic(identityHash: string) {
+    return this.cache.getCache<AnalyticDto>(
+      CachePrefix.URL_ANALYTICS,
+      `visitor:${identityHash}`,
+    );
+  }
+
+  /** ────────────────────────────────
+   *  Analytics Creation Logic
+   *  ────────────────────────────────
+   */
+  private async createAnalyticRecord(
+    identityHash: string,
+    ipAddress: string,
+    userAgent: string,
+    referrer: string,
+    url: Url,
+    os: string,
+    browser: string,
+    deviceType: string,
+    isUnique: boolean,
+    channels: Channel[] = [],
+  ): Promise<AnalyticDto> {
+    const { city, region, country, language } =
+      await this.ipUtil.getIpLocation(ipAddress);
+
+    const dto: CreateAnalyticDto = {
+      identityHash,
+      ipAddress,
+      userAgent,
+      referrer,
+      deviceType,
+      os,
+      browser,
+      city,
+      region,
+      country,
+      language,
+      isUnique,
+    };
+
+    return await this.analyticsService.recordVisit(dto, url, channels);
+  }
+
+  /** ────────────────────────────────
+   *  Main Processor
+   *  ────────────────────────────────
+   */
+  async process(job: Job<UrlAnalyticJob>): Promise<AnalyticDto> {
+    const { ipAddress, userAgent, referrer, urlCode } = job.data;
+
     try {
-      const { ipAddress, userAgent, referrer, urlCode } = job.data;
       const url = await this.urlService.findUrlByIdOrCode(undefined, urlCode);
       const { browser, os, deviceType } = this.parseUserAgent(userAgent);
-      const { identityHash, isUnique } = await this.parseIdentityVisitor(
+      const { identityHash, visitHash } = this.generateHashes(
         url.code,
         ipAddress,
-        browser,
         os,
+        browser,
         deviceType,
       );
 
-      if (!identityHash) return null;
+      // Get cached analytic (24h)
+      const cached = await this.getCachedAnalytic(visitHash);
 
-      const cached = await this.cache.getCache<Analytic>(
-        CachePrefix.URL_ANALYTICS,
-        `visitor:${identityHash}`,
-      );
+      // Case First-time visit
+      const existing =
+        await this.analyticsService.findAnalyticByIdentityHash(identityHash);
 
-      if (cached) return cached;
-
-      const nonUniqueExist = !isUnique
-        ? await this.analyticsService.findAnalyticByIdentityHash(identityHash)
-        : null;
-
-      if (nonUniqueExist) {
-        await this.analyticsService.incrementVisitorCount(nonUniqueExist);
-        const ttl = ms('24h');
-        await this.cache.set(
-          CachePrefix.URL_ANALYTICS,
-          `visitor:${nonUniqueExist.identityHash}`,
-          nonUniqueExist,
-          ttl,
-        );
-        return nonUniqueExist;
-      }
-
-      const { city, region, country, language } =
-        await this.ipUtil.getIpLocation(ipAddress);
-
-      const createAnalytic: CreateAnalyticDto = {
-        identityHash,
-        ipAddress,
-        userAgent,
-        referrer,
-        deviceType,
-        os,
-        browser,
-        city,
-        region,
-        country,
-        language,
-        isUnique,
-      };
-      const analytic = await this.analyticsService.recordVisit(
-        createAnalytic,
-        url,
-      );
-
-      if (analytic && !isUnique) {
-        const ttl = ms('24h');
-        await this.cache.set(
-          CachePrefix.URL_ANALYTICS,
-          `visitor:${identityHash}`,
+      if (!existing) {
+        return await this.createAnalyticRecord(
           identityHash,
-          ttl,
+          ipAddress,
+          userAgent,
+          referrer,
+          url,
+          os,
+          browser,
+          deviceType,
+          true, // isUnique
+          url.channels,
         );
       }
-      return analytic;
+
+      // Case Revisit after identity  — same visitor, TTL expired
+      if (!cached) {
+        const existing =
+          await this.analyticsService.findAnalyticByIdentityHash(visitHash);
+
+        // if visit Hash not exist create new record visit
+        if (!existing) {
+          return await this.createAnalyticRecord(
+            visitHash, // new hash for this session
+            ipAddress,
+            userAgent,
+            referrer,
+            url,
+            os,
+            browser,
+            deviceType,
+            false, // non-unique
+            url.channels,
+          ).then(async (record) => {
+            await this.cacheAnalytic(visitHash, record);
+            return record;
+          });
+        }
+        await this.analyticsService.incrementVisitorCount(existing);
+        return existing;
+      }
+
+      // Within TTL and same hash → no new record
+      return cached;
     } catch (error) {
-      this.logger.error(`[SKIPPED] Failed to process job ${job.id}: ${error}`);
-      return null;
+      throw new Error(error);
     }
+  }
+
+  /** ────────────────────────────────
+   *  Logging
+   *  ────────────────────────────────
+   */
+  @OnWorkerEvent('active')
+  onStart(job: Job<UrlAnalyticJob, AnalyticDto>) {
+    this.logger.jobActive(job);
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job<UrlAnalyticJob, AnalyticDto>) {
+    this.logger.jobFailed(job);
   }
 
   @OnWorkerEvent('completed')
-  async onCompleted(
-    job: Job<UrlAnalyticJob, AnalyticDto | null>,
-  ): Promise<void> {
-    const duration = Date.now() - job.timestamp;
-    const data = job.returnvalue;
-    const jobIsCompleted = await job.isCompleted();
-    const result = data ? JSON.stringify(data, null, 2) : 'SKIPPED';
-    this.logger.debug(
-      `[${job.queueName}:${job.id}]: ${jobIsCompleted ? 'COMPLETED' : 'FAILED'} ${duration}ms : ${result}`,
-    );
+  onCompleted(job: Job<UrlAnalyticJob, AnalyticDto>) {
+    this.logger.jobCompleted(job);
   }
 }

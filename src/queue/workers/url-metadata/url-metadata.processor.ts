@@ -8,6 +8,9 @@ import { URL_METADATA_QUEUE } from 'src/queue/queue.constans';
 import UrlMetadataService from './url-metadata.service';
 import LoggerService from 'src/logger/logger.service';
 import { UrlsService } from 'src/urls/urls.service';
+import { CacheService } from 'src/cache/cache.service';
+import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
+import ms from 'ms';
 
 @Processor(URL_METADATA_QUEUE, {
   concurrency: 4,
@@ -17,39 +20,50 @@ export class UrlMetadataProcessor extends WorkerHost {
     private readonly urlMetadataService: UrlMetadataService,
     private readonly logger: LoggerService,
     private readonly urlService: UrlsService,
+    private readonly cache: CacheService,
   ) {
     super();
   }
 
-  @OnWorkerEvent('active')
-  onStart(job: Job<UrlMetadataJob>) {
-    this.logger.debug(`[${job.queueName}:${job.id}]: STARTED`);
+  private async fetchMetadata(url: string): Promise<UrlMetadata> {
+    const cached = await this.cache.getCache<UrlMetadata>(
+      CachePrefix.URL_METADATA,
+      url,
+    );
+    if (cached) return cached;
+
+    const metadata = await this.urlMetadataService.fetchMetadata(url);
+    const ttl = ms('7d');
+    await this.cache.set(CachePrefix.URL_METADATA, url, metadata, ttl);
+    return metadata;
   }
 
   async process(job: Job<UrlMetadataJob>): Promise<UrlMetadata> {
     try {
       const { urlId } = job.data;
       const url = await this.urlService.findUrlByIdOrCode(urlId);
-      const metadata = await this.urlMetadataService.fetchMetadata(
-        url.originalUrl,
-      );
+      const metadata = await this.fetchMetadata(url.originalUrl);
       await this.urlService.updateUrl(url.id, {
         metadata,
       });
       return metadata;
     } catch (error) {
-      this.logger.error(`Error processing job ${job.id}: ${error.message}`);
-      throw error;
+      throw new Error(error);
     }
   }
 
+  @OnWorkerEvent('active')
+  onStart(job: Job<UrlMetadataJob, UrlMetadata>) {
+    this.logger.jobActive(job);
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job<UrlMetadataJob, UrlMetadata>) {
+    this.logger.jobFailed(job);
+  }
+
   @OnWorkerEvent('completed')
-  async onCompleted(job: Job<UrlMetadataJob, UrlMetadata>): Promise<void> {
-    const duration = Date.now() - job.timestamp;
-    const data = job.returnvalue;
-    const jobIsFail = await job.isFailed();
-    this.logger.debug(
-      `[${job.queueName}:${job.id}]: ${!jobIsFail ? 'COMPLETED' : 'FAILED'} - ${duration}ms : ${JSON.stringify(data, null, 2)}`,
-    );
+  onCompleted(job: Job<UrlMetadataJob, UrlMetadata>) {
+    this.logger.jobCompleted(job);
   }
 }

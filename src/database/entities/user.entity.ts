@@ -4,6 +4,7 @@ import { Account } from './account.entity';
 import Session from './session.entity';
 import { BaseEntity } from './base.entity';
 import { Url } from './url.entity';
+import { Channel } from './channel.entity';
 
 @Entity({ name: 'users' })
 @Index(['username', 'email'], { unique: true })
@@ -47,6 +48,9 @@ export class User extends BaseEntity {
     default: RolesEnum.USER,
   })
   role!: RolesEnum;
+
+  @OneToMany(() => Channel, (channel) => channel.user, { onDelete: 'CASCADE' })
+  channels!: Channel[];
 
   @OneToMany(() => Account, (account) => account.user)
   accounts!: Account[];

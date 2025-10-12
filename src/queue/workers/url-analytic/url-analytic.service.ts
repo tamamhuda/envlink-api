@@ -1,19 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { Analytic } from 'src/database/entities/analytic.entity';
+import { Channel } from 'src/database/entities/channel.entity';
 import { Url } from 'src/database/entities/url.entity';
 import { AnalyticRepository } from 'src/database/repositories/analytic.repository';
+import LoggerService from 'src/logger/logger.service';
 import { AnalyticDto, CreateAnalyticDto } from 'src/urls/dto/analytic.dto';
 
 @Injectable()
 export class UrlAnalyticService {
-  constructor(private readonly analyticRepository: AnalyticRepository) {}
+  constructor(
+    private readonly analyticRepository: AnalyticRepository,
+    private readonly logger: LoggerService,
+  ) {}
 
-  async recordVisit(data: CreateAnalyticDto, url: Url): Promise<AnalyticDto> {
+  async recordVisit(
+    data: CreateAnalyticDto,
+    url: Url,
+    channels: Channel[] = [],
+  ): Promise<AnalyticDto> {
     return this.analyticRepository.manager.transaction(async (manager) => {
       const analytic = manager.create(Analytic, {
         ...data,
         url,
-        channel: url.channel,
+        channels,
       });
 
       await manager.update(Url, url.id, {

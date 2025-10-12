@@ -14,6 +14,9 @@ import { UrlAnalyticProcessor } from './workers/url-analytic/url-analytic.proces
 import { UrlAnalyticService } from './workers/url-analytic/url-analytic.service';
 import UrlMetadataService from './workers/url-metadata/url-metadata.service';
 import { UrlMetadataProcessor } from './workers/url-metadata/url-metadata.processor';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { ExpressAdapter } from '@bull-board/express';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 
 @Global()
 @Module({
@@ -28,15 +31,40 @@ import { UrlMetadataProcessor } from './workers/url-metadata/url-metadata.proces
           defaultJobOptions: {
             attempts: 3,
             backoff: { type: 'exponential', delay: 5000 },
-            removeOnComplete: true,
-            removeOnFail: false,
+            removeOnComplete: {
+              age: 60 * 60 * 24, // 24 hours
+            },
+            removeOnFail: {
+              age: 60 * 60 * 24 * 7, // 7 days
+            },
           },
         };
       },
     }),
+
     BullModule.registerQueue({ name: SEND_MAIL_VERIFY_QUEUE }),
     BullModule.registerQueue({ name: URL_ANALYTIC_QUEUE }),
     BullModule.registerQueue({ name: URL_METADATA_QUEUE }),
+
+    BullBoardModule.forFeature(
+      {
+        name: SEND_MAIL_VERIFY_QUEUE,
+        adapter: BullMQAdapter,
+      },
+      {
+        name: URL_ANALYTIC_QUEUE,
+        adapter: BullMQAdapter,
+      },
+      {
+        name: URL_METADATA_QUEUE,
+        adapter: BullMQAdapter,
+      },
+    ),
+
+    BullBoardModule.forRoot({
+      route: '/queues',
+      adapter: ExpressAdapter,
+    }),
   ],
   providers: [
     MailProcessor,

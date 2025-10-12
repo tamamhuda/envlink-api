@@ -1,4 +1,3 @@
-import { ConflictException } from '@nestjs/common';
 import { createZodDto } from 'nestjs-zod';
 import * as z from 'zod';
 
@@ -9,6 +8,7 @@ export const shortenUrlSchema = z
     isProtected: z.boolean().default(false).optional(),
     accessCode: z.string().optional(),
     expiresAt: z.date().optional(),
+    channelIds: z.array(z.string().uuid().nonempty()).optional(),
   })
   .refine(
     (data) => {

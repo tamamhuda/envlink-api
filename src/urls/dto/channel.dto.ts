@@ -4,6 +4,6 @@ import { urlSchema } from './url.dto';
 
 export const channelSchema = baseSchema.extend({
   name: z.string().nonempty(),
-  description: z.string().nullable().optional(),
+  description: z.string().nullable(),
   urls: z.array(urlSchema),
 });

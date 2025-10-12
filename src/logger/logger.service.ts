@@ -5,6 +5,7 @@ import {
   Logger,
   LoggerService as NestLoggerService,
 } from '@nestjs/common';
+import { Job } from 'bullmq';
 import { Request, Response } from 'express';
 import { IpUtil } from 'src/common/utils/ip.util';
 
@@ -46,5 +47,25 @@ export default class LoggerService extends Logger implements NestLoggerService {
 
     const format = `[${request.method} - ${response.statusCode}] ${request.originalUrl} - ${responseTime}ms - [${controller}/${handler}] - ${ip}`;
     this.log(format);
+  }
+
+  jobActive(job: Job) {
+    this.debug(`[${job.queueName}:${job.id}]: STARTED`);
+  }
+
+  jobCompleted(job: Job) {
+    const duration = Date.now() - job.timestamp;
+    const data = job.returnvalue;
+    const result = data ? JSON.stringify(data, null, 2) : 'SKIPPED';
+    this.debug(
+      `[${job.queueName}:${job.id}]: COMPLETED - ${duration}ms : ${result}`,
+    );
+  }
+
+  jobFailed(job: Job) {
+    const error = job.failedReason;
+    this.error(
+      `[${job.queueName}:${job.id}]: FAILED:ATTEMPT-${job.attemptsMade} - ${JSON.stringify(error, null, 2)}`,
+    );
   }
 }

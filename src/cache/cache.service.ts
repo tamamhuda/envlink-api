@@ -36,7 +36,7 @@ export class CacheService {
   async getCache<T>(
     cachePrefix: CachePrefix,
     key: string,
-  ): Promise<StoredDataNoRaw<T>> {
+  ): Promise<StoredDataNoRaw<T> | null> {
     const store = await this.getStore(cachePrefix);
     return await store.get<T>(key).then((result: T) => {
       if (result) {
@@ -46,10 +46,10 @@ export class CacheService {
     });
   }
 
-  async set(
+  async set<T>(
     cachePrefix: CachePrefix,
     key: string,
-    value: any,
+    value: T,
     ttl?: number,
   ): Promise<boolean> {
     const store = await this.getStore(cachePrefix);

@@ -2,6 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { baseSchema } from 'src/common/schemas/base.schema';
 import * as z from 'zod';
+import { channelSchema } from './channel.dto';
 
 const metadataSchema = z.object({
   title: z.string().max(255).optional(),
@@ -26,11 +27,15 @@ export const urlSchema = baseSchema.extend({
   expiresAt: z.date().nullable(),
   clickCount: z.number().min(0).default(0),
   metadata: metadataSchema.nullable(),
+  channels: z.array(
+    channelSchema.pick({ id: true, name: true, description: true }),
+  ),
 });
 
 const publicUrlSchema = urlSchema.omit({
   id: true,
   accessCode: true,
+  channels: true,
 });
 
 const updateUrlSchema = urlSchema

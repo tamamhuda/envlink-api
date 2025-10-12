@@ -1,4 +1,11 @@
-import { Column, Entity, Index, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Url } from './url.entity';
 import { Channel } from './channel.entity';
@@ -89,9 +96,10 @@ export class Analytic extends BaseEntity {
   })
   url!: Url;
 
-  @ManyToOne(() => Channel, (channel) => channel.analytics, {
+  @ManyToMany(() => Channel, {
     onDelete: 'SET NULL',
     nullable: true,
   })
-  channel?: Channel;
+  @JoinTable()
+  channels!: Channel[];
 }

@@ -49,13 +49,8 @@ export class MailUtil {
       };
 
       await this.transport.sendMail(params);
-
-      this.logger.debug(
-        `[MAIL] Sent template email successfully to ${to} using template ${templateUuid}`,
-      );
     } catch (error) {
-      this.logger.error('[MAIL] Failed to send template email', error);
-      throw error;
+      throw new Error(error);
     }
   }
 

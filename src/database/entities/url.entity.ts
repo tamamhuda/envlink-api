@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 
@@ -68,15 +75,19 @@ export class Url extends BaseEntity {
   })
   user!: User;
 
-  @OneToMany(() => Analytic, (analytic) => analytic.url, {
+  @ManyToMany(() => Analytic, {
+    cascade: ['insert', 'update', 'remove'],
     nullable: true,
     onDelete: 'CASCADE',
   })
+  @JoinTable()
   analytics!: Analytic[];
 
-  @ManyToOne(() => Channel, (channel) => channel.urls, {
+  @ManyToMany(() => Channel, {
+    cascade: ['insert', 'update', 'remove'],
     nullable: true,
     onDelete: 'SET NULL',
   })
-  channel!: Channel;
+  @JoinTable()
+  channels!: Channel[];
 }

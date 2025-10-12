@@ -1,7 +1,8 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Url } from './url.entity';
 import { Analytic } from './analytic.entity';
+import { User } from './user.entity';
 
 @Entity({ name: 'channels' })
 export class Channel extends BaseEntity {
@@ -9,11 +10,22 @@ export class Channel extends BaseEntity {
   name!: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  description?: string;
+  description!: string | null;
 
-  @OneToMany(() => Url, (url) => url.channel)
+  @ManyToOne(() => User, (user) => user.channels, { onDelete: 'CASCADE' })
+  user!: User;
+
+  @ManyToMany(() => Url, {
+    cascade: ['insert', 'update', 'remove'],
+    onDelete: 'CASCADE',
+  })
+  @JoinTable()
   urls!: Url[];
 
-  @OneToMany(() => Analytic, (analythic) => analythic.channel)
+  @ManyToMany(() => Analytic, {
+    cascade: ['insert', 'update', 'remove'],
+    onDelete: 'CASCADE',
+  })
+  @JoinTable()
   analytics!: Analytic[];
 }

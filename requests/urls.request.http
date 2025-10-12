@@ -41,5 +41,6 @@ Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{state.tokens.accessToken}}
 {
-  "originalUrl": "https://tamamhuda.dev"
+  "originalUrl": "https://tamamhuda.dev",
+  "channelIds": ["81100e9e-61f2-4b47-add6-5e79b2b2e080"]
 }
