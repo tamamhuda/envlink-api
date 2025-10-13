@@ -18,6 +18,10 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import { AwsS3Util } from 'src/common/utils/aws-s3.util';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
+import Subscription from 'src/database/entities/subscription.entity';
+import Plan from 'src/database/entities/plan.entity';
+import { PlansEnum } from 'src/common/enums/plans.enum';
+import { PeriodEnum } from 'src/common/enums/Period.enum';
 
 @Injectable()
 export class UserService {
@@ -133,6 +137,20 @@ export class UserService {
         account,
       });
       await manager.save(session);
+
+      // Create Subscription (Free Plan)
+      const plan = await manager.findOne(Plan, {
+        where: {
+          name: PlansEnum.FREE,
+        },
+      });
+      if (!plan) throw new NotFoundException('Free plan not found');
+      const subscription = manager.create(Subscription, {
+        user,
+        plan,
+      });
+      subscription.initializeSubscriptionPeriod();
+      await manager.save(subscription);
 
       return { user, account, session };
     });

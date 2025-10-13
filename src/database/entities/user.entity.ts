@@ -1,10 +1,12 @@
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 import { RolesEnum } from '../../common/enums/roles.enum';
 import { Account } from './account.entity';
 import Session from './session.entity';
 import { BaseEntity } from './base.entity';
 import { Url } from './url.entity';
 import { Channel } from './channel.entity';
+import Subscription from './subscription.entity';
+import { PlanUsage } from './plan-usage.entity';
 
 @Entity({ name: 'users' })
 @Index(['username', 'email'], { unique: true })
@@ -60,4 +62,16 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Url, (url) => url.user)
   urls!: Url[];
+
+  @Column({ type: 'boolean', default: false })
+  isTrial!: boolean;
+
+  @OneToMany(() => Subscription, (sub) => sub.user, { cascade: true })
+  subscriptions!: Subscription[];
+
+  @ManyToOne(() => Subscription, { nullable: true, eager: true })
+  activeSubscription!: Subscription | null;
+
+  @OneToMany(() => PlanUsage, (usage) => usage.user)
+  usages!: PlanUsage[];
 }

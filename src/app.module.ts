@@ -22,8 +22,6 @@ import { InvalidateCacheInterceptor } from './common/interceptors/invalidate-cac
 import { UrlGeneratorModule } from 'nestjs-url-generator';
 import { getUrlGeneratorConfig } from './config/url-generator.config';
 import { CacheModule } from './cache/cache.module';
-import { getRedisConfig } from './config/cache.config';
-import { RedisModule } from '@nestjs-modules/ioredis';
 import { UrlsModule } from './urls/urls.module';
 import { QueueModule } from './queue/queue.module';
 import { CommonModule } from './common/common.module';

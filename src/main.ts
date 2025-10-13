@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from './config/env.config';
 import { getSwaggerDocumentConfig } from './config/swagger.config';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { PlanSeeder } from './database/seeders/plan.seeder';
 
 async function bootstrap() {
   const isWorker = process.env.WORKER === 'true';
@@ -43,6 +44,8 @@ async function bootstrap() {
   SwaggerModule.setup('api/v1/docs', app, cleanupOpenApiDoc(openApiDoc));
 
   const logger = app.get(LoggerService);
+  const seeder = app.get(PlanSeeder);
+  await seeder.seed();
 
   await app.listen(PORT, () => {
     logger.log(`Server is running on port ${PORT} with env ${NODE_ENV}`);

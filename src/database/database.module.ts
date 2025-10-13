@@ -5,6 +5,9 @@ import { SessionRepository } from './repositories/session.repository';
 import { UrlRepository } from './repositories/url.repository';
 import { AnalyticRepository } from './repositories/analytic.repository';
 import { ChannelRepository } from './repositories/channel.repository';
+import { SubscriptionRepository } from './repositories/subscription.repository';
+import { PlanRepository } from './repositories/plan.reposiotry';
+import { PlanSeeder } from './seeders/plan.seeder';
 
 @Global()
 @Module({
@@ -15,6 +18,9 @@ import { ChannelRepository } from './repositories/channel.repository';
     UrlRepository,
     AnalyticRepository,
     ChannelRepository,
+    SubscriptionRepository,
+    PlanRepository,
+    PlanSeeder,
   ],
   exports: [
     UserRepository,
@@ -23,6 +29,9 @@ import { ChannelRepository } from './repositories/channel.repository';
     UrlRepository,
     AnalyticRepository,
     ChannelRepository,
+    SubscriptionRepository,
+    PlanRepository,
+    PlanSeeder,
   ],
 })
 export class DatabaseModule {}
