@@ -6,7 +6,7 @@ import ip2Location, {
   IPGeolocation,
   IpGeolocationResponse,
 } from 'ip2location-io-nodejs';
-import { CacheService } from 'src/cache/cache.service';
+import { CacheService } from 'src/common/cache/cache.service';
 import { CachePrefix } from '../enums/cache-prefix.enum';
 import ms from 'ms';
 

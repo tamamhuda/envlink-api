@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { tap } from 'rxjs/operators';
-import LoggerService from '../logger/logger.service';
 import { Request } from 'express';
 import {
   INVALIDATE_CACHE_KEY,
@@ -14,8 +13,9 @@ import {
 } from '../decorators/invalidate-cache.decorator';
 import { CacheKeyContext } from '../interfaces/cache-context.interface';
 import { Observable } from 'rxjs';
-import { CacheService } from 'src/cache/cache.service';
+import { CacheService } from 'src/common/cache/cache.service';
 import { CachePrefix } from '../enums/cache-prefix.enum';
+import LoggerService from '../logger/logger.service';
 
 @Injectable()
 export class InvalidateCacheInterceptor<T> implements NestInterceptor<T, T> {

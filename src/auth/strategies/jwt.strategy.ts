@@ -11,7 +11,7 @@ import { Request } from 'express';
 import LoggerService from 'src/common/logger/logger.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { SessionInfoDto } from 'src/session/dto/session.dto';
-import { CacheService } from 'src/cache/cache.service';
+import { CacheService } from 'src/common/cache/cache.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(

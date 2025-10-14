@@ -9,7 +9,6 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDatabaseConfig } from './config/database.config';
-
 import { ENV_PATH, envValidate } from './config/env.config';
 import CatchEverythingFilter from './common/filters/catch-everything.filter';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -20,10 +19,12 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { InvalidateCacheInterceptor } from './common/interceptors/invalidate-cache.interceptor';
 import { UrlGeneratorModule } from 'nestjs-url-generator';
 import { getUrlGeneratorConfig } from './config/url-generator.config';
-import { CacheModule } from './cache/cache.module';
 import { UrlsModule } from './urls/urls.module';
 import { QueueModule } from './queue/queue.module';
 import { CommonModule } from './common/common.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { getCacheConfig, getRedisConfig } from './config/cache.config';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 @Module({
   imports: [
@@ -53,13 +54,27 @@ import { CommonModule } from './common/common.module';
       useFactory: getUrlGeneratorConfig,
     }),
 
+    // Cache Module
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: getCacheConfig,
+    }),
+
+    // Redis Module
+    RedisModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: getRedisConfig,
+    }),
+
     AccountModule,
     SessionModule,
     AuthModule,
     UserModule,
     DatabaseModule,
     HealthModule,
-    CacheModule,
     UrlsModule,
     QueueModule,
     CommonModule,

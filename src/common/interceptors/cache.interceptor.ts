@@ -4,7 +4,6 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import LoggerService from '../logger/logger.service';
 import { from, Observable, of, switchMap, tap } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 import {
@@ -18,7 +17,8 @@ import ms, { StringValue } from 'ms';
 import { CachePrefix } from '../enums/cache-prefix.enum';
 import { Request } from 'express';
 import { CacheKeyContext } from '../interfaces/cache-context.interface';
-import { CacheService } from 'src/cache/cache.service';
+import { CacheService } from 'src/common/cache/cache.service';
+import LoggerService from '../logger/logger.service';
 
 @Injectable()
 export class CacheInterceptor<T> implements NestInterceptor<T, T> {

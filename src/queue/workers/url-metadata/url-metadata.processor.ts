@@ -8,7 +8,7 @@ import { URL_METADATA_QUEUE } from 'src/queue/queue.constans';
 import UrlMetadataService from './url-metadata.service';
 import LoggerService from 'src/common/logger/logger.service';
 import { UrlsService } from 'src/urls/urls.service';
-import { CacheService } from 'src/cache/cache.service';
+import { CacheService } from 'src/common/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import ms from 'ms';
 

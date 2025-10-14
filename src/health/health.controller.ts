@@ -5,7 +5,7 @@ import {
   HealthCheckService,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
-import { CacheHealthIndicator } from 'src/cache/cache-health.indicator';
+import { CacheHealthIndicator } from 'src/common/cache/cache-health.indicator';
 import { IpHealthIndicator } from './ip-health.indicator';
 
 @Controller('health')

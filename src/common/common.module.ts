@@ -11,38 +11,50 @@ import LoggingInterceptor from './interceptors/logging.interceptor';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { UrlAnalyticInterceptor } from './interceptors/url-analytic.interceptor';
 import LoggerService from './logger/logger.service';
+import { CacheService } from './cache/cache.service';
+import { CacheHealthIndicator } from './cache/cache-health.indicator';
 
 @Global()
 @Module({
   providers: [
+    Logger,
+    LoggerService,
+    CacheService,
+    CacheHealthIndicator,
+
     CatchEverythingFilter,
     HttpExceptionFilter,
+
     CacheInterceptor,
     InvalidateCacheInterceptor,
     LoggingInterceptor,
     TransformInterceptor,
     UrlAnalyticInterceptor,
+
     IpUtil,
     AwsS3Util,
     JwtUtil,
     MailUtil,
-    Logger,
-    LoggerService,
   ],
   exports: [
+    Logger,
+    LoggerService,
+    CacheService,
+    CacheHealthIndicator,
+
     CatchEverythingFilter,
     HttpExceptionFilter,
+
     CacheInterceptor,
     InvalidateCacheInterceptor,
     LoggingInterceptor,
     TransformInterceptor,
     UrlAnalyticInterceptor,
+
     IpUtil,
     AwsS3Util,
     JwtUtil,
     MailUtil,
-    Logger,
-    LoggerService,
   ],
 })
 export class CommonModule {}

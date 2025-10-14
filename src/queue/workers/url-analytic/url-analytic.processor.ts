@@ -8,7 +8,7 @@ import { UrlsService } from 'src/urls/urls.service';
 import { IpUtil } from 'src/common/utils/ip.util';
 import LoggerService from 'src/common/logger/logger.service';
 import { UAParser } from 'ua-parser-js';
-import { CacheService } from 'src/cache/cache.service';
+import { CacheService } from 'src/common/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import ms from 'ms';
 import { createHash } from 'crypto';

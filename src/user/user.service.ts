@@ -21,7 +21,6 @@ import path from 'node:path';
 import Subscription from 'src/database/entities/subscription.entity';
 import Plan from 'src/database/entities/plan.entity';
 import { PlansEnum } from 'src/common/enums/plans.enum';
-import { PeriodEnum } from 'src/common/enums/Period.enum';
 
 @Injectable()
 export class UserService {
