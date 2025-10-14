@@ -34,7 +34,7 @@ import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorato
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { UserInfoDto, UserInfoResponse } from './dto/user-info.dto';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import { ZodString } from 'zod';
 import { ChangePasswordDto } from './dto/change-password.dto';

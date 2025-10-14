@@ -6,7 +6,7 @@ import {
 
 import { HealthIndicatorSession } from '@nestjs/terminus/dist/health-indicator/health-indicator.service';
 import { IpUtil } from 'src/common/utils/ip.util';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 
 @Injectable()
 export class IpHealthIndicator {

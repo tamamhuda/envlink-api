@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ZodSerializationException, ZodValidationException } from 'nestjs-zod';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { ErrorResponse } from '../interfaces/api-response.intercace';
 import { getReasonPhrase } from 'http-status-codes';
 import { ZodError } from 'zod';

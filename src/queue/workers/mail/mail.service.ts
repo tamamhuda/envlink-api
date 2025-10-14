@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { MailVerifyTemplateVariable } from 'src/common/interfaces/mail.interface';
 import { MailUtil } from 'src/common/utils/mail.util';
 import { Env } from 'src/config/env.config';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 
 @Injectable()
 export class MailService {

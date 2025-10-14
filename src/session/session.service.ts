@@ -9,7 +9,7 @@ import Session from 'src/database/entities/session.entity';
 import { SessionRepository } from 'src/database/repositories/session.repository';
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { JwtUtil } from 'src/common/utils/jwt.util';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { SessionInfoDto, sessionInfoSchema } from './dto/session.dto';
 import { UserService } from 'src/user/user.service';
 import { TokensDto } from 'src/auth/dto/token.dto';

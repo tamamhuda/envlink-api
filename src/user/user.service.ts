@@ -13,7 +13,7 @@ import { UserRepository } from 'src/database/repositories/user.repository';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
 import { providerSchema, UserInfoDto } from 'src/auth/dto/user-info.dto';
 import { Request } from 'express';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { AwsS3Util } from 'src/common/utils/aws-s3.util';
 import { randomUUID } from 'node:crypto';

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { tap } from 'rxjs/operators';
-import LoggerService from '../../logger/logger.service';
+import LoggerService from '../logger/logger.service';
 import { Request } from 'express';
 import {
   INVALIDATE_CACHE_KEY,

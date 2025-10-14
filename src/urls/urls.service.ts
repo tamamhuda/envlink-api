@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UrlRepository } from 'src/database/repositories/url.repository';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { ShortenUrlDto } from './dto/shorten.dto';
 import { UnlockUrlDto, UpdateUrlDto, UrlDto } from './dto/url.dto';
 import { UserInfo } from 'src/auth/dto/user-info.dto';

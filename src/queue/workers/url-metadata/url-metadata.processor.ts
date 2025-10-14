@@ -6,7 +6,7 @@ import {
 } from 'src/queue/interfaces/url-metadata.interface';
 import { URL_METADATA_QUEUE } from 'src/queue/queue.constans';
 import UrlMetadataService from './url-metadata.service';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { UrlsService } from 'src/urls/urls.service';
 import { CacheService } from 'src/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';

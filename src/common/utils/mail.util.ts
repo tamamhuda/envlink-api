@@ -7,7 +7,7 @@ import {
   MailtrapMailOptions,
   MailtrapTransporter,
 } from 'mailtrap/dist/types/transport';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { MailVerifyTemplateVariable } from '../interfaces/mail.interface';
 
 @Injectable()

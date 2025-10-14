@@ -2,9 +2,9 @@ import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { SwaggerModule } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import LoggerService from './logger/logger.service';
+import LoggerService from './common/logger/logger.service';
 import { WinstonModule } from 'nest-winston';
-import { instance } from './logger/logger.instance';
+import { instance } from './common/logger/logger.instance';
 import { ConfigService } from '@nestjs/config';
 import { Env } from './config/env.config';
 import { getSwaggerDocumentConfig } from './config/swagger.config';
@@ -52,4 +52,4 @@ async function bootstrap() {
   });
 }
 
-bootstrap();
+void bootstrap();

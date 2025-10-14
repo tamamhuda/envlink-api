@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import { AuthGuard } from '@nestjs/passport';
 import { JWT_ACCESS_STRATEGY } from 'src/config/jwt.config';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 
 @Injectable()
 export class JwtGuard extends AuthGuard(JWT_ACCESS_STRATEGY) {

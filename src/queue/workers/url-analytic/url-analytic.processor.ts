@@ -6,7 +6,7 @@ import { UrlAnalyticService } from './url-analytic.service';
 import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic.interface';
 import { UrlsService } from 'src/urls/urls.service';
 import { IpUtil } from 'src/common/utils/ip.util';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { UAParser } from 'ua-parser-js';
 import { CacheService } from 'src/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';

@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { ShortenUrlDto } from './dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { UpdateUrlDto, UrlDto, UrlResponse, UrlsResponse } from './dto/url.dto';

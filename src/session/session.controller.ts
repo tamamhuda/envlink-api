@@ -22,7 +22,7 @@ import {
 } from './dto/session.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { JWT_SECURITY } from 'src/config/jwt.config';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';

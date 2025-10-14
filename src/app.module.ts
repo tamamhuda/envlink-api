@@ -11,7 +11,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDatabaseConfig } from './config/database.config';
 
 import { ENV_PATH, envValidate } from './config/env.config';
-import { LoggerModule } from './logger/logger.module';
 import CatchEverythingFilter from './common/filters/catch-everything.filter';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import LoggingInterceptor from './common/interceptors/logging.interceptor';
@@ -59,7 +58,6 @@ import { CommonModule } from './common/common.module';
     AuthModule,
     UserModule,
     DatabaseModule,
-    LoggerModule,
     HealthModule,
     CacheModule,
     UrlsModule,

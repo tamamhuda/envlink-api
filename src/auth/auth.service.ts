@@ -4,7 +4,7 @@ import { AccountService } from 'src/account/account.service';
 import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { JwtUtil } from 'src/common/utils/jwt.util';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { SessionService } from 'src/session/session.service';
 import { UserService } from 'src/user/user.service';
 import { AuthenticatedDto } from './dto/authResponse.dto';

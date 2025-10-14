@@ -6,7 +6,7 @@ import { getJwtOptions } from 'src/config/jwt.config';
 import { RolesEnum } from 'src/common/enums/roles.enum';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { Request } from 'express';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { randomUUID } from 'node:crypto';
 
 @Injectable()

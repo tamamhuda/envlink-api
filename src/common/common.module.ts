@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Logger, Module } from '@nestjs/common';
 import { IpUtil } from './utils/ip.util';
 import { AwsS3Util } from './utils/aws-s3.util';
 import { JwtUtil } from './utils/jwt.util';
@@ -10,6 +10,7 @@ import { InvalidateCacheInterceptor } from './interceptors/invalidate-cache.inte
 import LoggingInterceptor from './interceptors/logging.interceptor';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { UrlAnalyticInterceptor } from './interceptors/url-analytic.interceptor';
+import LoggerService from './logger/logger.service';
 
 @Global()
 @Module({
@@ -25,6 +26,8 @@ import { UrlAnalyticInterceptor } from './interceptors/url-analytic.interceptor'
     AwsS3Util,
     JwtUtil,
     MailUtil,
+    Logger,
+    LoggerService,
   ],
   exports: [
     CatchEverythingFilter,
@@ -38,6 +41,8 @@ import { UrlAnalyticInterceptor } from './interceptors/url-analytic.interceptor'
     AwsS3Util,
     JwtUtil,
     MailUtil,
+    Logger,
+    LoggerService,
   ],
 })
 export class CommonModule {}

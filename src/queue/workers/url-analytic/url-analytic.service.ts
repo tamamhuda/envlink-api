@@ -3,7 +3,7 @@ import { Analytic } from 'src/database/entities/analytic.entity';
 import { Channel } from 'src/database/entities/channel.entity';
 import { Url } from 'src/database/entities/url.entity';
 import { AnalyticRepository } from 'src/database/repositories/analytic.repository';
-import LoggerService from 'src/logger/logger.service';
+import LoggerService from 'src/common/logger/logger.service';
 import { AnalyticDto, CreateAnalyticDto } from 'src/urls/dto/analytic.dto';
 
 @Injectable()
