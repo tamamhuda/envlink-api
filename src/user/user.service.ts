@@ -143,6 +143,7 @@ export class UserService {
           name: PlansEnum.FREE,
         },
       });
+
       if (!plan) throw new NotFoundException('Free plan not found');
       const subscription = manager.create(Subscription, {
         user,
@@ -150,6 +151,10 @@ export class UserService {
       });
       subscription.initializeSubscriptionPeriod();
       await manager.save(subscription);
+
+      await manager.update(User, user.id, {
+        activeSubscription: subscription,
+      });
 
       return { user, account, session };
     });

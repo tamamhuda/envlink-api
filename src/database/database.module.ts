@@ -8,6 +8,7 @@ import { ChannelRepository } from './repositories/channel.repository';
 import { SubscriptionRepository } from './repositories/subscription.repository';
 import { PlanRepository } from './repositories/plan.reposiotry';
 import { PlanSeeder } from './seeders/plan.seeder';
+import { PlanUsageRepository } from './repositories/plan-usage-history.repository';
 
 @Global()
 @Module({
@@ -19,6 +20,7 @@ import { PlanSeeder } from './seeders/plan.seeder';
     AnalyticRepository,
     ChannelRepository,
     SubscriptionRepository,
+    PlanUsageRepository,
     PlanRepository,
     PlanSeeder,
   ],
@@ -30,6 +32,7 @@ import { PlanSeeder } from './seeders/plan.seeder';
     AnalyticRepository,
     ChannelRepository,
     SubscriptionRepository,
+    PlanUsageRepository,
     PlanRepository,
     PlanSeeder,
   ],

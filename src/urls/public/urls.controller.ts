@@ -8,11 +8,11 @@ import {
   Post,
   UseInterceptors,
 } from '@nestjs/common';
-import { UrlsService } from './urls.service';
+import { UrlsService } from '../urls.service';
 import LoggerService from 'src/common/logger/logger.service';
-import { ShortenUrlDto } from './dto/shorten.dto';
+import { ShortenUrlDto } from '../dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { PublicUrlDto, PublicUrlResponse, UnlockUrlDto } from './dto/url.dto';
+import { PublicUrlDto, PublicUrlResponse, UnlockUrlDto } from '../dto/url.dto';
 import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
@@ -20,7 +20,12 @@ import {
 } from '@nestjs/swagger';
 import { UrlAnalyticInterceptor } from 'src/common/interceptors/url-analytic.interceptor';
 import { ForbiddenResponse } from 'src/common/dto/error-response.dto';
+import { Public } from 'src/common/decorators/public.decorator';
+import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
+import { PolicyScope } from 'src/common/throttle/throttle.constans';
+import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 
+@Public()
 @Controller('public/urls')
 export class PublicUrlsController {
   constructor(
@@ -28,7 +33,9 @@ export class PublicUrlsController {
     private readonly logger: LoggerService,
   ) {}
 
+  @SkipThrottle()
   @Post('shorten')
+  @ThrottleScope(PolicyScope.SHORTEN_PUBLIC)
   @ApiCreatedResponse({
     type: PublicUrlResponse,
     description: 'Created a new public short URL',
@@ -38,6 +45,7 @@ export class PublicUrlsController {
     return await this.urlsService.createUrl(body);
   }
 
+  @SkipThrottle()
   @Get(':code')
   @UseInterceptors(UrlAnalyticInterceptor)
   @ApiOkResponse({
@@ -54,6 +62,7 @@ export class PublicUrlsController {
     return await this.urlsService.getUrlByCode(code);
   }
 
+  @SkipThrottle()
   @Post('unlock/:code')
   @ApiOkResponse({
     type: PublicUrlResponse,

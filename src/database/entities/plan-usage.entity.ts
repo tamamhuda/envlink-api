@@ -22,6 +22,13 @@ export class PlanUsage extends BaseEntity {
   })
   history!: PlanUsageHistory[];
 
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+  })
+  usageIdentity!: string;
+
   @Column()
   scope!: string;
 

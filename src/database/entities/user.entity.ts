@@ -1,4 +1,11 @@
-import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { RolesEnum } from '../../common/enums/roles.enum';
 import { Account } from './account.entity';
 import Session from './session.entity';
@@ -70,7 +77,7 @@ export class User extends BaseEntity {
   subscriptions!: Subscription[];
 
   @ManyToOne(() => Subscription, { nullable: true, eager: true })
-  activeSubscription!: Subscription | null;
+  activeSubscription!: Subscription;
 
   @OneToMany(() => PlanUsage, (usage) => usage.user)
   usages!: PlanUsage[];

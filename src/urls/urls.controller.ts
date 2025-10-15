@@ -9,27 +9,28 @@ import {
   Post,
   Put,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
 import LoggerService from 'src/common/logger/logger.service';
 import { ShortenUrlDto } from './dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { UpdateUrlDto, UrlDto, UrlResponse, UrlsResponse } from './dto/url.dto';
-import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { Request } from 'express';
+import { ThrottlePlan } from 'src/common/throttle/decorators/throttle-plan.decorator';
 
 @Controller('urls')
 export class UrlsController {
   constructor(
     private readonly urlsService: UrlsService,
-
     private readonly logger: LoggerService,
   ) {}
 
   @Post()
-  @UseGuards(JwtGuard)
+  @ThrottlePlan({
+    scope: 'shorten',
+    cost: 1,
+  })
   @ApiCreatedResponse({
     type: UrlResponse,
     description: 'Created a new short URL',
@@ -44,7 +45,6 @@ export class UrlsController {
   }
 
   @Get(':id')
-  @UseGuards(JwtGuard)
   @ApiOkResponse({
     type: UrlResponse,
     description: 'Get a short URL for a private access',
@@ -56,7 +56,6 @@ export class UrlsController {
   }
 
   @Get()
-  @UseGuards(JwtGuard)
   @ApiOkResponse({
     type: UrlsResponse,
     description: 'Get all short URLs for a user',
@@ -68,7 +67,6 @@ export class UrlsController {
   }
 
   @Put(':id')
-  @UseGuards(JwtGuard)
   @ApiOkResponse({
     type: UrlResponse,
     description: 'Update a short URL',
@@ -83,7 +81,6 @@ export class UrlsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUrl(@Param('id') id: string): Promise<void> {
     await this.urlsService.deleteUrl(id);

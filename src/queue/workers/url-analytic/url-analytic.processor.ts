@@ -7,17 +7,17 @@ import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic.interface';
 import { UrlsService } from 'src/urls/urls.service';
 import { IpUtil } from 'src/common/utils/ip.util';
 import LoggerService from 'src/common/logger/logger.service';
-import { UAParser } from 'ua-parser-js';
 import { CacheService } from 'src/common/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import ms from 'ms';
-import { createHash } from 'crypto';
 import { Url } from 'src/database/entities/url.entity';
 import { Channel } from 'src/database/entities/channel.entity';
+import { ClientIdentityUtil } from 'src/common/utils/client-identity.util';
 
 @Processor(URL_ANALYTIC_QUEUE, { concurrency: 10 })
 export class UrlAnalyticProcessor extends WorkerHost {
   constructor(
+    private readonly clientIdentityUtil: ClientIdentityUtil,
     private readonly ipUtil: IpUtil,
     private readonly urlService: UrlsService,
     private readonly analyticsService: UrlAnalyticService,
@@ -25,43 +25,6 @@ export class UrlAnalyticProcessor extends WorkerHost {
     private readonly cache: CacheService,
   ) {
     super();
-  }
-
-  /** ────────────────────────────────
-   *  Utility: Hash + UA parsing
-   *  ────────────────────────────────
-   */
-  private parseUserAgent(userAgent: string) {
-    const { browser, os, device } = new UAParser(userAgent).getResult();
-    const deviceType =
-      device.type ||
-      (/Windows|Mac\s?OS|Linux/i.test(os.name ?? '') ? 'desktop' : 'unknown');
-
-    return {
-      browser: browser.name || 'unknown',
-      os: os.name || 'unknown',
-      deviceType,
-    };
-  }
-
-  private generateHashes(
-    urlCode: string,
-    ip: string,
-    os: string,
-    browser: string,
-    deviceType: string,
-  ) {
-    // Stable identity hash
-    const identityHash = createHash('sha256')
-      .update(`${urlCode}:${os}:${browser}:${deviceType}`)
-      .digest('hex');
-
-    // Dynamic visit hash (captures IP changes)
-    const visitHash = createHash('sha256')
-      .update(`${identityHash}:${ip}`)
-      .digest('hex');
-
-    return { identityHash, visitHash };
   }
 
   private async cacheAnalytic(identityHash: string, analytic: AnalyticDto) {
@@ -126,14 +89,14 @@ export class UrlAnalyticProcessor extends WorkerHost {
 
     try {
       const url = await this.urlService.findUrlByIdOrCode(undefined, urlCode);
-      const { browser, os, deviceType } = this.parseUserAgent(userAgent);
-      const { identityHash, visitHash } = this.generateHashes(
-        url.code,
-        ipAddress,
-        os,
-        browser,
-        deviceType,
-      );
+      const { browser, os, deviceType } =
+        this.clientIdentityUtil.parseUserAgent(userAgent);
+      const { identityHash, visitHash } =
+        this.clientIdentityUtil.generateHashes(url.code, ipAddress, {
+          os,
+          browser,
+          deviceType,
+        });
 
       // Get cached analytic (24h)
       const cached = await this.getCachedAnalytic(visitHash);

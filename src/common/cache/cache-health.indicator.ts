@@ -7,6 +7,7 @@ import {
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { HealthIndicatorSession } from '@nestjs/terminus/dist/health-indicator/health-indicator.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import LoggerService from '../logger/logger.service';
 
 @Injectable()
 export class CacheHealthIndicator {
@@ -15,6 +16,7 @@ export class CacheHealthIndicator {
   constructor(
     private readonly healthIndicatorService: HealthIndicatorService,
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    private readonly logger: LoggerService,
   ) {
     this.indicator = this.healthIndicatorService.check(this.key);
   }
@@ -24,7 +26,9 @@ export class CacheHealthIndicator {
       const store = this.cache.stores.find(
         (store) => store.namespace === CachePrefix.APP,
       );
+
       if (key !== this.key || !store) return this.indicator.down();
+
       await store.set('PING', 'PONG', 60);
       await store.delete('PING');
       return this.indicator.up();

@@ -10,7 +10,6 @@ import {
   Post,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { SessionService } from './session.service';
 import { Request } from 'express';
@@ -20,14 +19,15 @@ import {
   SessionsInfoResponse,
   SessionInfoDto,
 } from './dto/session.dto';
-import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import LoggerService from 'src/common/logger/logger.service';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { Cached } from 'src/common/decorators/cached.decorator';
+import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 
+@SkipThrottle()
 @Controller('session')
 export class SessionController {
   constructor(
@@ -36,7 +36,6 @@ export class SessionController {
   ) {}
 
   @Get(':id')
-  @UseGuards(JwtGuard)
   @ApiBearerAuth(JWT_SECURITY)
   @ApiResponse({
     status: 200,
@@ -53,7 +52,6 @@ export class SessionController {
   }
 
   @Get()
-  @UseGuards(JwtGuard)
   @ApiBearerAuth(JWT_SECURITY)
   @ApiResponse({
     status: 200,
@@ -75,7 +73,6 @@ export class SessionController {
   }
 
   @Post('revoke/:id')
-  @UseGuards(JwtGuard)
   @ApiBearerAuth(JWT_SECURITY)
   @ApiResponse({
     status: 204,
@@ -91,7 +88,6 @@ export class SessionController {
   }
 
   @Post('revoke')
-  @UseGuards(JwtGuard)
   @ApiBearerAuth(JWT_SECURITY)
   @ApiResponse({
     status: 204,

@@ -1,8 +1,3 @@
-import {
-  createKeyv,
-  RedisClientConnectionType,
-  RedisClientOptions,
-} from '@keyv/redis';
 import { ConfigService } from '@nestjs/config';
 import { CacheManagerOptions } from '@nestjs/cache-manager';
 import ms from 'ms';
@@ -11,6 +6,7 @@ import { CachePrefix } from '../common/enums/cache-prefix.enum';
 import { Env } from './env.config';
 import { RedisOptions } from 'ioredis';
 import { RedisSingleOptions } from '@nestjs-modules/ioredis';
+import { createKeyv, Keyv } from '@keyv/redis';
 
 export const getRedisConfig = (
   config: ConfigService<Env>,
@@ -36,7 +32,7 @@ export const getCacheConfig = (
   const stores = Object.values(CachePrefix).map((namespace) =>
     createKeyv(redis, {
       namespace,
-      keyPrefixSeparator: ':',
+      keyPrefixSeparator: `:`,
     }),
   );
 

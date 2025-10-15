@@ -1,6 +1,5 @@
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { CachePrefix } from '../enums/cache-prefix.enum';
-import { Request } from 'express';
 import { CacheKeyContext } from '../interfaces/cache-context.interface';
 
 export const CACHE_PREFIX = 'CACHE_PREFIX';

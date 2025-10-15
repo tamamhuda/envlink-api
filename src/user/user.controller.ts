@@ -9,7 +9,6 @@ import {
   Put,
   Req,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -20,7 +19,6 @@ import {
   ApiConsumes,
   ApiOkResponse,
 } from '@nestjs/swagger';
-import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import { Cached } from 'src/common/decorators/cached.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
@@ -31,6 +29,9 @@ import { ImageUploadDto } from './dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { AwsS3Util } from 'src/common/utils/aws-s3.util';
+import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
+import { PolicyScope } from 'src/common/throttle/throttle.constans';
 
 @Controller('user')
 export class UserController {
@@ -39,8 +40,8 @@ export class UserController {
     private readonly awsS3Util: AwsS3Util,
   ) {}
 
+  @SkipThrottle()
   @Get('me')
-  @UseGuards(JwtGuard)
   @ApiOkResponse({
     type: UserInfoResponse,
   })
@@ -52,7 +53,7 @@ export class UserController {
   }
 
   @Put('update/:id')
-  @UseGuards(JwtGuard)
+  @ThrottleScope(PolicyScope.UPDATE_USER)
   @ApiOkResponse({
     type: UserInfoResponse,
   })
@@ -68,7 +69,7 @@ export class UserController {
   }
 
   @Post('image/upload')
-  @UseGuards(JwtGuard)
+  @ThrottleScope(PolicyScope.IMAGE_UPLOAD_USER)
   @ApiOkResponse({
     type: UserInfoResponse,
   })

@@ -18,7 +18,7 @@ export class PlanSeeder {
         name: PlansEnum.FREE,
         limit: 100,
         resetInterval: '1d',
-        cost: 0,
+        cost: 1,
         description: 'Free plan with 100 daily requests.',
         chargeOnSuccess: false,
       },

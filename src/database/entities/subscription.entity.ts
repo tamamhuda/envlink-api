@@ -1,5 +1,5 @@
 import { addDays, addMonths, addYears, differenceInDays } from 'date-fns';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import Plan from './plan.entity';
 import { User } from './user.entity';
@@ -12,7 +12,10 @@ export default class Subscription extends BaseEntity {
   @ManyToOne(() => User, (user) => user.subscriptions, { onDelete: 'CASCADE' })
   user!: User;
 
-  @ManyToOne(() => Plan, (plan) => plan.subscriptions, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Plan, (plan) => plan.subscriptions, {
+    onDelete: 'CASCADE',
+    eager: true,
+  })
   plan!: Plan;
 
   @Column({ type: 'timestamptz', nullable: true })

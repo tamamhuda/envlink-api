@@ -17,6 +17,10 @@ export class SubscriptionRepository extends Repository<Subscription> {
     return this.findOne({ where: { id } });
   }
 
+  async findOneByUserId(userId: string): Promise<Subscription | null> {
+    return this.findOne({ where: { user: { id: userId } } });
+  }
+
   async updateOne(
     subscription: Subscription,
     data: Partial<Subscription>,

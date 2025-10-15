@@ -1,13 +1,33 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { JWT_ACCESS_STRATEGY } from 'src/config/jwt.config';
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
 import LoggerService from 'src/common/logger/logger.service';
+import { JWT_ACCESS_STRATEGY } from 'src/config/jwt.config';
 
 @Injectable()
-export class JwtGuard extends AuthGuard(JWT_ACCESS_STRATEGY) {
-  constructor(private readonly logger: LoggerService) {
+export class JwtAuthGuard extends AuthGuard(JWT_ACCESS_STRATEGY) {
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly logger: LoggerService,
+  ) {
     super();
+  }
+
+  canActivate(context: ExecutionContext) {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) return true;
+
+    return super.canActivate(context);
   }
 
   handleRequest<UserInfoDto = any>(
@@ -15,11 +35,12 @@ export class JwtGuard extends AuthGuard(JWT_ACCESS_STRATEGY) {
     user: UserInfoDto,
     info: any,
   ): UserInfoDto {
-    if (info instanceof TokenExpiredError)
+    if (info instanceof TokenExpiredError) {
       throw new UnauthorizedException('Token expired');
-
-    if (info instanceof JsonWebTokenError)
+    }
+    if (info instanceof JsonWebTokenError) {
       throw new UnauthorizedException('Invalid token');
+    }
     if (err || !user) {
       throw new UnauthorizedException('Invalid Authorization');
     }

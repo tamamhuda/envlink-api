@@ -13,6 +13,14 @@ import { UrlAnalyticInterceptor } from './interceptors/url-analytic.interceptor'
 import LoggerService from './logger/logger.service';
 import { CacheService } from './cache/cache.service';
 import { CacheHealthIndicator } from './cache/cache-health.indicator';
+import { ThrottleInterceptor } from './interceptors/throttle.interceptor';
+
+import { ThrottleService } from './throttle/throttle.service';
+import { ThrottlePolicyResolver } from './throttle/throttle-policy.resolver';
+import { ClientIdentityUtil } from './utils/client-identity.util';
+import { ThrottleGuard } from './throttle/guards/throttle.guard';
+import { ThrottlePlanGuard } from './throttle/guards/throttle-plan.guard';
+import { ThrottleScopeGuard } from './throttle/guards/throttle-scope.guard';
 
 @Global()
 @Module({
@@ -30,11 +38,20 @@ import { CacheHealthIndicator } from './cache/cache-health.indicator';
     LoggingInterceptor,
     TransformInterceptor,
     UrlAnalyticInterceptor,
+    ThrottleInterceptor,
+
+    ThrottleGuard,
+    ThrottleService,
+    ThrottlePolicyResolver,
+    ThrottlePlanGuard,
+    ThrottleGuard,
+    ThrottleScopeGuard,
 
     IpUtil,
     AwsS3Util,
     JwtUtil,
     MailUtil,
+    ClientIdentityUtil,
   ],
   exports: [
     Logger,
@@ -50,11 +67,20 @@ import { CacheHealthIndicator } from './cache/cache-health.indicator';
     LoggingInterceptor,
     TransformInterceptor,
     UrlAnalyticInterceptor,
+    ThrottleInterceptor,
+
+    ThrottleGuard,
+    ThrottleService,
+    ThrottlePolicyResolver,
+    ThrottlePlanGuard,
+    ThrottleGuard,
+    ThrottleScopeGuard,
 
     IpUtil,
     AwsS3Util,
     JwtUtil,
     MailUtil,
+    ClientIdentityUtil,
   ],
 })
 export class CommonModule {}

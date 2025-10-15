@@ -29,7 +29,6 @@ import {
 import { LocalAuthGuard } from './guards/local.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { TokensDto, TokensResponse } from './dto/token.dto';
-import { JwtGuard } from './guards/jwt.guard';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { ZodSerializerDto } from 'nestjs-zod';
@@ -38,6 +37,10 @@ import LoggerService from 'src/common/logger/logger.service';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import { ZodString } from 'zod';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { PolicyScope } from 'src/common/throttle/throttle.constans';
+import { Public } from 'src/common/decorators/public.decorator';
+import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -46,7 +49,9 @@ export class AuthController {
     private readonly logger: LoggerService,
   ) {}
 
+  @Public()
   @Post('register')
+  @ThrottleScope(PolicyScope.REGISTER)
   @ApiOkResponse({
     type: AuthenticatedResponse,
     description: 'Registration successful',
@@ -60,12 +65,14 @@ export class AuthController {
     return await this.authService.register(registerDto, req);
   }
 
+  @Public()
   @Post('login')
+  @ThrottleScope(PolicyScope.LOGIN)
+  @UseGuards(LocalAuthGuard)
   @ApiOkResponse({
     type: AuthenticatedResponse,
     description: 'Login successful',
   })
-  @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @InvalidateCache<AuthenticatedDto>(
     CachePrefix.USER,
@@ -76,6 +83,7 @@ export class AuthController {
     return await this.authService.signInLocalAccount(req);
   }
 
+  @SkipThrottle()
   @Post('refresh')
   @UseGuards(JwtRefreshGuard)
   @ApiOkResponse({
@@ -89,8 +97,8 @@ export class AuthController {
     return await this.authService.refresh(req.user, req);
   }
 
+  @SkipThrottle()
   @Post('logout')
-  @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @ApiNoContentResponse({
     description: 'Logout successful',
@@ -104,6 +112,7 @@ export class AuthController {
     await this.authService.logout(req);
   }
 
+  @SkipThrottle()
   @Get('verify')
   @ApiOkResponse({
     type: UserInfoDto,
@@ -124,7 +133,9 @@ export class AuthController {
     return userInfo;
   }
 
+  @Public()
   @Post('/verify/resend')
+  @ThrottleScope(PolicyScope.RESEND_EMAIL)
   @ApiBearerAuth(JWT_SECURITY)
   @ApiOkResponse({
     type: ZodString,
@@ -156,7 +167,7 @@ export class AuthController {
   }
 
   @Post('change-password')
-  @UseGuards(JwtGuard)
+  @ThrottleScope(PolicyScope.CHANGE_PASSWORD)
   @ApiBearerAuth(JWT_SECURITY)
   @ApiOkResponse({
     type: UserInfoResponse,

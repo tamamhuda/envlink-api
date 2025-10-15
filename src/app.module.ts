@@ -1,5 +1,5 @@
 import { ZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
-import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
+import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { AccountModule } from './account/account.module';
 import { SessionModule } from './session/session.module';
@@ -25,6 +25,9 @@ import { CommonModule } from './common/common.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { getCacheConfig, getRedisConfig } from './config/cache.config';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { ThrottleInterceptor } from './common/interceptors/throttle.interceptor';
+import { ThrottleGuard } from './common/throttle/guards/throttle.guard';
+import { JwtAuthGuard } from './auth/guards/jwt.guard';
 
 @Module({
   imports: [
@@ -113,6 +116,20 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     {
       provide: APP_INTERCEPTOR,
       useClass: CacheInterceptor, // before controller
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ThrottleInterceptor, // before controller
+    },
+
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    // 2️⃣ Then throttler guard (depends on req.user)
+    {
+      provide: APP_GUARD,
+      useClass: ThrottleGuard,
     },
   ],
 })
