@@ -3,12 +3,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { JWT_REFRESH_STRATEGY } from 'src/config/jwt.config';
 import { UserInfoDto } from '../dto/user-info.dto';
-import { AuthService } from '../auth.service';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/env.config';
 import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { Request } from 'express';
 import LoggerService from 'src/common/logger/logger.service';
+import { SessionService } from 'src/session/session.service';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -17,7 +17,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(
     config: ConfigService<Env>,
-    private readonly authService: AuthService,
+    private readonly sessionService: SessionService,
     private readonly logger: LoggerService,
   ) {
     super({
@@ -29,10 +29,10 @@ export class JwtRefreshStrategy extends PassportStrategy(
   }
 
   async validate(request: Request, payload: JwtPayload): Promise<UserInfoDto> {
-    const { user } = await this.authService.validateJwtPayload(
+    const { user } = await this.sessionService.validateCurrentSession(
       payload,
       request,
-      'refresh',
+      true,
     );
     return user;
   }

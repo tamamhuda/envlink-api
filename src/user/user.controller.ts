@@ -34,6 +34,7 @@ import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.dec
 import { PolicyScope } from 'src/common/throttle/throttle.constans';
 
 @Controller('user')
+@ApiBearerAuth(JWT_SECURITY)
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -45,7 +46,6 @@ export class UserController {
   @ApiOkResponse({
     type: UserInfoResponse,
   })
-  @ApiBearerAuth(JWT_SECURITY)
   @HttpCode(HttpStatus.OK)
   @Cached(CachePrefix.USER, (req) => `${req.user?.id}`)
   userInfo(@Req() req: Request): UserInfoDto {
@@ -57,7 +57,6 @@ export class UserController {
   @ApiOkResponse({
     type: UserInfoResponse,
   })
-  @ApiBearerAuth(JWT_SECURITY)
   @HttpCode(HttpStatus.OK)
   @InvalidateCache(CachePrefix.USER, (req) => `${req.user?.id}`)
   async updateUser(
@@ -85,7 +84,6 @@ export class UserController {
       },
     },
   })
-  @ApiBearerAuth(JWT_SECURITY)
   @HttpCode(HttpStatus.OK)
   @InvalidateCache(CachePrefix.USER, (req) => `${req.user?.id}`)
   @UseInterceptors(FileInterceptor('file'))

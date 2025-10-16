@@ -3,7 +3,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { JWT_ACCESS_STRATEGY } from 'src/config/jwt.config';
 import { UserInfoDto } from '../dto/user-info.dto';
-import { AuthService } from '../auth.service';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/env.config';
 import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
@@ -12,6 +11,7 @@ import LoggerService from 'src/common/logger/logger.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { SessionInfoDto } from 'src/session/dto/session.dto';
 import { CacheService } from 'src/common/cache/cache.service';
+import { SessionService } from 'src/session/session.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(
@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(
 ) {
   constructor(
     config: ConfigService<Env>,
-    private readonly authService: AuthService,
+    private readonly sessionService: SessionService,
 
     private readonly cache: CacheService,
     private readonly logger: LoggerService,
@@ -33,19 +33,26 @@ export class JwtStrategy extends PassportStrategy(
     });
   }
 
-  private async setSessionCache(
-    sessionInfo: SessionInfoDto,
+  async validateAndSetSessionCache(
     payload: JwtPayload,
+    req: Request,
+    exp: number,
     key: string,
-  ) {
-    const { exp } = payload;
+  ): Promise<UserInfoDto> {
+    const sessionInfo = await this.sessionService.validateCurrentSession(
+      payload,
+      req,
+    );
+
     const now = Date.now();
     const ttl = exp * 1000 - now;
     await this.cache.set(CachePrefix.SESSION, key, sessionInfo, ttl);
+
+    return sessionInfo.user;
   }
 
   async validate(req: Request, payload: JwtPayload): Promise<UserInfoDto> {
-    const { sub, sessionId } = payload;
+    const { sub, sessionId, exp } = payload;
     const key = `${sub}:${sessionId}`;
 
     const sessionCached = await this.cache.getCache<SessionInfoDto>(
@@ -53,20 +60,8 @@ export class JwtStrategy extends PassportStrategy(
       key,
     );
 
-    if (sessionCached) {
-      req.session = sessionCached;
-      return sessionCached.user;
-    }
+    if (sessionCached) return sessionCached.user;
 
-    const sessionInfo = await this.authService.validateJwtPayload(
-      payload,
-      req,
-      'access',
-    );
-
-    await this.setSessionCache(sessionInfo, payload, key);
-
-    req.session = sessionInfo;
-    return sessionInfo.user;
+    return await this.validateAndSetSessionCache(payload, req, exp, key);
   }
 }

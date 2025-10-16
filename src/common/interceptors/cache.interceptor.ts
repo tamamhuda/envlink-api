@@ -42,7 +42,7 @@ export class CacheInterceptor<T> implements NestInterceptor<T, T> {
       query: request.query,
       body: request.body as CacheKeyContext['body'],
       user: request.user,
-      session: request.session,
+      // session: request.session,
     };
 
     const cachePrefix = this.reflector.get<CachePrefix>(CACHE_PREFIX, handler);

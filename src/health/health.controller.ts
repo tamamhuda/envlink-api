@@ -7,7 +7,9 @@ import {
 } from '@nestjs/terminus';
 import { CacheHealthIndicator } from 'src/common/cache/cache-health.indicator';
 import { IpHealthIndicator } from './ip-health.indicator';
+import { Public } from 'src/common/decorators/public.decorator';
 
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(

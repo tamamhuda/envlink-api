@@ -1,7 +1,6 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { AccountService } from 'src/account/account.service';
-import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { JwtUtil } from 'src/common/utils/jwt.util';
 import LoggerService from 'src/common/logger/logger.service';
@@ -13,8 +12,6 @@ import { TokensDto } from './dto/token.dto';
 import { UserInfoDto } from './dto/user-info.dto';
 import { UrlGeneratorService } from 'nestjs-url-generator';
 import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
-import { SessionInfoDto } from 'src/session/dto/session.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
 import { IpUtil } from 'src/common/utils/ip.util';
 import { InjectQueue } from '@nestjs/bullmq';
 import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
@@ -104,21 +101,6 @@ export class AuthService {
     return await this.userService.mapToUserInfoDto(account, account.user);
   }
 
-  async validateJwtPayload(
-    payload: JwtPayload,
-    req: Request,
-    type: 'access' | 'refresh',
-    isExpired?: boolean,
-  ): Promise<SessionInfoDto> {
-    const session = await this.sessionService.validateCurrentSession(
-      payload.sessionId,
-      isExpired,
-    );
-
-    await this.sessionService.validateSessionTokens(session, req, type);
-    return this.sessionService.mapSessionToDto(session);
-  }
-
   async signInLocalAccount(req: Request): Promise<AuthenticatedDto> {
     const account = await this.accountService.findOneByProviderAccountId(
       req.user.id,
@@ -176,55 +158,5 @@ export class AuthService {
         return 'Email link verification is invalid';
       throw error;
     }
-  }
-
-  async resendVerifyEmail(req: Request, redirectUrl?: string): Promise<string> {
-    const { sub, role, sessionId } =
-      await this.jwtUtil.extractJwtPayloadFromHeader(req, 'access');
-
-    const {
-      user: { email, fullName },
-      isVerified,
-    } = await this.accountService.findOneByProviderAccountId(sub);
-
-    if (isVerified) throw new ConflictException('Account already verified');
-
-    const token = await this.jwtUtil.assignVerifyEmailToken(
-      sub,
-      role,
-      sessionId,
-    );
-
-    const verifyLink = this.urlGeratorService.generateUrlFromPath({
-      relativePath: 'auth/verify',
-      query: {
-        token,
-        redirectUrl,
-      },
-    });
-
-    await this.mailVerifyQueue.add('EmailVerification', {
-      email,
-      firstName: fullName,
-      verifyLink,
-    });
-
-    return 'OK';
-  }
-
-  async changePassword(req: Request, body: ChangePasswordDto) {
-    const { oldPassword, newPassword } = body;
-
-    const { email } = req.user;
-    const existingAccount =
-      await this.accountService.validateAccountCredentials(email, oldPassword);
-
-    const passwordHash = await this.bcryptUtil.hashPassword(newPassword);
-
-    const account = await this.accountService.update(existingAccount, {
-      passwordHash,
-    });
-
-    return this.userService.mapToUserInfoDto(account, account.user);
   }
 }

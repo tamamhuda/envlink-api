@@ -33,7 +33,6 @@ export class PublicUrlsController {
     private readonly logger: LoggerService,
   ) {}
 
-  @SkipThrottle()
   @Post('shorten')
   @ThrottleScope(PolicyScope.SHORTEN_PUBLIC)
   @ApiCreatedResponse({

@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { Env } from './env.config';
 import { DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
-import { JWT_SECURITY } from './jwt.config';
+import { JWT_REFRESH_SECURITY, JWT_SECURITY } from './jwt.config';
 
 export const getSwaggerDocumentConfig = (
   config: ConfigService<Env>,
@@ -13,17 +13,6 @@ export const getSwaggerDocumentConfig = (
   const APP_VERSION = config.get<Env['APP_VERSION']>('APP_VERSION') ?? 'v1.0.0';
   return new DocumentBuilder()
 
-    .addBearerAuth(
-      {
-        name: 'JWT',
-        description: 'Bearer token',
-        bearerFormat: 'JWT',
-        type: 'http',
-        scheme: 'bearer',
-        in: 'header',
-      },
-      JWT_SECURITY,
-    )
     .setTitle(APP_NAME)
     .addServer('http://localhost:3000')
     .addServer(
@@ -32,6 +21,28 @@ export const getSwaggerDocumentConfig = (
     )
     .addServer('https://staging.enlink.app', 'Staging Environment')
     .addServer('https://api.envlink.one', 'Production API')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Enter Access Token (Bearer <token>)',
+        in: 'header',
+      },
+      JWT_SECURITY,
+    )
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Enter Refresh Token (Bearer <token>)',
+        in: 'header',
+      },
+      JWT_REFRESH_SECURITY,
+    )
     .setDescription(APP_DESCRIPTION)
     .setVersion(APP_VERSION)
     .build();

@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -7,11 +8,29 @@ import { Account } from 'src/database/entities/account.entity';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
 import { AccountRepository } from 'src/database/repositories/account.repository';
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
+import { SessionService } from 'src/session/session.service';
+import { Request } from 'express';
+import { JwtUtil } from 'src/common/utils/jwt.util';
+import { UrlGeneratorService } from 'nestjs-url-generator';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { SendMailVerifyJob } from 'src/queue/interfaces/mail-verify.interface';
+import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
+import { ChangePasswordDto } from 'src/auth/dto/change-password.dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AccountService {
   private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
-  constructor(private readonly accountRepository: AccountRepository) {}
+  constructor(
+    private readonly accountRepository: AccountRepository,
+    private readonly sessionService: SessionService,
+    private readonly userService: UserService,
+    private readonly jwtUtil: JwtUtil,
+    private readonly urlGeratorService: UrlGeneratorService,
+    @InjectQueue(SEND_MAIL_VERIFY_QUEUE)
+    private readonly mailVerifyQueue: Queue<SendMailVerifyJob>,
+  ) {}
 
   async findOneByProviderUsernameOrEmail(
     usernameOrEmail: string,
@@ -97,5 +116,61 @@ export class AccountService {
       throw new UnauthorizedException('Invalid credentials');
     }
     return account;
+  }
+
+  async logout(req: Request) {
+    await this.sessionService.revokeCurrentSession(req);
+  }
+
+  async resendVerifyEmail(req: Request, redirectUrl?: string): Promise<string> {
+    const { sub, role, sessionId } =
+      await this.jwtUtil.extractJwtPayloadFromHeader(req, 'access');
+
+    const {
+      user: { email, fullName },
+      isVerified,
+    } = await this.findOneByProviderAccountId(sub);
+
+    if (isVerified) throw new ConflictException('Account already verified');
+
+    const token = await this.jwtUtil.assignVerifyEmailToken(
+      sub,
+      role,
+      sessionId,
+    );
+
+    const verifyLink = this.urlGeratorService.generateUrlFromPath({
+      relativePath: 'auth/verify',
+      query: {
+        token,
+        redirectUrl,
+      },
+    });
+
+    await this.mailVerifyQueue.add('EmailVerification', {
+      email,
+      firstName: fullName,
+      verifyLink,
+    });
+
+    return 'OK';
+  }
+
+  async changePassword(req: Request, body: ChangePasswordDto) {
+    const { oldPassword, newPassword } = body;
+
+    const { email } = req.user;
+    const existingAccount = await this.validateAccountCredentials(
+      email,
+      oldPassword,
+    );
+
+    const passwordHash = await this.bcryptUtil.hashPassword(newPassword);
+
+    const account = await this.update(existingAccount, {
+      passwordHash,
+    });
+
+    return this.userService.mapToUserInfoDto(account, account.user);
   }
 }

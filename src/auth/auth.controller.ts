@@ -16,10 +16,7 @@ import { RegisterDto } from './dto/register.dto';
 import {
   ApiOkResponse,
   ApiBearerAuth,
-  ApiNoContentResponse,
   ApiPermanentRedirectResponse,
-  ApiConflictResponse,
-  ApiBody,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import {
@@ -32,16 +29,15 @@ import { TokensDto, TokensResponse } from './dto/token.dto';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { UserInfoDto, UserInfoResponse } from './dto/user-info.dto';
+import { UserInfoDto } from './dto/user-info.dto';
 import LoggerService from 'src/common/logger/logger.service';
-import { JWT_SECURITY } from 'src/config/jwt.config';
-import { ZodString } from 'zod';
-import { ChangePasswordDto } from './dto/change-password.dto';
 import { PolicyScope } from 'src/common/throttle/throttle.constans';
 import { Public } from 'src/common/decorators/public.decorator';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
+import { JWT_REFRESH_SECURITY } from 'src/config/jwt.config';
 
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -49,7 +45,6 @@ export class AuthController {
     private readonly logger: LoggerService,
   ) {}
 
-  @Public()
   @Post('register')
   @ThrottleScope(PolicyScope.REGISTER)
   @ApiOkResponse({
@@ -65,7 +60,6 @@ export class AuthController {
     return await this.authService.register(registerDto, req);
   }
 
-  @Public()
   @Post('login')
   @ThrottleScope(PolicyScope.LOGIN)
   @UseGuards(LocalAuthGuard)
@@ -85,33 +79,19 @@ export class AuthController {
 
   @SkipThrottle()
   @Post('refresh')
+  @ApiBearerAuth(JWT_REFRESH_SECURITY)
   @UseGuards(JwtRefreshGuard)
   @ApiOkResponse({
     type: TokensResponse,
     description: 'Refresh token successful',
   })
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(TokensDto)
   async refreshToken(@Req() req: Request): Promise<TokensDto> {
     return await this.authService.refresh(req.user, req);
   }
 
-  @SkipThrottle()
-  @Post('logout')
-  @ApiBearerAuth()
-  @ApiNoContentResponse({
-    description: 'Logout successful',
-  })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @InvalidateCache(
-    CachePrefix.SESSION,
-    ({ session, user }) => `${user?.id}:${session?.id}`,
-  )
-  async logout(@Req() req: Request): Promise<void> {
-    await this.authService.logout(req);
-  }
-
+  @Public()
   @SkipThrottle()
   @Get('verify')
   @ApiOkResponse({
@@ -131,58 +111,5 @@ export class AuthController {
     if (redirectUrl)
       res.status(HttpStatus.PERMANENT_REDIRECT).redirect(redirectUrl);
     return userInfo;
-  }
-
-  @Public()
-  @Post('/verify/resend')
-  @ThrottleScope(PolicyScope.RESEND_EMAIL)
-  @ApiBearerAuth(JWT_SECURITY)
-  @ApiOkResponse({
-    type: ZodString,
-    description: 'Resend verify email successful',
-    examples: {
-      OK: {
-        summary: 'Ok',
-        value: 'OK',
-      },
-    },
-  })
-  @ApiConflictResponse({
-    type: ZodString,
-    description: 'Resend verify email unsuccessful',
-    examples: {
-      CONFLICT: {
-        summary: 'Conflict',
-        value: 'Account already verified',
-      },
-    },
-  })
-  @HttpCode(HttpStatus.OK)
-  async resendVerifyEmail(
-    @Req() req: Request,
-    @Query('redirectUrl', new DefaultValuePipe(undefined))
-    redirectUrl: string,
-  ): Promise<string> {
-    return await this.authService.resendVerifyEmail(req, redirectUrl);
-  }
-
-  @Post('change-password')
-  @ThrottleScope(PolicyScope.CHANGE_PASSWORD)
-  @ApiBearerAuth(JWT_SECURITY)
-  @ApiOkResponse({
-    type: UserInfoResponse,
-    description: 'Change password successful',
-  })
-  @ApiBody({
-    type: ChangePasswordDto,
-    required: true,
-  })
-  @HttpCode(HttpStatus.OK)
-  @InvalidateCache(
-    CachePrefix.SESSION,
-    ({ session, user }) => `${user?.id}:${session?.id}`,
-  )
-  async changePassword(@Req() req: Request, @Body() body: ChangePasswordDto) {
-    return await this.authService.changePassword(req, body);
   }
 }

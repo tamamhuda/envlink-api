@@ -15,10 +15,16 @@ import LoggerService from 'src/common/logger/logger.service';
 import { ShortenUrlDto } from './dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { UpdateUrlDto, UrlDto, UrlResponse, UrlsResponse } from './dto/url.dto';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { Request } from 'express';
 import { ThrottlePlan } from 'src/common/throttle/decorators/throttle-plan.decorator';
+import { JWT_SECURITY } from 'src/config/jwt.config';
 
+@ApiBearerAuth(JWT_SECURITY)
 @Controller('urls')
 export class UrlsController {
   constructor(

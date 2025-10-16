@@ -30,4 +30,5 @@ export function getJwtOptions(
 
 export const JWT_ACCESS_STRATEGY = 'jwt';
 export const JWT_REFRESH_STRATEGY = 'jwt-refresh';
-export const JWT_SECURITY = 'JWT';
+export const JWT_SECURITY = 'jwt-access';
+export const JWT_REFRESH_SECURITY = 'jwt-refresh';

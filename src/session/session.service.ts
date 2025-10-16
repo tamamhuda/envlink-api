@@ -15,6 +15,7 @@ import { UserService } from 'src/user/user.service';
 import { TokensDto } from 'src/auth/dto/token.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { IpUtil } from 'src/common/utils/ip.util';
+import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class SessionService {
@@ -57,45 +58,38 @@ export class SessionService {
     return this.sessionRepository.updateOne(session, partialSession);
   }
 
-  async validateSessionTokens(
-    session: Session,
-    req: Request,
-    type: 'refresh' | 'access',
-  ) {
-    if (type === 'access') return;
+  async validateSessionTokens(session: Session, req: Request) {
+    const authorizationToken = this.jwtUtil.extractAuthorizationHeader(req);
+    const { isRevoked, expiresAt, refreshTokenHash } = session;
 
-    if (type === 'refresh') {
-      const authorizationToken = this.jwtUtil.extractAuthorizationHeader(req);
-      const { refreshTokenHash } = session;
-
-      if (!refreshTokenHash) throw new UnauthorizedException('Invalid session');
-
-      const isTokenValid = await this.bcryptUtil.verifyToken(
-        authorizationToken,
-        refreshTokenHash,
-      );
-
-      if (!isTokenValid) throw new UnauthorizedException('Invalid session');
-    }
-  }
-
-  async validateCurrentSession(
-    id: string,
-    isExpired?: boolean,
-  ): Promise<Session> {
-    const session = await this.findSessionById(id);
-
-    const { isRevoked, expiresAt } = session;
+    if (!refreshTokenHash) throw new UnauthorizedException('Invalid session');
 
     if (isRevoked || !expiresAt)
       throw new UnauthorizedException('Invalid session');
 
-    if (isExpired || (expiresAt && expiresAt < new Date())) {
+    if (expiresAt && expiresAt < new Date()) {
       await this.updateSession(session, { isRevoked: true });
       throw new UnauthorizedException('Session expired');
     }
 
-    return session;
+    const isTokenValid = await this.bcryptUtil.verifyToken(
+      authorizationToken,
+      refreshTokenHash,
+    );
+
+    if (!isTokenValid) throw new UnauthorizedException('Invalid session');
+  }
+
+  async validateCurrentSession(
+    payload: JwtPayload,
+    req: Request,
+    isRefresh: boolean = false,
+  ): Promise<SessionInfoDto> {
+    const { sessionId } = payload;
+    const session = await this.findSessionById(sessionId);
+    if (isRefresh) await this.validateSessionTokens(session, req);
+
+    return this.mapSessionToDto(session);
   }
 
   async createSessionWithTokens(
