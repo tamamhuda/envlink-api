@@ -43,13 +43,13 @@ export class User extends BaseEntity {
     length: 50,
     nullable: true,
   })
-  phoneNumber?: string;
+  phoneNumber!: string | null;
 
   @Column({
     type: 'text',
     nullable: true,
   })
-  avatar?: string;
+  avatar!: string | null;
 
   @Column({
     type: 'enum',

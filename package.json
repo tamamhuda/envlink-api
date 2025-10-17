@@ -37,6 +37,7 @@
     "@logtail/node": "^0.5.6",
     "@logtail/winston": "^0.5.6",
     "@nestjs-modules/ioredis": "^2.0.2",
+    "@nestjs/axios": "^4.0.1",
     "@nestjs/bullmq": "^11.0.3",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
@@ -51,6 +52,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "@nestql/bull-board": "^1.0.3",
     "@types/nodemailer": "^6.4.20",
+    "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.61.0",
     "cache-manager": "^7.2.4",
@@ -81,6 +83,7 @@
     "typescript-eslint": "^8.44.1",
     "ua-parser-js": "^2.0.5",
     "winston": "^3.17.0",
+    "xendit-node": "^7.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

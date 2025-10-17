@@ -21,9 +21,14 @@ import { ClientIdentityUtil } from './utils/client-identity.util';
 import { ThrottleGuard } from './throttle/guards/throttle.guard';
 import { ThrottlePlanGuard } from './throttle/guards/throttle-plan.guard';
 import { ThrottleScopeGuard } from './throttle/guards/throttle-scope.guard';
+import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
+import { XenditService } from './xendit/xendit.service';
+import { XenditUtil } from './utils/xendit.util';
 
 @Global()
 @Module({
+  imports: [HttpModule, ConfigModule],
   providers: [
     Logger,
     LoggerService,
@@ -52,6 +57,9 @@ import { ThrottleScopeGuard } from './throttle/guards/throttle-scope.guard';
     JwtUtil,
     MailUtil,
     ClientIdentityUtil,
+    XenditUtil,
+
+    XenditService,
   ],
   exports: [
     Logger,
@@ -81,6 +89,9 @@ import { ThrottleScopeGuard } from './throttle/guards/throttle-scope.guard';
     JwtUtil,
     MailUtil,
     ClientIdentityUtil,
+    XenditUtil,
+
+    XenditService,
   ],
 })
 export class CommonModule {}

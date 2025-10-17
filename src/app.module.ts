@@ -28,6 +28,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { ThrottleInterceptor } from './common/interceptors/throttle.interceptor';
 import { ThrottleGuard } from './common/throttle/guards/throttle.guard';
 import { JwtAuthGuard } from './auth/guards/jwt.guard';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { JwtAuthGuard } from './auth/guards/jwt.guard';
     UrlsModule,
     QueueModule,
     CommonModule,
+    SubscriptionsModule,
   ],
 
   providers: [

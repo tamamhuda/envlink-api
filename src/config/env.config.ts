@@ -44,6 +44,9 @@ const envSchema = z
     MAIL_SENDER: z.string().nonempty('no-reply@envlink.one'),
 
     IP2_API_KEY: z.string().nonempty(),
+
+    XENDIT_API_KEY: z.string().nonempty(),
+    XENDIT_API_URL: z.string().nonempty(),
   })
   .required();
 

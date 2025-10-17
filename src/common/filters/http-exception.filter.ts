@@ -21,8 +21,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
     const errorException = exception.getResponse();
-    let error: object | string = errorException;
+    let error: object | string = exception.message;
     let message: string = getReasonPhrase(status);
+
+    if (errorException instanceof HttpException) {
+      message = errorException.message;
+      error = getReasonPhrase(status);
+    }
 
     if (exception instanceof ZodSerializationException) {
       const zodError = exception.getZodError() as ZodError;
@@ -35,6 +40,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       error = zodError.issues;
       message = exception.message;
     }
+
+    // if (error.valueOf() === Object && error instanceof HttpException) {
+    //   message = error.message;
+    //   error = getReasonPhrase(status);
+    // }
 
     this.logger.httpException(HttpExceptionFilter.name, request, exception);
 

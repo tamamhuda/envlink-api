@@ -1,4 +1,6 @@
 export enum PeriodEnum {
-  MONTHLY = 'MONTHLY',
-  YEARLY = 'YEARLY',
+  DAY = 'DAY',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+  YEAR = 'YEAR',
 }

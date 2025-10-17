@@ -1,11 +1,13 @@
 import { addDays, addMonths, addYears, differenceInDays } from 'date-fns';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import Plan from './plan.entity';
 import { User } from './user.entity';
 import { PlanUsage } from './plan-usage.entity';
 import { PeriodEnum } from 'src/common/enums/Period.enum';
 import ms, { StringValue } from 'ms';
+import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
+import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
 
 @Entity({ name: 'subscriptions' })
 export default class Subscription extends BaseEntity {
@@ -18,6 +20,9 @@ export default class Subscription extends BaseEntity {
   })
   plan!: Plan;
 
+  @Column({ type: 'varchar', nullable: true })
+  description!: string | null;
+
   @Column({ type: 'timestamptz', nullable: true })
   startedAt!: Date | null;
 
@@ -27,17 +32,34 @@ export default class Subscription extends BaseEntity {
   @Column({ type: 'int', default: 0 })
   remaining!: number;
 
-  @Column({ type: 'enum', enum: PeriodEnum, default: PeriodEnum.MONTHLY })
+  @Column({ type: 'enum', enum: PeriodEnum, default: PeriodEnum.MONTH })
   period!: PeriodEnum;
 
-  @Column({ type: 'boolean', default: true })
-  isActive!: boolean;
+  @Column({ type: 'int', default: 1 })
+  interval!: number;
+
+  @Column({
+    type: 'enum',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.ACTIVE,
+  })
+  status!: SubscriptionStatus;
 
   @Column({ type: 'boolean', default: false })
   isTrial!: boolean;
 
   @Column({ type: 'float', default: 0 })
   amountPaid!: number;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+  })
+  metadata?: {
+    strategy: UpgradeStrategy;
+    previous_plan: string;
+    new_plan: string;
+  } | null;
 
   @Column({ type: 'varchar', nullable: true })
   paymentId!: string | null;
@@ -59,11 +81,11 @@ export default class Subscription extends BaseEntity {
 
     // Set expiry based on subscription period
     switch (this.period) {
-      case PeriodEnum.MONTHLY:
-        this.expiresAt = addMonths(this.startedAt, 1);
+      case PeriodEnum.MONTH:
+        this.expiresAt = addMonths(this.startedAt, this.interval);
         break;
-      case PeriodEnum.YEARLY:
-        this.expiresAt = addYears(this.startedAt, 1);
+      case PeriodEnum.YEAR:
+        this.expiresAt = addYears(this.startedAt, this.interval);
         break;
       default:
         this.expiresAt = addDays(this.startedAt, 30);

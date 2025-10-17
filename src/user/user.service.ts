@@ -34,9 +34,7 @@ export class UserService {
   async mapToUserInfoDto(account: Account, user: User): Promise<UserInfoDto> {
     const providers = providerSchema.parse(account);
     const { avatar, ...restUser } = user;
-    const avatarUrl = avatar
-      ? await this.awsS3Util.getFileUrl(avatar)
-      : undefined;
+    const avatarUrl = avatar ? await this.awsS3Util.getFileUrl(avatar) : null;
     return {
       ...restUser,
       avatar: avatarUrl,
@@ -227,7 +225,7 @@ export class UserService {
     const user = await this.update(req.user.id, {
       avatar: imageKey,
     });
-    delete user.avatar;
+    user.avatar = avatar;
     return {
       ...user,
       avatar,
