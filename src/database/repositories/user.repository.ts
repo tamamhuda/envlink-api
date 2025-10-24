@@ -40,6 +40,13 @@ export class UserRepository extends Repository<User> {
     return this.findOne({ where });
   }
 
+  async findByExternalId(externalId: string): Promise<User | null> {
+    return this.findOne({
+      where: { externalId: externalId },
+      relations: ['activeSubscription', 'activeSubscription.plan'],
+    });
+  }
+
   async updateOne(user: User, updateUserDto: Partial<User>): Promise<User> {
     const updated = this.merge(user, updateUserDto);
     return this.save(updated);

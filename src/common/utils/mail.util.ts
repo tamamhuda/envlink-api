@@ -1,87 +1,56 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/env.config';
-import { MailtrapTransport } from 'mailtrap';
-import { createTransport } from 'nodemailer';
-import {
-  MailtrapMailOptions,
-  MailtrapTransporter,
-} from 'mailtrap/dist/types/transport';
 import LoggerService from 'src/common/logger/logger.service';
-import { MailVerifyTemplateVariable } from '../interfaces/mail.interface';
+import { SendMailClient } from 'zeptomail';
+import { CcBccItem, EmailAddress } from 'zeptomail/types';
 
 @Injectable()
 export class MailUtil {
-  private readonly SENDER: string;
-  private readonly TEMPLATE_ID_VERIFY_EMAIL: string;
-  private readonly APP_NAME: string;
-  private readonly transport: MailtrapTransporter;
+  private readonly SENDER_ADDRESS: string;
+  private readonly client = SendMailClient;
+  private readonly template: Record<'VERIFY_EMAIL' | 'SUBSCRIPTION', string>;
 
   constructor(
     private readonly config: ConfigService<Env>,
     private readonly logger: LoggerService,
   ) {
-    this.SENDER = this.config.getOrThrow('MAIL_SENDER');
-    this.TEMPLATE_ID_VERIFY_EMAIL = this.config.getOrThrow(
-      'TEMPLATE_ID_VERIFY_EMAIL',
-    );
-    this.APP_NAME = this.config.getOrThrow('APP_NAME');
-    this.transport = createTransport(
-      MailtrapTransport({
-        token: this.config.getOrThrow('MAILTRAP_TOKEN'),
-      }),
-    );
+    this.SENDER_ADDRESS = config.getOrThrow('SENDER_ADDRESS');
+    const url = config.getOrThrow('ZEPTO_API_URL');
+    const token = config.getOrThrow('ZEPTOMAIL_TOKEN');
+    this.client = new SendMailClient({ url, token });
+    this.template = {
+      VERIFY_EMAIL: config.getOrThrow('TEMPLATE_KEY_VERIFY_EMAIL'),
+      SUBSCRIPTION: '',
+    };
   }
 
   async sendTemplateEmail(
-    to: string,
-    templateUuid: string,
-    templateVariables: MailVerifyTemplateVariable,
-    subject?: string,
+    to: CcBccItem[],
+    template: 'VERIFY_EMAIL' | 'SUBSCRIPTION',
+    merge_info: Record<string, string>,
+    subject: string,
   ) {
     try {
-      const params: MailtrapMailOptions = {
-        from: this.SENDER,
-        to,
-        templateUuid,
-        templateVariables,
-        subject,
+      const mail_template_key = this.template[template];
+      const from: EmailAddress = {
+        name: 'no-reply Envlink',
+        address: this.SENDER_ADDRESS,
       };
 
-      await this.transport.sendMail(params);
+      await this.client
+        .sendMailWithTemplate({
+          mail_template_key,
+          from,
+          to,
+          subject,
+          merge_info,
+        })
+        .catch((error: any) =>
+          this.logger.error(JSON.stringify(error, null, 2)),
+        );
     } catch (error) {
       throw new Error(error);
-    }
-  }
-
-  async sendVerifyEmail(
-    email: string,
-    first_name: string,
-    verify_link: string,
-  ) {
-    try {
-      const templateVariables: MailVerifyTemplateVariable = {
-        APP_NAME: this.APP_NAME,
-        FIRST_NAME: first_name,
-        VERIFY_LINK: verify_link,
-        EXPIRY: '5m',
-      };
-
-      const params: MailtrapMailOptions = {
-        from: this.SENDER,
-        to: email,
-        templateUuid: this.TEMPLATE_ID_VERIFY_EMAIL,
-        templateVariables,
-      };
-
-      await this.transport.sendMail(params).then(() => {
-        this.logger.debug(
-          `Verification email sent successfully: ${JSON.stringify(params, null, 2)}`,
-        );
-      });
-    } catch (error) {
-      this.logger.error('Failed to send verification email', error);
-      throw error;
     }
   }
 }

@@ -29,6 +29,8 @@ import { ThrottleInterceptor } from './common/interceptors/throttle.interceptor'
 import { ThrottleGuard } from './common/throttle/guards/throttle.guard';
 import { JwtAuthGuard } from './auth/guards/jwt.guard';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
+import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 
 @Module({
   imports: [
@@ -83,6 +85,8 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     QueueModule,
     CommonModule,
     SubscriptionsModule,
+    WebhooksModule,
+    PaymentMethodsModule,
   ],
 
   providers: [

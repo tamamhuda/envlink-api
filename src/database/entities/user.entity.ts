@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 import { RolesEnum } from '../../common/enums/roles.enum';
 import { Account } from './account.entity';
 import Session from './session.entity';
@@ -14,14 +7,21 @@ import { Url } from './url.entity';
 import { Channel } from './channel.entity';
 import Subscription from './subscription.entity';
 import { PlanUsage } from './plan-usage.entity';
+import { Transaction } from './transaction.entity';
+import { PaymentMethod } from './payment-method.entity';
 
 @Entity({ name: 'users' })
-@Index(['username', 'email'], { unique: true })
+@Index(['username', 'email', 'externalId'], { unique: true })
 export class User extends BaseEntity {
   @Column({
     type: 'varchar',
+    nullable: true,
+  })
+  externalId!: string | null;
+
+  @Column({
+    type: 'varchar',
     length: 25,
-    unique: true,
   })
   username!: string;
 
@@ -34,7 +34,6 @@ export class User extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 50,
-    unique: true,
   })
   email!: string;
 
@@ -73,12 +72,22 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   isTrial!: boolean;
 
-  @OneToMany(() => Subscription, (sub) => sub.user, { cascade: true })
+  @OneToMany(() => Subscription, (sub) => sub.user)
   subscriptions!: Subscription[];
 
-  @ManyToOne(() => Subscription, { nullable: true, eager: true })
+  @ManyToOne(() => Subscription, {
+    nullable: true,
+    eager: true,
+    onDelete: 'SET NULL',
+  })
   activeSubscription!: Subscription;
 
   @OneToMany(() => PlanUsage, (usage) => usage.user)
   usages!: PlanUsage[];
+
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  transactions!: Transaction[];
+
+  @OneToMany(() => PaymentMethod, (paymentMethod) => paymentMethod.user)
+  paymentMethods!: PaymentMethod[];
 }

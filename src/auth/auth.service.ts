@@ -64,7 +64,7 @@ export class AuthService {
       },
     });
 
-    await this.mailVerifyQueue.add('EmailVerification', {
+    await this.mailVerifyQueue.add(`EmailVerification`, {
       email,
       firstName: fullName,
       verifyLink,

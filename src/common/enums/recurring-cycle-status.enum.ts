@@ -1,0 +1,7 @@
+export enum RecurringCycleStatus {
+  SCHEDULED = 'SCHEDULED',
+  RETRYING = 'RETRYING',
+  FAILED = 'FAILED',
+  SUCCEEDED = 'SUCCEEDED',
+  CANCELLED = 'CANCELLED',
+}

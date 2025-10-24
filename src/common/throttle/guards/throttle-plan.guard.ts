@@ -51,16 +51,8 @@ export class ThrottlePlanGuard implements CanActivate {
 
     // If chargeOnSuccess = false → charge *before* handler
     if (!policy.chargeOnSuccess) {
-      this.logger.debug(`Charging user ${user.id} for ${cost} tokens`);
       try {
         await limiter.consume(key, cost);
-        await this.throttleService.recordUsage(
-          key,
-          cost,
-          user?.id,
-          'charge-start',
-          policy,
-        );
 
         return true;
       } catch (rejRes) {

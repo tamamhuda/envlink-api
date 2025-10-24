@@ -203,22 +203,24 @@ export class ThrottleService {
 
   async recordUsage(
     key: string,
-    cost: number,
+    used: number,
     userId: string,
     action: string,
     policy: ThrottlePolicy,
-    limitRemaining?: number,
   ): Promise<PlanUsageHistory> {
     return await this.planUsageRepository.manager.transaction(
       async (manager) => {
-        const remaining =
-          limitRemaining ?? (await this.getRemaining(key, policy));
+        const remaining = await this.getRemaining(key, policy);
         const usageIdentity = createHash('SHA256').update(key).digest('hex');
 
-        const user = await manager.findOneOrFail(User, {
-          where: { id: userId },
-          relations: ['activeSubscription', 'activeSubscription.plan'],
-        });
+        const user = await manager
+          .findOneOrFail(User, {
+            where: { id: userId },
+            relations: ['activeSubscription', 'activeSubscription.plan'],
+          })
+          .catch(() => {
+            throw new Error('User not found');
+          });
 
         const subscription = user.activeSubscription;
 
@@ -236,14 +238,14 @@ export class ThrottleService {
             subscription,
             plan: subscription.plan,
             scope: policy.scope,
-            used: cost,
+            used,
             resetAt: new Date(Date.now() + policy.windowMs),
           });
 
           const savedPlanUsage = await manager.save(planUsage);
           const history = manager.create(PlanUsageHistory, {
             action,
-            used: cost,
+            used,
             usage: savedPlanUsage,
           });
           return await manager.save(history);
@@ -251,13 +253,13 @@ export class ThrottleService {
 
         const history = manager.create(PlanUsageHistory, {
           action,
-          used: cost,
+          used,
           usage: existingUsage,
         });
 
         const merge = manager.merge(PlanUsage, existingUsage, {
           remaining,
-          used: existingUsage.used + cost,
+          used: existingUsage.used + used,
         });
         await manager.save(merge);
 

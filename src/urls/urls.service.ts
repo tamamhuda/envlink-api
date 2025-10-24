@@ -29,7 +29,7 @@ export class UrlsService {
     private readonly urlRepository: UrlRepository,
     private readonly logger: LoggerService,
     @InjectQueue(URL_METADATA_QUEUE)
-    private readonly queue: Queue<UrlMetadataJob>,
+    private readonly urlMetadataQueue: Queue<UrlMetadataJob>,
     private readonly userService: UserService,
   ) {}
 
@@ -84,9 +84,6 @@ export class UrlsService {
         channels = await manager.find(Channel, {
           where: { id: In(channelIds) },
         });
-        this.logger.debug(
-          `Found ${channels.length} channels for user ${user.id}`,
-        );
       }
 
       const url = manager.create(Url, {
@@ -108,7 +105,7 @@ export class UrlsService {
             where: { id },
             relations: ['channels'],
           });
-          void this.queue.add(`url-metadata-${code}`, {
+          void this.urlMetadataQueue.add(`url-metadata-${code}`, {
             urlId: id,
           });
           return url;

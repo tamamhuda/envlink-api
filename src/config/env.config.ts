@@ -47,6 +47,11 @@ const envSchema = z
 
     XENDIT_API_KEY: z.string().nonempty(),
     XENDIT_API_URL: z.string().nonempty(),
+
+    ZEPTOMAIL_TOKEN: z.string().nonempty(),
+    TEMPLATE_KEY_VERIFY_EMAIL: z.string().nonempty(),
+    SENDER_ADDRESS: z.string().nonempty(),
+    ZEPTO_API_URL: z.string().nonempty('api.zeptomail.com'),
   })
   .required();
 

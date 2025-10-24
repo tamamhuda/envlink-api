@@ -164,6 +164,12 @@ export class UserService {
     return user;
   }
 
+  async findUserByExternalId(id: string): Promise<User> {
+    const user = await this.userRepository.findOneById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
   async updateEmailOrUsername(username?: string, email?: string) {
     if (username)
       await Promise.resolve().then(() =>

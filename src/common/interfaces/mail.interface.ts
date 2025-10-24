@@ -1,7 +1,8 @@
-export interface MailVerifyTemplateVariable {
+export interface MailVerifyTemplateInfo {
   APP_NAME: string;
-  FIRST_NAME: string;
-  VERIFY_LINK: string;
-  EXPIRY: string;
+  GIVEN_NAME: string;
+  VERIFY_URL: string;
+  DURATION: string;
+  CURRENT_YEAR: string;
   [key: string]: string;
 }

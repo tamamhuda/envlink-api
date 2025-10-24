@@ -1,5 +1,5 @@
 import { addDays, addMonths, addYears, differenceInDays } from 'date-fns';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import Plan from './plan.entity';
 import { User } from './user.entity';
@@ -8,17 +8,17 @@ import { PeriodEnum } from 'src/common/enums/Period.enum';
 import ms, { StringValue } from 'ms';
 import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
 import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
+import { PlansEnum } from 'src/common/enums/plans.enum';
+import { SubscriptionCycle } from './subscription-cycle.entity';
 
 @Entity({ name: 'subscriptions' })
+@Index(['referenceId', 'externalId'])
 export default class Subscription extends BaseEntity {
-  @ManyToOne(() => User, (user) => user.subscriptions, { onDelete: 'CASCADE' })
-  user!: User;
+  @Column({ type: 'varchar', nullable: true })
+  externalId!: string | null;
 
-  @ManyToOne(() => Plan, (plan) => plan.subscriptions, {
-    onDelete: 'CASCADE',
-    eager: true,
-  })
-  plan!: Plan;
+  @Column({ type: 'varchar', nullable: true })
+  referenceId!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   description!: string | null;
@@ -55,10 +55,10 @@ export default class Subscription extends BaseEntity {
     type: 'jsonb',
     nullable: true,
   })
-  metadata?: {
+  metadata!: {
     strategy: UpgradeStrategy;
-    previous_plan: string;
-    new_plan: string;
+    previousPlan: PlansEnum;
+    newPlan: PlansEnum;
   } | null;
 
   @Column({ type: 'varchar', nullable: true })
@@ -66,6 +66,32 @@ export default class Subscription extends BaseEntity {
 
   @Column({ type: 'varchar', nullable: true })
   transactionStatus!: string | null;
+
+  @Column({ type: 'date', nullable: true })
+  nextBillingDate!: Date | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  failureCode!: string | null;
+
+  @ManyToOne(() => User, (user) => user.subscriptions, {
+    onDelete: 'CASCADE',
+  })
+  user!: User;
+
+  @ManyToOne(() => Plan, (plan) => plan.subscriptions, {
+    onDelete: 'CASCADE',
+    eager: true,
+  })
+  plan!: Plan;
+
+  @OneToMany(
+    () => SubscriptionCycle,
+    (subscriptionCycle) => subscriptionCycle.subscription,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  subscriptionCycles!: SubscriptionCycle[];
 
   @OneToMany(() => PlanUsage, (planUsage) => planUsage.subscription, {
     cascade: true,
@@ -78,6 +104,7 @@ export default class Subscription extends BaseEntity {
    */
   initializeSubscriptionPeriod() {
     this.startedAt = new Date();
+    this.status = SubscriptionStatus.ACTIVE;
 
     // Set expiry based on subscription period
     switch (this.period) {
@@ -104,5 +131,10 @@ export default class Subscription extends BaseEntity {
   private parseIntervalToDays(interval: string): number {
     const msValue = ms(interval as StringValue); // e.g. 604800000 ms (7 days)
     return msValue / (1000 * 60 * 60 * 24);
+  }
+
+  assignReferenceId(): string {
+    this.referenceId = `${this.plan.name}-${this.id}-${Date.now()}`;
+    return this.referenceId;
   }
 }

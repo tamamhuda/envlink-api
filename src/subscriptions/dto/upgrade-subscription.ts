@@ -5,10 +5,10 @@ import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
 import * as z from 'zod';
 
 export const upgradeSubscriptionSchema = z.object({
+  plan: z.nativeEnum(PlansEnum),
   strategy: z
     .nativeEnum(UpgradeStrategy)
     .default(UpgradeStrategy.UPGRADE_IMMEDIATELY),
-  newPlan: z.nativeEnum(PlansEnum),
   amount: z.number().nonnegative().min(0),
   discount: z.number().nonnegative().min(0).optional(),
   schedule: z.object({

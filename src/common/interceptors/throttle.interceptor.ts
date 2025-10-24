@@ -43,8 +43,9 @@ export class ThrottleInterceptor<T> implements NestInterceptor<T> {
           policy,
         );
 
-        // Only charge successful responses
-        if (policy.chargeOnSuccess) {
+        // Only charge successful responses with user
+        const user = request.user;
+        if (policy.chargeOnSuccess && user) {
           await this.throttleService.consume(key, policy, cost);
           // Reapply updated headers (after consuming)
           await this.throttleService.applyRateLimiterHeader(
@@ -52,10 +53,18 @@ export class ThrottleInterceptor<T> implements NestInterceptor<T> {
             key,
             policy,
           );
+          await this.throttleService.recordUsage(
+            key,
+            cost,
+            user.id,
+            'charge-on-success',
+            policy,
+          );
         }
 
         return result;
       }),
+
       catchError((err) => throwError(() => err)),
     );
   }

@@ -68,4 +68,8 @@ export default class LoggerService extends Logger implements NestLoggerService {
       `[${job.queueName}:${job.id}]: FAILED:ATTEMPT-${job.attemptsMade} - ${JSON.stringify(error, null, 2)}`,
     );
   }
+
+  json(message: string = '', data: any) {
+    this.debug(`${message}${JSON.stringify(data, null, 2)}`);
+  }
 }
