@@ -3,13 +3,17 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { WinstonModule } from 'nest-winston';
-import { instance } from './common/logger/logger.instance';
+import { instance as loggerInstance } from './common/logger/logger.instance';
 import { ConfigService } from '@nestjs/config';
 import { Env } from './config/env.config';
 import { getSwaggerDocumentConfig } from './config/swagger.config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { PlanSeeder } from './database/seeders/plan.seeder';
 import LoggerService from './common/logger/logger.service';
+import { join } from 'path';
+import * as hbs from 'hbs';
+import { Response } from 'express';
+import * as yaml from 'yaml';
 
 async function bootstrap() {
   const isWorker = process.env.WORKER === 'true';
@@ -17,7 +21,7 @@ async function bootstrap() {
   if (isWorker) {
     // DON'T start app.listen()
     const appContext = await NestFactory.createApplicationContext(AppModule, {
-      logger: WinstonModule.createLogger({ instance }),
+      logger: WinstonModule.createLogger({ instance: loggerInstance }),
     });
     const logger = appContext.get(LoggerService);
     logger.log(
@@ -28,20 +32,51 @@ async function bootstrap() {
 
   // HTTP server context
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: WinstonModule.createLogger({ instance }),
+    logger: WinstonModule.createLogger({ instance: loggerInstance }),
   });
 
-  app.setGlobalPrefix('api/v1');
-  app.set('trust proxy', true);
-
   const config = app.get(ConfigService<Env>);
-  const PORT = config.get<Env['PORT']>('PORT') || 3000;
-  const NODE_ENV = config.get<Env['NODE_ENV']>('NODE_ENV') || 'local';
+  const PORT = config.getOrThrow('PORT') || 3000;
+  const NODE_ENV = config.getOrThrow('NODE_ENV') || 'local';
+  const API_PREFIX = config.getOrThrow('API_PREFIX');
+  const API_DOCS = `${API_PREFIX}/docs`;
+
+  app.setGlobalPrefix(API_PREFIX);
+  app.set('trust proxy', true);
+  app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  app.engine('html', hbs.__express);
+  app.setViewEngine('html');
+
+  // Cors configuration
+  app.enableCors({
+    origin: [
+      'http://localhost:4000',
+      'http://0.0.0.0:4000',
+      'https://local-nest.utadev.app',
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Client-Url'],
+  });
 
   // Swagger / OpenAPI
   const swaggerConfig = getSwaggerDocumentConfig(config);
   const openApiDoc = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/v1/docs', app, cleanupOpenApiDoc(openApiDoc));
+  SwaggerModule.setup(API_DOCS, app, cleanupOpenApiDoc(openApiDoc));
+
+  const router = app.getHttpAdapter().getInstance();
+
+  router.get(`/${API_DOCS}/openapi.json`, (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="openapi.json"');
+    res.send(openApiDoc);
+  });
+
+  router.get(`/${API_DOCS}/openapi.yaml`, (req, res) => {
+    res.setHeader('Content-Type', 'application/x-yaml');
+    res.setHeader('Content-Disposition', 'attachment; filename="openapi.yaml"');
+    res.send(yaml.stringify(openApiDoc));
+  });
 
   const logger = app.get(LoggerService);
   const seeder = app.get(PlanSeeder);

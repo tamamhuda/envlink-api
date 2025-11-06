@@ -3,12 +3,13 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getRedisConfig } from 'src/config/cache.config';
 import {
+  SEND_MAIL_SUBSCRIPTION_QUEUE,
   SEND_MAIL_VERIFY_QUEUE,
   URL_ANALYTIC_QUEUE,
   URL_METADATA_QUEUE,
 } from './queue.constans';
-import { MailProcessor } from './workers/mail/mail.processor';
-import { MailService } from './workers/mail/mail.service';
+import { MailVerifyProcessor } from './workers/mail/mail-verify.processor';
+import { MailVerifyService } from './workers/mail/mail-verify.service';
 import { UrlsModule } from 'src/urls/urls.module';
 import { UrlAnalyticProcessor } from './workers/url-analytic/url-analytic.processor';
 import { UrlAnalyticService } from './workers/url-analytic/url-analytic.service';
@@ -17,6 +18,8 @@ import { UrlMetadataProcessor } from './workers/url-metadata/url-metadata.proces
 import { BullBoardModule } from '@bull-board/nestjs';
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { MailSubscriptionService } from './workers/mail/mail-subscription.service';
+import { MailSubscriptionProcessor } from './workers/mail/mail-subscription.processor';
 
 @Global()
 @Module({
@@ -43,12 +46,17 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
     }),
 
     BullModule.registerQueue({ name: SEND_MAIL_VERIFY_QUEUE }),
+    BullModule.registerQueue({ name: SEND_MAIL_SUBSCRIPTION_QUEUE }),
     BullModule.registerQueue({ name: URL_ANALYTIC_QUEUE }),
     BullModule.registerQueue({ name: URL_METADATA_QUEUE }),
 
     BullBoardModule.forFeature(
       {
         name: SEND_MAIL_VERIFY_QUEUE,
+        adapter: BullMQAdapter,
+      },
+      {
+        name: SEND_MAIL_SUBSCRIPTION_QUEUE,
         adapter: BullMQAdapter,
       },
       {
@@ -67,8 +75,10 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
     }),
   ],
   providers: [
-    MailProcessor,
-    MailService,
+    MailVerifyProcessor,
+    MailVerifyService,
+    MailSubscriptionProcessor,
+    MailSubscriptionService,
     UrlAnalyticService,
     UrlAnalyticProcessor,
     UrlMetadataProcessor,

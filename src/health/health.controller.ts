@@ -8,9 +8,11 @@ import {
 import { CacheHealthIndicator } from 'src/common/cache/cache-health.indicator';
 import { IpHealthIndicator } from './ip-health.indicator';
 import { Public } from 'src/common/decorators/public.decorator';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Public()
 @Controller('health')
+@ApiTags('Health')
 export class HealthController {
   constructor(
     private health: HealthCheckService,
@@ -21,6 +23,7 @@ export class HealthController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Check health status' })
   @HealthCheck()
   check(@Ip() ipAddr: string) {
     return this.health.check([

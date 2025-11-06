@@ -10,7 +10,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true,
+    "incremental": false,
     "skipLibCheck": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
@@ -19,5 +19,6 @@
     "noFallthroughCasesInSwitch": false,
     "strictPropertyInitialization": true,
     "esModuleInterop": true
-  }
+  },
+  "exclude": ["node_modules", "dist"]
 }
