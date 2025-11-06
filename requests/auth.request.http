@@ -20,12 +20,11 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "fullName": "John Doe",
+  "full_name": "John Doe",
   "username": "johndoe{{$timestamp}}",
   "email": "johndoe{{$timestamp}}@example.com",
   "password": "password123",
-  "confirmPassword": "password123",
-  "redirectUrl": "https://tamamhuda.dev"
+  "confirm_password": "password123"
 }
 
 >>! ./.state/auth.json
@@ -79,7 +78,7 @@ Content-Type: application/json
 Authorization: Bearer {{state.tokens?.accessToken}}
 
 {
-  "oldPassword": "password123",
-  "newPassword": "newpassword123",
-  "confirmPassword": "newpassword123"
+  "old_password": "password123",
+  "new_password": "newpassword123",
+  "confirm_password": "newpassword123"
 }

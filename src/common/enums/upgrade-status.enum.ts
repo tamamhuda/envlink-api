@@ -1,0 +1,7 @@
+export enum UpgradeStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  CANCELED = 'CANCELED',
+  PENDING = 'PENDING',
+  EXPIRED = 'EXPIRED',
+}

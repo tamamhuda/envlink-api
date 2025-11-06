@@ -1,4 +1,4 @@
-export enum PeriodEnum {
+export enum SubscriptionInterval {
   DAY = 'DAY',
   WEEK = 'WEEK',
   MONTH = 'MONTH',

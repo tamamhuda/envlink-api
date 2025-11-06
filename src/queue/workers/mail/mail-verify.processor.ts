@@ -1,16 +1,16 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job, Worker } from 'bullmq';
 import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
-import { MailService } from './mail.service';
+import { MailVerifyService } from './mail-verify.service';
 import { SendMailVerifyJob } from 'src/queue/interfaces/mail-verify.interface';
 import LoggerService from 'src/common/logger/logger.service';
 
 @Processor(SEND_MAIL_VERIFY_QUEUE, {
   concurrency: 5,
 })
-export class MailProcessor extends WorkerHost {
+export class MailVerifyProcessor extends WorkerHost {
   constructor(
-    private readonly mailService: MailService,
+    private readonly mailService: MailVerifyService,
     private readonly logger: LoggerService,
   ) {
     super();

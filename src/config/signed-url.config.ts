@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { UrlGeneratorModuleOptions } from 'nestjs-url-generator';
 import { Env } from './env.config';
 
-export function getUrlGeneratorConfig(
+export function getSignedUrlConfig(
   config: ConfigService<Env>,
 ): UrlGeneratorModuleOptions {
   return {

@@ -1,4 +1,4 @@
-export enum PlansEnum {
+export enum PlanEnum {
   FREE = 'Free',
   PRO = 'Pro',
   ENTERPRISE = 'Enterprise',

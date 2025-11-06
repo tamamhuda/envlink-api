@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MailVerifyTemplateInfo } from 'src/common/interfaces/mail.interface';
+import {
+  MailSubscriptionTemplateInfo,
+  MailVerifyTemplateInfo,
+} from 'src/common/interfaces/mail.interface';
 import { MailUtil } from 'src/common/utils/mail.util';
 import { Env } from 'src/config/env.config';
 import LoggerService from 'src/common/logger/logger.service';
 import { CcBccItem } from 'zeptomail/types';
 
 @Injectable()
-export class MailService {
-  private readonly TEMPLATE_KEY_VERIFY_EMAIL: string;
+export class MailVerifyService {
   private readonly APP_NAME: string;
 
   constructor(
@@ -16,9 +18,6 @@ export class MailService {
     private readonly config: ConfigService<Env>,
     private readonly logger: LoggerService,
   ) {
-    this.TEMPLATE_KEY_VERIFY_EMAIL = this.config.getOrThrow(
-      'TEMPLATE_KEY_VERIFY_EMAIL',
-    );
     this.APP_NAME = this.config.getOrThrow('APP_NAME');
   }
 

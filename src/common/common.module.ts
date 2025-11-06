@@ -25,6 +25,9 @@ import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { XenditService } from './xendit/xendit.service';
 import { XenditUtil } from './utils/xendit.util';
+import { TokenUtil } from './utils/token.util';
+import { ClientUrlMiddleware } from './middlewares/client-url.middleware';
+import { SnakeCaseResponseInterceptor } from './interceptors/snake-case-transform.interceptor';
 
 @Global()
 @Module({
@@ -44,6 +47,7 @@ import { XenditUtil } from './utils/xendit.util';
     TransformInterceptor,
     UrlAnalyticInterceptor,
     ThrottleInterceptor,
+    SnakeCaseResponseInterceptor,
 
     ThrottleGuard,
     ThrottleService,
@@ -58,8 +62,11 @@ import { XenditUtil } from './utils/xendit.util';
     MailUtil,
     ClientIdentityUtil,
     XenditUtil,
+    TokenUtil,
 
     XenditService,
+
+    ClientUrlMiddleware,
   ],
   exports: [
     Logger,
@@ -76,6 +83,7 @@ import { XenditUtil } from './utils/xendit.util';
     TransformInterceptor,
     UrlAnalyticInterceptor,
     ThrottleInterceptor,
+    SnakeCaseResponseInterceptor,
 
     ThrottleGuard,
     ThrottleService,
@@ -90,8 +98,10 @@ import { XenditUtil } from './utils/xendit.util';
     MailUtil,
     ClientIdentityUtil,
     XenditUtil,
+    TokenUtil,
 
     XenditService,
+    ClientUrlMiddleware,
   ],
 })
 export class CommonModule {}

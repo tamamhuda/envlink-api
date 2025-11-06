@@ -1,0 +1,6 @@
+export enum SubscriptionHistoryType {
+  UPGRADED = 'UPGRADED',
+  RENEWED = 'RENEWED',
+  DEACTIVATED = 'DEACTIVATED',
+  REACTIVATED = 'REACTIVATED',
+}

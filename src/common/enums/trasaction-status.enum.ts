@@ -3,4 +3,5 @@ export enum TransactionStatus {
   PAID = 'PAID',
   FAILED = 'FAILED',
   REFUSED = 'REFUSED',
+  REFUNDED = 'REFUNDED',
 }

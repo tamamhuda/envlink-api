@@ -1,6 +1,6 @@
 import { ZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
 import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AccountModule } from './account/account.module';
 import { SessionModule } from './session/session.module';
 import { AuthModule } from './auth/auth.module';
@@ -18,7 +18,6 @@ import { HealthModule } from 'src/health/health.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { InvalidateCacheInterceptor } from './common/interceptors/invalidate-cache.interceptor';
 import { UrlGeneratorModule } from 'nestjs-url-generator';
-import { getUrlGeneratorConfig } from './config/url-generator.config';
 import { UrlsModule } from './urls/urls.module';
 import { QueueModule } from './queue/queue.module';
 import { CommonModule } from './common/common.module';
@@ -31,6 +30,10 @@ import { JwtAuthGuard } from './auth/guards/jwt.guard';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { getSignedUrlConfig } from './config/signed-url.config';
+import { ClientUrlMiddleware } from './common/middlewares/client-url.middleware';
+import { SnakeCaseResponseInterceptor } from './common/interceptors/snake-case-transform.interceptor';
 
 @Module({
   imports: [
@@ -57,7 +60,7 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
     UrlGeneratorModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: getUrlGeneratorConfig,
+      useFactory: getSignedUrlConfig,
     }),
 
     // Cache Module
@@ -87,6 +90,7 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
     SubscriptionsModule,
     WebhooksModule,
     PaymentMethodsModule,
+    TransactionsModule,
   ],
 
   providers: [
@@ -108,13 +112,17 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: ZodSerializerInterceptor, // after invalidation
-    },
-
-    {
-      provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor, // wraps everything
     },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ZodSerializerInterceptor, // after invalidation
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SnakeCaseResponseInterceptor, // before serialization
+    },
+
     {
       provide: APP_INTERCEPTOR,
       useClass: InvalidateCacheInterceptor, // after controller, before serialization
@@ -123,6 +131,7 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
       provide: APP_INTERCEPTOR,
       useClass: CacheInterceptor, // before controller
     },
+
     {
       provide: APP_INTERCEPTOR,
       useClass: ThrottleInterceptor, // before controller
@@ -132,11 +141,15 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    // 2️⃣ Then throttler guard (depends on req.user)
+    // Then throttler guard (depends on req.user)
     {
       provide: APP_GUARD,
       useClass: ThrottleGuard,
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ClientUrlMiddleware).forRoutes('*');
+  }
+}

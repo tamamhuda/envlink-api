@@ -1,0 +1,4 @@
+export enum PaymentType {
+  PAYMENT_LINK = 'PAYMENT_LINK',
+  PAYMENT_REQUEST = 'PAYMENT_REQUEST',
+}

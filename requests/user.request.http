@@ -30,5 +30,5 @@ Content-Type: application/json
 Authorization: Bearer {{state.tokens.accessToken}}
 
 {
-    "fullName": "John Doe Update"
+    "full_name": "John Doe Update"
 }
