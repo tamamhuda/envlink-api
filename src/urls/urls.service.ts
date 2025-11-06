@@ -8,7 +8,6 @@ import { UrlRepository } from 'src/database/repositories/url.repository';
 import LoggerService from 'src/common/logger/logger.service';
 import { ShortenUrlDto } from './dto/shorten.dto';
 import { UnlockUrlDto, UpdateUrlDto, UrlDto } from './dto/url.dto';
-import { UserInfo } from 'src/auth/dto/user-info.dto';
 import { UserService } from 'src/user/user.service';
 import { Url } from 'src/database/entities/url.entity';
 import { Request } from 'express';
@@ -20,6 +19,7 @@ import { Queue } from 'bullmq';
 import { UrlMetadataJob } from 'src/queue/interfaces/url-metadata.interface';
 import { Channel } from 'src/database/entities/channel.entity';
 import { In } from 'typeorm';
+import { UserInfo } from 'src/auth/dto/user-info.dto';
 
 @Injectable()
 export class UrlsService {

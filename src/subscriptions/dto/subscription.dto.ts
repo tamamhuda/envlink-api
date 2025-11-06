@@ -1,53 +1,41 @@
 import { createZodDto } from 'nestjs-zod';
-import { userInfoSchema } from 'src/auth/dto/user-info.dto';
 import { createResponseDto } from 'src/common/dto/response.dto';
-import { PeriodEnum } from 'src/common/enums/Period.enum';
-import { PlansEnum } from 'src/common/enums/plans.enum';
+import { SubscriptionInterval } from 'src/common/enums/Period.enum';
+import { PlanEnum } from 'src/common/enums/plans.enum';
 import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
 import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
 import { baseSchema } from 'src/common/schemas/base.schema';
 import * as z from 'zod';
+import { planSchema } from './upgrade-plan-option.dto';
+import { zodToCamelCase } from 'src/common/utils/case-transform.util';
 
 export const subscriptionInfoSchema = baseSchema.extend({
-  referenceId: z.string().nullable(),
-  externalId: z.string().nullable(),
-  user: userInfoSchema.pick({
-    id: true,
-    fullName: true,
-    email: true,
-  }),
-  plan: z.object({
-    name: z.nativeEnum(PlansEnum),
-    limit: z.number().min(1),
-    resetInterval: z.string(),
-    cost: z.number().min(1),
-    chargeOnSuccess: z.boolean().default(false),
-    description: z.string().nullable(),
-  }),
-  startedAt: z.date().nullable(),
-  expiresAt: z.date().nullable(),
+  reference_id: z.string().nullable(),
+  external_id: z.string().nullable(),
+  user_id: z.string().uuid(),
+  plan: planSchema,
+  started_at: z.date().nullable(),
+  expires_at: z.date().nullable(),
   remaining: z.number().min(0),
-  period: z.nativeEnum(PeriodEnum),
-  interval: z.number().min(1),
   status: z.nativeEnum(SubscriptionStatus),
-  isTrial: z.boolean().default(false),
+  is_trial: z.boolean().default(false),
   schedule: z
     .object({
-      reference_id: z.string(),
-      interval: z.nativeEnum(PeriodEnum),
+      interval: z.nativeEnum(SubscriptionInterval),
       interval_count: z.number().min(1),
-      anchor_date: z.string().optional(),
+      total_recurrence: z.number().min(1),
     })
     .nullable(),
   metadata: z
     .object({
       strategy: z.nativeEnum(UpgradeStrategy),
-      previousPlan: z.nativeEnum(PlansEnum),
-      newPlan: z.nativeEnum(PlansEnum),
+      previous_plan: z.nativeEnum(PlanEnum),
+      new_plan: z.nativeEnum(PlanEnum),
     })
+    .catchall(z.any())
     .nullable(),
-  transactionStatus: z.string().nullable(),
-  paymentId: z.string().nullable(),
+  transaction_status: z.string().nullable(),
+  next_billing_date: z.date().nullable(),
   actions: z
     .array(
       z.object({
@@ -60,7 +48,15 @@ export const subscriptionInfoSchema = baseSchema.extend({
     .optional(),
 });
 
-export class SubscriptionInfoDto extends createZodDto(subscriptionInfoSchema) {}
+const subscriptionInfoDtoSchema = zodToCamelCase(subscriptionInfoSchema);
+
+export class SubscriptionInfoDto extends createZodDto(
+  subscriptionInfoDtoSchema,
+) {}
+
+export class SubscriptionInfoSerializerDto extends createZodDto(
+  subscriptionInfoSchema,
+) {}
 
 export class SubscriptionInfoResponse extends createResponseDto(
   subscriptionInfoSchema,

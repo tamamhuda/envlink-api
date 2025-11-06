@@ -12,11 +12,18 @@ import { UrlsService } from '../urls.service';
 import LoggerService from 'src/common/logger/logger.service';
 import { ShortenUrlDto } from '../dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { PublicUrlDto, PublicUrlResponse, UnlockUrlDto } from '../dto/url.dto';
+import {
+  PublicUrlDto,
+  PublicUrlResponse,
+  PublicUrlSerializerDto,
+  UnlockUrlDto,
+} from '../dto/url.dto';
 import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiOkResponse,
+  ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 import { UrlAnalyticInterceptor } from 'src/common/interceptors/url-analytic.interceptor';
 import { ForbiddenResponse } from 'src/common/dto/error-response.dto';
@@ -27,6 +34,7 @@ import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decor
 
 @Public()
 @Controller('public/urls')
+@ApiTags('Public URLs')
 export class PublicUrlsController {
   constructor(
     private readonly urlsService: UrlsService,
@@ -35,11 +43,12 @@ export class PublicUrlsController {
 
   @Post('shorten')
   @ThrottleScope(PolicyScope.SHORTEN_PUBLIC)
+  @ApiOperation({ summary: 'Shorten a URL for public access' })
   @ApiCreatedResponse({
     type: PublicUrlResponse,
-    description: 'Created a new public short URL',
+    description: 'Created a new public short URL successfully',
   })
-  @ZodSerializerDto(PublicUrlDto)
+  @ZodSerializerDto(PublicUrlSerializerDto)
   async shortenUrl(@Body() body: ShortenUrlDto): Promise<PublicUrlDto> {
     return await this.urlsService.createUrl(body);
   }
@@ -47,6 +56,7 @@ export class PublicUrlsController {
   @SkipThrottle()
   @Get(':code')
   @UseInterceptors(UrlAnalyticInterceptor)
+  @ApiOperation({ summary: 'Get a short URL for public access' })
   @ApiOkResponse({
     type: PublicUrlResponse,
     description: 'Get a short URL for a public access',
@@ -56,19 +66,20 @@ export class PublicUrlsController {
     description: 'Forbidden access to the URL',
   })
   @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto(PublicUrlDto)
+  @ZodSerializerDto(PublicUrlSerializerDto)
   async getUrl(@Param('code') code: string): Promise<PublicUrlDto> {
     return await this.urlsService.getUrlByCode(code);
   }
 
   @SkipThrottle()
   @Post('unlock/:code')
+  @ApiOperation({ summary: 'Unlock a short URL for public access' })
   @ApiOkResponse({
     type: PublicUrlResponse,
     description: 'Unlock a short URL for a public access',
   })
   @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto(PublicUrlDto)
+  @ZodSerializerDto(PublicUrlSerializerDto)
   async unlockUrl(
     @Param('code') code: string,
     @Body() body: UnlockUrlDto,
