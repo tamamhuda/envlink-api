@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { AccountController } from './account.controller';
 import { SessionModule } from 'src/session/session.module';
-import { UserModule } from 'src/user/user.module';
+import { AccountVerifyService } from './account-verify.service';
 
 @Module({
-  imports: [SessionModule, UserModule],
+  imports: [SessionModule],
   controllers: [AccountController],
-  providers: [AccountService],
-  exports: [AccountService],
+  providers: [AccountService, AccountVerifyService],
+  exports: [AccountService, AccountVerifyService],
 })
 export class AccountModule {}
