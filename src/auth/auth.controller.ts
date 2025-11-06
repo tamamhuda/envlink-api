@@ -1,28 +1,30 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   HttpCode,
   HttpStatus,
   Post,
   Query,
   Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
+import { RegisterBodyDto } from './dto/register.dto';
 import {
   ApiOkResponse,
   ApiBearerAuth,
-  ApiPermanentRedirectResponse,
+  ApiHeaders,
+  ApiTags,
+  ApiOperation,
+  ApiBody,
 } from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import {
   AuthenticatedDto,
   AuthenticatedResponse,
-} from './dto/authResponse.dto';
+  AuthenticatedSerializerDto,
+} from './dto/authenticated.dto';
 import { LocalAuthGuard } from './guards/local.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { TokensDto, TokensResponse } from './dto/token.dto';
@@ -36,9 +38,12 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
 import { JWT_REFRESH_SECURITY } from 'src/config/jwt.config';
+import { ClientUrl } from 'src/common/decorators/client-url.decorator';
+import { LoginBodyDto } from './dto/login.dto';
 
-@Public()
 @Controller('auth')
+@Public()
+@ApiTags('Authentication')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -47,32 +52,46 @@ export class AuthController {
 
   @Post('register')
   @ThrottleScope(PolicyScope.REGISTER)
+  @ApiOperation({ summary: 'Register a new account' })
   @ApiOkResponse({
     type: AuthenticatedResponse,
     description: 'Registration successful',
   })
+  @ApiHeaders([
+    {
+      name: 'X-Client-Url',
+      description: 'Client URL used for email verification',
+      required: false,
+    },
+  ])
   @HttpCode(HttpStatus.CREATED)
-  @ZodSerializerDto(AuthenticatedDto)
+  @ZodSerializerDto(AuthenticatedSerializerDto)
   async register(
-    @Body() registerDto: RegisterDto,
+    @Body() registerDto: RegisterBodyDto,
     @Req() req: Request,
+    @ClientUrl() clientUrl: string,
   ): Promise<AuthenticatedDto> {
-    return await this.authService.register(registerDto, req);
+    return await this.authService.register(registerDto, req, clientUrl);
   }
 
   @Post('login')
-  @ThrottleScope(PolicyScope.LOGIN)
+  @SkipThrottle()
   @UseGuards(LocalAuthGuard)
+  @ApiOperation({ summary: 'Login an account' })
   @ApiOkResponse({
     type: AuthenticatedResponse,
     description: 'Login successful',
+  })
+  @ApiBody({
+    type: LoginBodyDto,
+    required: true,
   })
   @HttpCode(HttpStatus.OK)
   @InvalidateCache<AuthenticatedDto>(
     CachePrefix.USER,
     ({ res }) => `${res?.user.id}`,
   )
-  @ZodSerializerDto(AuthenticatedDto)
+  @ZodSerializerDto(AuthenticatedSerializerDto)
   async login(@Req() req: Request): Promise<AuthenticatedDto> {
     return await this.authService.signInLocalAccount(req);
   }
@@ -81,6 +100,7 @@ export class AuthController {
   @Post('refresh')
   @ApiBearerAuth(JWT_REFRESH_SECURITY)
   @UseGuards(JwtRefreshGuard)
+  @ApiOperation({ summary: 'Refresh token' })
   @ApiOkResponse({
     type: TokensResponse,
     description: 'Refresh token successful',
@@ -91,25 +111,14 @@ export class AuthController {
     return await this.authService.refresh(req.user, req);
   }
 
-  @Public()
   @SkipThrottle()
   @Get('verify')
+  @ApiOperation({ summary: 'Verify email' })
   @ApiOkResponse({
     type: UserInfoDto,
+    description: 'Verify email successful',
   })
-  @ApiPermanentRedirectResponse({
-    description: 'Verify email successful with redirect url',
-  })
-  @HttpCode(HttpStatus.OK || HttpStatus.PERMANENT_REDIRECT)
-  async verify(
-    @Res() res: Response,
-    @Query('token') token: string,
-    @Query('redirectUrl', new DefaultValuePipe(undefined))
-    redirectUrl: string,
-  ): Promise<UserInfoDto | string> {
-    const userInfo = await this.authService.verify(token);
-    if (redirectUrl)
-      res.status(HttpStatus.PERMANENT_REDIRECT).redirect(redirectUrl);
-    return userInfo;
+  async verify(@Query('token') token: string): Promise<UserInfoDto> {
+    return await this.authService.verify(token);
   }
 }

@@ -6,17 +6,13 @@ import { JwtUtil } from 'src/common/utils/jwt.util';
 import LoggerService from 'src/common/logger/logger.service';
 import { SessionService } from 'src/session/session.service';
 import { UserService } from 'src/user/user.service';
-import { AuthenticatedDto } from './dto/authResponse.dto';
-import { RegisterDto } from './dto/register.dto';
+import { AuthenticatedDto } from './dto/authenticated.dto';
+import { RegisterBodyDto } from './dto/register.dto';
 import { TokensDto } from './dto/token.dto';
 import { UserInfoDto } from './dto/user-info.dto';
-import { UrlGeneratorService } from 'nestjs-url-generator';
-import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
 import { IpUtil } from 'src/common/utils/ip.util';
-import { InjectQueue } from '@nestjs/bullmq';
-import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
-import { Queue } from 'bullmq';
-import { SendMailVerifyJob } from 'src/queue/interfaces/mail-verify.interface';
+import { AccountVerifyService } from 'src/account/account-verify.service';
+import { UserMapper } from 'src/user/mapper/user.mapper';
 
 @Injectable()
 export class AuthService {
@@ -27,18 +23,18 @@ export class AuthService {
     private readonly accountService: AccountService,
     private readonly sessionService: SessionService,
     private readonly jwtUtil: JwtUtil,
+    private readonly userMapper: UserMapper,
     private readonly ipUtil: IpUtil,
     private readonly logger: LoggerService,
-    private readonly urlGeratorService: UrlGeneratorService,
-    @InjectQueue(SEND_MAIL_VERIFY_QUEUE)
-    private readonly mailVerifyQueue: Queue<SendMailVerifyJob>,
+    private readonly accountVerifyService: AccountVerifyService,
   ) {}
 
   async register(
-    registerDto: RegisterDto,
+    registerBody: RegisterBodyDto,
     req: Request,
+    clientUrl?: string,
   ): Promise<AuthenticatedDto> {
-    const { password, redirectUrl, ...userDto } = registerDto;
+    const { password, ...userDto } = registerBody;
 
     const passwordHash = await this.bcryptUtil.hashPassword(password);
 
@@ -47,28 +43,12 @@ export class AuthService {
         userDto,
         passwordHash,
       );
-    const userInfo = await this.userService.mapToUserInfoDto(account, user);
+
+    const userInfo = await this.userMapper.mapToUserInfoDto(account, user);
 
     const { id, role, email, fullName } = user;
 
-    const emailVerificationToken = await this.jwtUtil.assignVerifyEmailToken(
-      id,
-      role,
-      session.id,
-    );
-    const verifyLink = this.urlGeratorService.generateUrlFromPath({
-      relativePath: 'auth/verify',
-      query: {
-        token: emailVerificationToken,
-        redirectUrl,
-      },
-    });
-
-    await this.mailVerifyQueue.add(`EmailVerification`, {
-      email,
-      firstName: fullName,
-      verifyLink,
-    });
+    await this.accountVerifyService.send(id, email, fullName, clientUrl);
 
     const { accessToken, refreshToken } = await this.jwtUtil.signTokens(
       id,
@@ -98,7 +78,7 @@ export class AuthService {
       password,
     );
 
-    return await this.userService.mapToUserInfoDto(account, account.user);
+    return await this.userMapper.mapToUserInfoDto(account, account.user);
   }
 
   async signInLocalAccount(req: Request): Promise<AuthenticatedDto> {
@@ -106,13 +86,11 @@ export class AuthService {
       req.user.id,
     );
 
-    const { session, tokens } =
-      await this.sessionService.createSessionWithTokens(account, req);
-    const userInfo = await this.userService.mapToUserInfoDto(
-      session.account,
-      session.user,
-    );
-
+    const {
+      session: { user },
+      tokens,
+    } = await this.sessionService.createSessionWithTokens(account, req);
+    const userInfo = await this.userMapper.mapToUserInfoDto(account, user);
     return { tokens, user: userInfo };
   }
 
@@ -127,7 +105,7 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.jwtUtil.signTokens(
       user.id,
       user.role,
-      sessionId,
+      session.id,
     );
     const refreshTokenHash = await this.bcryptUtil.hashToken(refreshToken);
 
@@ -142,21 +120,8 @@ export class AuthService {
     await this.sessionService.revokeCurrentSession(req);
   }
 
-  async verify(token: string): Promise<UserInfoDto | string> {
-    try {
-      const { sub } = await this.jwtUtil.verifyEmailToken(token);
-      const account = await this.accountService.findOneByProviderAccountId(sub);
-      const { user } = await this.accountService.update(account, {
-        isVerified: true,
-        verifiedAt: new Date(),
-      });
-      return await this.userService.mapToUserInfoDto(account, user);
-    } catch (error) {
-      if (error instanceof TokenExpiredError)
-        return 'Email link verification is expired';
-      if (error instanceof JsonWebTokenError)
-        return 'Email link verification is invalid';
-      throw error;
-    }
+  async verify(token: string): Promise<UserInfoDto> {
+    const account = await this.accountVerifyService.verify(token);
+    return this.userMapper.mapToUserInfoDto(account, account.user);
   }
 }

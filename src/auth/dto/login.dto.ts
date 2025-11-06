@@ -6,4 +6,4 @@ const loginSchema = z.object({
   password: z.string().min(8).max(100).nonempty(),
 });
 
-export class LoginDto extends createZodDto(loginSchema) {}
+export class LoginBodyDto extends createZodDto(loginSchema) {}
