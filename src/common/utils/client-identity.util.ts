@@ -8,9 +8,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ClientIdentityUtil {
-  /**
-   * Parse User-Agent string into browser, OS, and device type.
-   */
+  // Parse User-Agent string into browser, OS, and device type.
   parseUserAgent(userAgent: string): ClientInfo {
     const { browser, os, device } = new UAParser(userAgent).getResult();
 
@@ -25,13 +23,7 @@ export class ClientIdentityUtil {
     };
   }
 
-  /**
-   * Generate a stable identity hash and a dynamic visit hash.
-   *
-   * @param urlCode - URL code or identifier
-   * @param ip - Client IP address
-   * @param clientInfo - Parsed client info from parseUserAgent
-   */
+  // Generate a stable identity hash and a dynamic visit hash.
   generateHashes(
     unique: string,
     ip: string,

@@ -12,10 +12,7 @@ export class XenditUtil {
   private x: Xendit;
   private xHttpClient: AxiosInstance;
 
-  constructor(
-    private readonly config: ConfigService<Env>,
-    private readonly http: HttpService,
-  ) {
+  constructor(private readonly config: ConfigService<Env>) {
     this.x = new Xendit({
       secretKey: this.config.getOrThrow('XENDIT_API_KEY'),
     });

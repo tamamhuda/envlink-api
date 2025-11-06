@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 import { Env } from 'src/config/env.config';
 import { getJwtOptions } from 'src/config/jwt.config';
 import { RolesEnum } from 'src/common/enums/roles.enum';
@@ -11,18 +11,11 @@ import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class JwtUtil {
-  private readonly verifyEmailOptions: JwtSignOptions;
-  private readonly verifyExpiresIn = '5m';
   constructor(
     private readonly config: ConfigService<Env>,
     private readonly jwt: JwtService,
     private readonly logger: LoggerService,
-  ) {
-    this.verifyEmailOptions = {
-      secret: this.config.getOrThrow('APP_SECRET'),
-      expiresIn: this.verifyExpiresIn,
-    };
-  }
+  ) {}
 
   private jwtOptions(type: 'access' | 'refresh') {
     return getJwtOptions(this.config, type);
@@ -42,23 +35,8 @@ export class JwtUtil {
     );
   }
 
-  async assignVerifyEmailToken(
-    sub: string,
-    role: RolesEnum,
-    sessionId: string,
-  ) {
-    return this.jwt.signAsync(
-      { jti: randomUUID().toString(), sub, role, sessionId },
-      this.verifyEmailOptions,
-    );
-  }
-
   async verifyRefreshToken(token: string): Promise<JwtPayload> {
     return this.jwt.verifyAsync(token, this.jwtOptions('refresh'));
-  }
-
-  async verifyEmailToken(token: string): Promise<JwtPayload> {
-    return this.jwt.verifyAsync(token, this.verifyEmailOptions);
   }
 
   async extractRefreshExpiresAt(token: string): Promise<Date> {
@@ -87,6 +65,11 @@ export class JwtUtil {
       return await this.verifyAccessToken(token);
     }
     return await this.verifyRefreshToken(token);
+  }
+
+  async extractSessionIdFromHeader(req: Request): Promise<string> {
+    const payload = await this.extractJwtPayloadFromHeader(req, 'access');
+    return payload.sessionId;
   }
 
   async signTokens(

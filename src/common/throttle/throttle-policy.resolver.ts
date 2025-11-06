@@ -7,13 +7,13 @@ import {
 } from '../interfaces/throttle.interface';
 import { PlanRepository } from 'src/database/repositories/plan.reposiotry';
 import { SubscriptionRepository } from 'src/database/repositories/subscription.repository';
-import { PlansEnum } from '../enums/plans.enum';
-import { UserInfo } from 'src/auth/dto/user-info.dto';
+import { PlanEnum } from '../enums/plans.enum';
 import {
   PolicyScope,
   THROTTLE_POLICIES,
   THROTTLE_SCOPE_KEY,
 } from './throttle.constans';
+import { UserInfo } from 'src/auth/dto/user-info.dto';
 
 @Injectable()
 export class ThrottlePolicyResolver {
@@ -31,7 +31,7 @@ export class ThrottlePolicyResolver {
     user?: UserInfo,
   ): Promise<ThrottlePolicy> {
     const freePlan = await this.plans.findOneOrFail({
-      where: { name: PlansEnum.FREE },
+      where: { name: PlanEnum.FREE },
     });
 
     const subscriptionPlan =

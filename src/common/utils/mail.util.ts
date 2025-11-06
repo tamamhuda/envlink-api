@@ -4,25 +4,20 @@ import { Env } from 'src/config/env.config';
 import LoggerService from 'src/common/logger/logger.service';
 import { SendMailClient } from 'zeptomail';
 import { CcBccItem, EmailAddress } from 'zeptomail/types';
+import getMailConfig, { TemplateOption } from 'src/config/mail.config';
 
 @Injectable()
 export class MailUtil {
-  private readonly SENDER_ADDRESS: string;
   private readonly client = SendMailClient;
-  private readonly template: Record<'VERIFY_EMAIL' | 'SUBSCRIPTION', string>;
+  private readonly template: TemplateOption;
 
   constructor(
-    private readonly config: ConfigService<Env>,
+    config: ConfigService<Env>,
     private readonly logger: LoggerService,
   ) {
-    this.SENDER_ADDRESS = config.getOrThrow('SENDER_ADDRESS');
-    const url = config.getOrThrow('ZEPTO_API_URL');
-    const token = config.getOrThrow('ZEPTOMAIL_TOKEN');
+    const { template, token, url } = getMailConfig(config);
     this.client = new SendMailClient({ url, token });
-    this.template = {
-      VERIFY_EMAIL: config.getOrThrow('TEMPLATE_KEY_VERIFY_EMAIL'),
-      SUBSCRIPTION: '',
-    };
+    this.template = template;
   }
 
   async sendTemplateEmail(
@@ -32,10 +27,15 @@ export class MailUtil {
     subject: string,
   ) {
     try {
-      const mail_template_key = this.template[template];
+      const {
+        KEY: mail_template_key,
+        NAME: name,
+        SENDER: address,
+      } = this.template[template];
+
       const from: EmailAddress = {
-        name: 'no-reply Envlink',
-        address: this.SENDER_ADDRESS,
+        name,
+        address,
       };
 
       await this.client

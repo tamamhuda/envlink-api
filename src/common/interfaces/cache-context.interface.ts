@@ -8,6 +8,6 @@ export interface CacheKeyContext<TResponse = any> {
   query: ParsedQs;
   body?: Record<string, any>;
   user?: UserInfoDto;
-  session?: SessionInfoDto | null;
+  sessionId?: string | null;
   res?: TResponse; // make this required
 }

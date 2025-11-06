@@ -21,9 +21,9 @@ export default class LoggerService extends Logger implements NestLoggerService {
     exception: HttpException,
   ): void {
     const ip = this.ipUtil.getClientIp(request);
-
     const format = `${ip} - [${request.method} - ${exception.getStatus()}] ${request.originalUrl} - [${handlerName}] - ${exception.message}`;
     this.error(format);
+    this.error(JSON.stringify(exception, null, 2));
   }
 
   errorException(

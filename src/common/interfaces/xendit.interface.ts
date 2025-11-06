@@ -1,7 +1,9 @@
+import { PaymentMethodStatus } from '../enums/payment-method-status.enum';
 import { PaymentMethodType } from '../enums/payment-method-type.enum';
-import { PeriodEnum } from '../enums/Period.enum';
-import { PlansEnum } from '../enums/plans.enum';
+import { SubscriptionInterval } from '../enums/Period.enum';
+import { PlanEnum } from '../enums/plans.enum';
 import { RecurringCycleStatus } from '../enums/recurring-cycle-status.enum';
+import { RecurringCycleType } from '../enums/recurring-cycle-type.enum';
 import { UpgradeStrategy } from '../enums/upgrade-strategy.enum';
 
 /** Base create payload (request body) */
@@ -17,11 +19,10 @@ export interface CreateRecurringPlan {
   notification_config?: NotificationConfig;
   payment_link_for_failed_attempt?: boolean;
   failed_cycle_action?: 'RESUME' | 'STOP';
-  metadata?: {
+  metadata: {
     strategy: UpgradeStrategy;
-    previousPlan: PlansEnum;
-    newPlan: PlansEnum;
-    [key: string]: any;
+    previousPlan: PlanEnum;
+    newPlan: PlanEnum;
   };
   description?: string;
   items?: RecurringItem[];
@@ -32,7 +33,7 @@ export interface CreateRecurringPlan {
 /** Recurring schedule configuration */
 export interface RecurringSchedule {
   reference_id: string;
-  interval: PeriodEnum;
+  interval: SubscriptionInterval;
   interval_count: number;
   total_recurrence?: number | null;
   anchor_date?: string;
@@ -123,7 +124,7 @@ export interface RecurringPlanData {
  */
 export interface RecurringSchedule {
   reference_id: string;
-  interval: PeriodEnum;
+  interval: SubscriptionInterval;
   interval_count: number;
   total_recurrence?: number | null;
   anchor_date?: string;
@@ -187,7 +188,10 @@ export type RecurringCycleEvent =
   | 'recurring.cycle.succeeded'
   | 'recurring.cycle.failed';
 
-export type RecurringCycleType = 'IMMEDIATE' | 'SCHEDULED';
+export type RecurringPaymentLink = {
+  invoice_id: string;
+  payment_link_url: string;
+};
 
 export interface RecurringCycleAttempt {
   /** Type of attempt (e.g., INITIAL, RETRY) */
@@ -206,7 +210,7 @@ export interface RecurringCycleAttempt {
   failure_code: string | null;
 
   /** Optional payment link if generated */
-  payment_link: string | null;
+  payment_link: RecurringPaymentLink | null;
 
   /** Attempt sequence number */
   attempt_number: number;
@@ -301,12 +305,15 @@ export interface PaymentMethodCallback {
 export interface PaymentMethodData {
   id: string;
   type: PaymentMethodType;
-  status: 'ACTIVE' | 'FAILED' | 'EXPIRED';
+  status: PaymentMethodStatus;
   actions: any[];
   country: string;
   created: string;
   updated: string;
-  metadata: Record<string, any> | null;
+  metadata: {
+    default?: boolean;
+    [key: string]: any;
+  } | null;
   customer_id: string;
   description: string | null;
   reusability: 'MULTIPLE_USE' | 'SINGLE_USE';
