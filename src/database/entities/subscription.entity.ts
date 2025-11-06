@@ -4,12 +4,14 @@ import { BaseEntity } from './base.entity';
 import Plan from './plan.entity';
 import { User } from './user.entity';
 import { PlanUsage } from './plan-usage.entity';
-import { PeriodEnum } from 'src/common/enums/Period.enum';
+import { SubscriptionInterval } from 'src/common/enums/Period.enum';
 import ms, { StringValue } from 'ms';
 import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
 import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
-import { PlansEnum } from 'src/common/enums/plans.enum';
+import { PlanEnum } from 'src/common/enums/plans.enum';
 import { SubscriptionCycle } from './subscription-cycle.entity';
+import { Transaction } from './transaction.entity';
+import { SubscriptionEndReason } from 'src/common/enums/subscription-end-reason.enum';
 
 @Entity({ name: 'subscriptions' })
 @Index(['referenceId', 'externalId'])
@@ -32,11 +34,18 @@ export default class Subscription extends BaseEntity {
   @Column({ type: 'int', default: 0 })
   remaining!: number;
 
-  @Column({ type: 'enum', enum: PeriodEnum, default: PeriodEnum.MONTH })
-  period!: PeriodEnum;
+  @Column({
+    type: 'enum',
+    enum: SubscriptionInterval,
+    default: SubscriptionInterval.DAY,
+  })
+  interval!: SubscriptionInterval;
 
   @Column({ type: 'int', default: 1 })
-  interval!: number;
+  intervalCount!: number;
+
+  @Column({ type: 'int', default: 12 })
+  totalRecurrence!: number;
 
   @Column({
     type: 'enum',
@@ -51,27 +60,44 @@ export default class Subscription extends BaseEntity {
   @Column({ type: 'float', default: 0 })
   amountPaid!: number;
 
+  @Column({ type: 'float', default: 0 })
+  amount!: number;
+
   @Column({
     type: 'jsonb',
     nullable: true,
   })
   metadata!: {
     strategy: UpgradeStrategy;
-    previousPlan: PlansEnum;
-    newPlan: PlansEnum;
+    previousPlan: PlanEnum;
+    newPlan: PlanEnum;
+    previousExternalId: string | null;
+    [key: string]: any;
   } | null;
-
-  @Column({ type: 'varchar', nullable: true })
-  paymentId!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   transactionStatus!: string | null;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'int', default: 1 })
+  currentCycle!: number;
+
+  @Column({ type: 'timestamptz', nullable: true })
   nextBillingDate!: Date | null;
 
   @Column({ type: 'varchar', nullable: true })
   failureCode!: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  cancellationDate!: Date | null;
+
+  @Column({ type: 'boolean', default: false })
+  cancelAtPeriodEnd!: boolean;
+
+  @Column({ type: 'enum', enum: SubscriptionEndReason, nullable: true })
+  endReason!: SubscriptionEndReason | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  endedAt!: Date | null;
 
   @ManyToOne(() => User, (user) => user.subscriptions, {
     onDelete: 'CASCADE',
@@ -93,6 +119,11 @@ export default class Subscription extends BaseEntity {
   )
   subscriptionCycles!: SubscriptionCycle[];
 
+  @OneToMany(() => Transaction, (transaction) => transaction.subscription, {
+    onDelete: 'CASCADE',
+  })
+  transactions!: Transaction[];
+
   @OneToMany(() => PlanUsage, (planUsage) => planUsage.subscription, {
     cascade: true,
   })
@@ -107,12 +138,15 @@ export default class Subscription extends BaseEntity {
     this.status = SubscriptionStatus.ACTIVE;
 
     // Set expiry based on subscription period
-    switch (this.period) {
-      case PeriodEnum.MONTH:
-        this.expiresAt = addMonths(this.startedAt, this.interval);
+    switch (this.interval) {
+      case SubscriptionInterval.DAY:
+        this.expiresAt = addDays(this.startedAt, this.intervalCount);
         break;
-      case PeriodEnum.YEAR:
-        this.expiresAt = addYears(this.startedAt, this.interval);
+      case SubscriptionInterval.MONTH:
+        this.expiresAt = addMonths(this.startedAt, this.intervalCount);
+        break;
+      case SubscriptionInterval.YEAR:
+        this.expiresAt = addYears(this.startedAt, this.intervalCount);
         break;
       default:
         this.expiresAt = addDays(this.startedAt, 30);
@@ -124,12 +158,12 @@ export default class Subscription extends BaseEntity {
     const totalDays = differenceInDays(this.expiresAt, this.startedAt);
     const resets = Math.max(1, Math.floor(totalDays / resetIntervalDays));
 
-    // Total remaining = resets * plan.limit
+    // Total remaining per interval = resets * plan.limit
     this.remaining = resets * this.plan.limit;
   }
 
   private parseIntervalToDays(interval: string): number {
-    const msValue = ms(interval as StringValue); // e.g. 604800000 ms (7 days)
+    const msValue = ms(interval as StringValue);
     return msValue / (1000 * 60 * 60 * 24);
   }
 

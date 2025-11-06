@@ -8,7 +8,6 @@ import { BaseEntity } from './base.entity';
 export default class Session extends BaseEntity {
   @Column({
     type: 'varchar',
-    unique: true,
     nullable: true,
   })
   refreshTokenHash?: string;

@@ -1,15 +1,25 @@
-import { Column, Entity, ManyToOne, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  Index,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 import { TransactionStatus } from 'src/common/enums/trasaction-status.enum';
-import { PaymentMethodType } from 'src/common/enums/payment-method-type.enum';
 import { SubscriptionCycle } from './subscription-cycle.entity';
 import { PaymentMethod } from './payment-method.entity';
+import { PaymentType } from 'src/common/enums/payment-type.enum';
+import Subscription from './subscription.entity';
 
 @Entity({ name: 'transactions' })
+@Index(['referenceId'], { unique: true })
 export class Transaction extends BaseEntity {
   @ManyToOne(() => User, (user) => user.transactions, {
     onDelete: 'CASCADE',
+    eager: true,
   })
   user!: User;
 
@@ -30,7 +40,13 @@ export class Transaction extends BaseEntity {
       eager: true,
     },
   )
+  @JoinColumn()
   subscriptionCycle!: SubscriptionCycle;
+
+  @ManyToOne(() => Subscription, (subscription) => subscription.transactions, {
+    onDelete: 'CASCADE',
+  })
+  subscription!: Subscription;
 
   @Column({ type: 'varchar' })
   referenceId!: string;
@@ -52,10 +68,16 @@ export class Transaction extends BaseEntity {
   status!: TransactionStatus;
 
   @Column({
-    type: 'enum',
-    enum: PaymentMethodType,
+    type: 'varchar',
   })
-  paymentMethodType!: PaymentMethodType;
+  paymentMethodType!: string;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentType,
+    default: PaymentType.PAYMENT_REQUEST,
+  })
+  paymentType!: PaymentType;
 
   @Column({ type: 'jsonb', nullable: true })
   metadata!: Record<string, any> | null;
@@ -71,6 +93,9 @@ export class Transaction extends BaseEntity {
 
   @Column({ type: 'timestamptz', nullable: true })
   refundedAt!: Date | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  invoiceId!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   invoiceUrl!: string | null;

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PlansEnum } from 'src/common/enums/plans.enum';
-import Plan from 'src/database/entities/plan.entity';
-import { PlanRepository } from 'src/database/repositories/plan.reposiotry';
+import { PlanEnum } from 'src/common/enums/plans.enum';
+import Plan from '../entities/plan.entity';
+import { PlanRepository } from '../repositories/plan.reposiotry';
 
 @Injectable()
 export class PlanSeeder {
@@ -10,48 +10,41 @@ export class PlanSeeder {
   constructor(private readonly planRepo: PlanRepository) {}
 
   async seed() {
-    const existingPlans = await this.planRepo.find();
-    const existingNames = new Set(existingPlans.map((p) => p.name));
-
     const plans: Partial<Plan>[] = [
       {
-        name: PlansEnum.FREE,
+        name: PlanEnum.FREE,
         limit: 100,
         resetInterval: '1d',
         cost: 1,
         description: 'Free plan with 100 daily requests.',
         chargeOnSuccess: false,
+        price: 0,
       },
       {
-        name: PlansEnum.PRO,
+        name: PlanEnum.PRO,
         limit: 1000,
         resetInterval: '1d',
         cost: 9.99,
         description: 'Pro plan with 1000 daily requests.',
         chargeOnSuccess: true,
+        price: 19000,
       },
       {
-        name: PlansEnum.ENTERPRISE,
+        name: PlanEnum.ENTERPRISE,
         limit: 10000,
         resetInterval: '1h',
         cost: 49.99,
         description: 'Business plan with hourly resets and higher limits.',
         chargeOnSuccess: true,
+        price: 39000,
       },
     ];
 
-    const newPlans = plans.filter(
-      (plan: Plan) => !existingNames.has(plan.name),
-    );
+    //  TypeORM upsert handles both create and update
+    await this.planRepo.upsert(plans, ['name']);
 
-    if (newPlans.length === 0) {
-      this.logger.log('All plans already exist, skipping seeding.');
-      return;
-    }
-
-    await this.planRepo.save(newPlans);
     this.logger.log(
-      `Seeded ${newPlans.length} new plan(s): ${newPlans.map((p) => p.name).join(', ')}`,
+      `Seeded or updated ${plans.length} plan(s): ${plans.map((p) => p.name).join(', ')}`,
     );
   }
 }

@@ -1,13 +1,14 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from './base.entity';
-import { PlansEnum } from 'src/common/enums/plans.enum';
+import { PlanEnum } from 'src/common/enums/plans.enum';
 import { PlanUsage } from './plan-usage.entity';
 import Subscription from './subscription.entity';
 
 @Entity({ name: 'plans' })
+@Unique(['name'])
 export default class Plan extends BaseEntity {
-  @Column({ type: 'enum', enum: PlansEnum, default: PlansEnum.FREE })
-  name!: PlansEnum;
+  @Column({ type: 'enum', enum: PlanEnum, default: PlanEnum.FREE })
+  name!: PlanEnum;
 
   @Column({ type: 'int', default: 100 })
   limit!: number;
@@ -35,4 +36,7 @@ export default class Plan extends BaseEntity {
     nullable: true,
   })
   subscriptions!: Subscription[];
+
+  @Column({ type: 'float', default: 0 })
+  price!: number;
 }

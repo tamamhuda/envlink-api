@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import Subscription from '../entities/subscription.entity';
 import { DataSource, Repository } from 'typeorm';
+import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
 
 @Injectable()
 export class SubscriptionRepository extends Repository<Subscription> {
@@ -42,6 +43,26 @@ export class SubscriptionRepository extends Repository<Subscription> {
     return this.findOne({
       where: { user: { id: userId } },
       relations: ['user', 'plan'],
+    });
+  }
+
+  async findOneByUserIdAndStatus(
+    userId: string,
+    status: SubscriptionStatus,
+  ): Promise<Subscription | null> {
+    return this.findOne({
+      where: { user: { id: userId }, status },
+      relations: ['user', 'plan'],
+    });
+  }
+
+  async findOneByIdAndUserId(
+    userId: string,
+    id: string,
+  ): Promise<Subscription | null> {
+    return this.findOne({
+      where: { id: id, user: { id: userId } },
+      relations: ['user', 'user.activeSubscription', 'plan'],
     });
   }
 

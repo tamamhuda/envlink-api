@@ -12,6 +12,10 @@ export class UserRepository extends Repository<User> {
     return this.findOne({ where: { id } });
   }
 
+  async findOneByExternalId(externalId: string): Promise<User | null> {
+    return this.findOne({ where: { externalId } });
+  }
+
   async findByEmailOrUsername(
     email: string,
     username: string,

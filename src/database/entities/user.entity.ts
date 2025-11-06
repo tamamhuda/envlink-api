@@ -9,6 +9,7 @@ import Subscription from './subscription.entity';
 import { PlanUsage } from './plan-usage.entity';
 import { Transaction } from './transaction.entity';
 import { PaymentMethod } from './payment-method.entity';
+import { SubscriptionHistory } from './subscription-history.entity';
 
 @Entity({ name: 'users' })
 @Index(['username', 'email', 'externalId'], { unique: true })
@@ -90,4 +91,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => PaymentMethod, (paymentMethod) => paymentMethod.user)
   paymentMethods!: PaymentMethod[];
+
+  @OneToMany(() => SubscriptionHistory, (history) => history.user)
+  subscriptionHistories!: SubscriptionHistory[];
 }

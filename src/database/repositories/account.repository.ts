@@ -42,6 +42,16 @@ export class AccountRepository extends Repository<Account> {
     });
   }
 
+  async findOneByProviderAndProviderEmail(
+    provider: ProviderEnum,
+    providerEmail: string,
+  ): Promise<Account | null> {
+    return await this.findOne({
+      where: { provider, providerEmail },
+      relations: ['user'],
+    });
+  }
+
   async findOneByproviderUsernameAndPasswordHash(
     providerUsername: string,
     passwordHash: string,

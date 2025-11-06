@@ -14,7 +14,7 @@ export const getSwaggerDocumentConfig = (
   return new DocumentBuilder()
 
     .setTitle(APP_NAME)
-    .addServer('http://localhost:3000')
+    .addServer('http://localhost:3000', 'Local Development')
     .addServer(
       'https://local-nest.utadev.app',
       'Local Development (Cloudflare Tunnel)',

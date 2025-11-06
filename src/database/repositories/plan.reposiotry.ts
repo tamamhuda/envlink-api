@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import Plan from '../entities/plan.entity';
 import { DataSource, Repository } from 'typeorm';
-import { PlansEnum } from 'src/common/enums/plans.enum';
+import { PlanEnum } from 'src/common/enums/plans.enum';
 
 @Injectable()
 export class PlanRepository extends Repository<Plan> {
@@ -14,7 +14,11 @@ export class PlanRepository extends Repository<Plan> {
     return await this.save(plan);
   }
 
-  async findOneByName(name: PlansEnum): Promise<Plan | null> {
+  async findOneByName(name: PlanEnum): Promise<Plan | null> {
     return await this.findOne({ where: { name } });
+  }
+
+  async findAll(): Promise<Plan[]> {
+    return await this.find();
   }
 }

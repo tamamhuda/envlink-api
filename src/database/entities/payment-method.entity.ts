@@ -1,18 +1,38 @@
-import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
 import { PaymentMethodData } from 'src/common/interfaces/xendit.interface';
 import { PaymentMethodType } from 'src/common/enums/payment-method-type.enum';
 import { Transaction } from './transaction.entity';
+import { SubscriptionCycle } from './subscription-cycle.entity';
+import { createHash } from 'crypto';
+import { PaymentMethodStatus } from 'src/common/enums/payment-method-status.enum';
 
 @Entity({ name: 'payment_methods' })
-@Index(['externalId', 'customerId'], { unique: true })
+@Index(['externalId', 'customerId', 'accountIdentityHash'], { unique: true })
 export class PaymentMethod extends BaseEntity {
   @ManyToOne(() => User, (user) => user.paymentMethods, { onDelete: 'CASCADE' })
   user!: User;
 
   @OneToMany(() => Transaction, (transaction) => transaction.paymentMethod)
   transactions!: Transaction[];
+
+  @OneToMany(
+    () => SubscriptionCycle,
+    (subscriptionCycle) => subscriptionCycle.paymentMethod,
+    {
+      onDelete: 'SET NULL',
+    },
+  )
+  subscriptionCycles!: SubscriptionCycle[];
 
   @Column({ type: 'varchar' })
   externalId!: string; // pm-xxxx from Xendit
@@ -26,6 +46,9 @@ export class PaymentMethod extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   reusability!: string | null; // MULTIPLE_USE, SINGLE_USE, etc.
 
+  @Column({ type: 'varchar', nullable: true })
+  accountIdentityHash!: string | null;
+
   // ---- Common Fields ----
   @Column({ type: 'varchar', nullable: true })
   country!: string | null;
@@ -33,8 +56,8 @@ export class PaymentMethod extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   currency!: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
-  status!: string | null; // ACTIVE, FAILED, EXPIRED
+  @Column({ type: 'enum', enum: PaymentMethodStatus, nullable: true })
+  status!: PaymentMethodStatus; // ACTIVE, FAILED, EXPIRED
 
   @Column({ type: 'varchar', nullable: true })
   channelCode!: string | null; // e.g. OVO, DANA, BRI, BPI, etc.
@@ -43,10 +66,10 @@ export class PaymentMethod extends BaseEntity {
   provider!: string | null; // Issuer, bank, or ewallet provider name
 
   @Column({ type: 'varchar', nullable: true })
-  failure_code!: string | null;
+  failureCode!: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  description!: string | null;
+  customName!: string | null;
 
   // ---- Card Fields ----
   @Column({ type: 'varchar', nullable: true })
@@ -107,8 +130,47 @@ export class PaymentMethod extends BaseEntity {
   @Column({ type: 'int', default: 1 })
   rank!: number;
 
+  @Column({ type: 'boolean', default: true })
+  isRecurring!: boolean;
+
   @Column({ type: 'jsonb', nullable: true })
   metadata!: Record<string, any> | null;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  setAccountIdentityHash() {
+    this.accountIdentityHash = this.hashIdentity(this.getAccountIdentity());
+  }
+
+  getAccountIdentityHash(): string {
+    return this.hashIdentity(this.getAccountIdentity());
+  }
+
+  // ---- Logic builders ----
+  private getAccountIdentity(): string {
+    switch (this.type) {
+      case PaymentMethodType.CARD:
+        // Uniqueness by card details
+        return [
+          this.cardType ?? 'UNKNOWN',
+          this.maskedCardNumber ?? '****',
+          this.expiryMonth ?? 'MM',
+          this.expiryYear ?? 'YY',
+        ].join(':');
+
+      case PaymentMethodType.EWALLET:
+      case PaymentMethodType.DIRECT_DEBIT:
+        // Uniqueness by user + channelCode
+        return `${this.user.id}:${this.channelCode ?? 'UNKNOWN'}`;
+
+      default:
+        return `${this.user.id}:${this.channelCode ?? 'UNKNOWN'}`;
+    }
+  }
+
+  private hashIdentity(identity: string): string {
+    return createHash('sha256').update(identity).digest('hex');
+  }
 
   assignPaymentMethodByType(type: PaymentMethodType, data: PaymentMethodData) {
     const { card, ewallet, direct_debit } = data;
@@ -141,5 +203,59 @@ export class PaymentMethod extends BaseEntity {
         this.channelCode = direct_debit?.channel_code || null;
         break;
     }
+  }
+
+  getSummary() {
+    let paymentMethodType: string | null = null;
+    let lastNumber: string | null = null;
+    let paymentMethodDisplay: string | null = null;
+
+    switch (this.type) {
+      case PaymentMethodType.CARD: {
+        const network = this.network || 'Card';
+        paymentMethodType = network;
+        // Extract last 4 digits (from **** **** **** 4242)
+        const match = this.maskedCardNumber?.match(/(\d{4})$/);
+        lastNumber = match ? match[1] : null;
+        paymentMethodDisplay = lastNumber
+          ? `${network} ending •••• ${lastNumber}`
+          : network;
+        break;
+      }
+
+      case PaymentMethodType.EWALLET: {
+        const channel = this.channelCode?.toUpperCase() || 'E-Wallet';
+        paymentMethodType = channel;
+        lastNumber = this.accountNumber ? this.accountNumber.slice(-4) : null;
+        paymentMethodDisplay = lastNumber
+          ? `${channel} Wallet •••• ${lastNumber}`
+          : `${channel} Wallet`;
+        break;
+      }
+
+      case PaymentMethodType.DIRECT_DEBIT: {
+        const bank = this.channelCode || this.provider || 'Bank';
+        paymentMethodType = bank;
+        lastNumber = this.bankAccountNumber
+          ? this.bankAccountNumber.slice(-4)
+          : null;
+        paymentMethodDisplay = lastNumber
+          ? `${bank} account •••• ${lastNumber}`
+          : `${bank} account`;
+        break;
+      }
+
+      default:
+        paymentMethodType = 'Unknown';
+        paymentMethodDisplay = 'Unknown payment method';
+        break;
+    }
+
+    return {
+      paymentMethodType,
+      lastNumber,
+      currency: this.currency || 'IDR',
+      paymentMethodDisplay,
+    };
   }
 }

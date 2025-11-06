@@ -13,6 +13,8 @@ const envSchema = z
     APP_VERSION: z.string().default('v1.0.0'),
     APP_URL: z.string().default('http://localhost:3000'),
     APP_SECRET: z.string().default('secret'),
+    API_VERSION: z.string().default('v1'),
+    API_PREFIX: z.string().default('api/v1'),
 
     DB_HOST: z.string().default('localhost'),
     DB_PORT: z.coerce.number().default(5432),
@@ -47,10 +49,13 @@ const envSchema = z
 
     XENDIT_API_KEY: z.string().nonempty(),
     XENDIT_API_URL: z.string().nonempty(),
+    XENDIT_PUBLIC_KEY: z.string().nonempty(),
 
     ZEPTOMAIL_TOKEN: z.string().nonempty(),
     TEMPLATE_KEY_VERIFY_EMAIL: z.string().nonempty(),
+    TEMPLATE_KEY_SUBSCRIPTION: z.string().nonempty(),
     SENDER_ADDRESS: z.string().nonempty(),
+    SENDER_NOTIFICATION: z.string().nonempty(),
     ZEPTO_API_URL: z.string().nonempty('api.zeptomail.com'),
   })
   .required();

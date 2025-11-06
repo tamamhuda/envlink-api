@@ -10,6 +10,9 @@ import { PlanRepository } from './repositories/plan.reposiotry';
 import { PlanSeeder } from './seeders/plan.seeder';
 import { PlanUsageRepository } from './repositories/plan-usage-history.repository';
 import { PaymentMethodRepository } from './repositories/payment-method.repository';
+import { SubscriptionCycleRepository } from './repositories/subscription-cycle.repository';
+import { TransactionRepository } from './repositories/transaction.repository';
+import { SubscriptionHistoryRepository } from './repositories/subscription-history.repository';
 
 @Global()
 @Module({
@@ -25,6 +28,9 @@ import { PaymentMethodRepository } from './repositories/payment-method.repositor
     PlanRepository,
     PlanSeeder,
     PaymentMethodRepository,
+    SubscriptionCycleRepository,
+    TransactionRepository,
+    SubscriptionHistoryRepository,
   ],
   exports: [
     UserRepository,
@@ -38,6 +44,9 @@ import { PaymentMethodRepository } from './repositories/payment-method.repositor
     PlanRepository,
     PlanSeeder,
     PaymentMethodRepository,
+    SubscriptionCycleRepository,
+    TransactionRepository,
+    SubscriptionHistoryRepository,
   ],
 })
 export class DatabaseModule {}
