@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { sleep } from '@nestjs/terminus/dist/utils';
 import { OkDto } from 'src/common/dto/response.dto';
 import {
   PaymentMethodCallback,
@@ -7,12 +6,12 @@ import {
   RecurringPlanCallback,
 } from 'src/common/interfaces/xendit.interface';
 import { PaymentMethodsService } from 'src/payment-methods/payment-methods.service';
-import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
+import { SubscriptionsCallbackService } from 'src/subscriptions/subscriptions-callback.service';
 
 @Injectable()
 export class WebhooksService {
   constructor(
-    private readonly subscriptionsService: SubscriptionsService,
+    private readonly subscriptionCallbackService: SubscriptionsCallbackService,
     private readonly paymentMethodsService: PaymentMethodsService,
   ) {}
 
@@ -28,11 +27,11 @@ export class WebhooksService {
     const { event } = body;
 
     if (event.includes('recurring.plan')) {
-      return await this.subscriptionsService.handleRecurringPlan(
+      return await this.subscriptionCallbackService.handleRecurringPlan(
         body as RecurringPlanCallback,
       );
     } else if (event.includes('recurring.cycle')) {
-      return await this.subscriptionsService.handleRecurringCycle(
+      return await this.subscriptionCallbackService.handleRecurringCycle(
         body as RecurringCycleCallback,
       );
     } else {

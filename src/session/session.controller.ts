@@ -13,11 +13,17 @@ import {
 } from '@nestjs/common';
 import { SessionService } from './session.service';
 import { Request } from 'express';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   SessionInfoResponse,
   SessionsInfoResponse,
   SessionInfoDto,
+  SessionInfoSerializerDto,
 } from './dto/session.dto';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import LoggerService from 'src/common/logger/logger.service';
@@ -29,6 +35,7 @@ import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decor
 
 @SkipThrottle()
 @Controller('session')
+@ApiTags('Sessions')
 export class SessionController {
   constructor(
     private readonly sessionService: SessionService,
@@ -36,15 +43,16 @@ export class SessionController {
   ) {}
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get session by id' })
   @ApiBearerAuth(JWT_SECURITY)
   @ApiResponse({
     status: 200,
     type: SessionInfoResponse,
-    description: 'Returns session by id',
+    description: 'Get session by id successfully',
   })
   @HttpCode(HttpStatus.OK)
   @Cached(CachePrefix.SESSION, ({ user, params }) => `${user?.id}:${params.id}`)
-  @ZodSerializerDto(SessionInfoDto)
+  @ZodSerializerDto(SessionInfoSerializerDto)
   async getSessionById(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<SessionInfoDto> {
@@ -52,14 +60,15 @@ export class SessionController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all user sessions' })
   @ApiBearerAuth(JWT_SECURITY)
   @ApiResponse({
     status: 200,
     type: SessionsInfoResponse,
-    description: 'Returns all user sessions',
+    description: 'Get all user sessions successfully',
   })
   @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto([SessionInfoDto])
+  @ZodSerializerDto([SessionInfoSerializerDto])
   async getAllUserSessions(
     @Req() req: Request,
     @Query('isActive', new DefaultValuePipe(false), ParseBoolPipe)
@@ -73,6 +82,7 @@ export class SessionController {
   }
 
   @Post('revoke/:id')
+  @ApiOperation({ summary: 'Revoke a user session' })
   @ApiBearerAuth(JWT_SECURITY)
   @ApiResponse({
     status: 204,
@@ -88,6 +98,7 @@ export class SessionController {
   }
 
   @Post('revoke')
+  @ApiOperation({ summary: 'Revoke all user sessions' })
   @ApiBearerAuth(JWT_SECURITY)
   @ApiResponse({
     status: 204,

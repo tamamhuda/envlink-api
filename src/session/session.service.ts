@@ -11,11 +11,11 @@ import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { JwtUtil } from 'src/common/utils/jwt.util';
 import LoggerService from 'src/common/logger/logger.service';
 import { SessionInfoDto, sessionInfoSchema } from './dto/session.dto';
-import { UserService } from 'src/user/user.service';
 import { TokensDto } from 'src/auth/dto/token.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { IpUtil } from 'src/common/utils/ip.util';
 import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
+import { UserMapper } from 'src/user/mapper/user.mapper';
 
 @Injectable()
 export class SessionService {
@@ -25,20 +25,18 @@ export class SessionService {
     private readonly ipUtil: IpUtil,
     private readonly sessionRepository: SessionRepository,
     private readonly jwtUtil: JwtUtil,
-    private readonly userService: UserService,
-
+    private readonly userMapper: UserMapper,
     private readonly logger: LoggerService,
   ) {}
 
-  @ZodSerializerDto(SessionInfoDto)
   async mapSessionToDto(session: Session): Promise<SessionInfoDto> {
     const { user, account } = session;
 
-    const userInfo = await this.userService.mapToUserInfoDto(account, user);
-    return sessionInfoSchema.parseAsync({
+    const userInfo = await this.userMapper.mapToUserInfoDto(account, user);
+    return {
       ...session,
       user: userInfo,
-    });
+    };
   }
 
   async findSessionById(id: string): Promise<Session> {

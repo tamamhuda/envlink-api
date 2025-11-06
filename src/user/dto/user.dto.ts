@@ -1,26 +1,34 @@
 import { createZodDto } from 'nestjs-zod';
-import { createResponseDto } from 'src/common/dto/response.dto';
 import { RolesEnum } from 'src/common/enums/roles.enum';
+import { baseSchema } from 'src/common/schemas/base.schema';
+import { zodToCamelCase } from 'src/common/utils/case-transform.util';
 import * as z from 'zod';
 
-const userSchema = z.object({
+export const userBaseSchema = baseSchema.extend({
   email: z.string().email().nonempty(),
   username: z.string().min(3).nonempty(),
-  fullName: z.string().nonempty(),
-  phoneNumber: z.string().optional(),
-  role: z.nativeEnum(RolesEnum).default(RolesEnum.USER).optional(),
-  avatar: z.string().url().optional(),
+  full_name: z.string().nonempty(),
+  phone_number: z.string().nullable().optional(),
+  role: z.nativeEnum(RolesEnum).default(RolesEnum.USER),
+  avatar: z.string().url().nullable().optional(),
 });
 
-const updateSchema = userSchema
-  .omit({
-    role: true,
-  })
-  .partial()
-  .refine((data) => Object.keys(data).length > 0, {
-    message: 'Provide at least one field to update',
-  });
+const updateSchema = zodToCamelCase(
+  userBaseSchema
+    .pick({
+      username: true,
+      full_name: true,
+      email: true,
+      phone_number: true,
+      avatar: true,
+    })
+    .partial()
+    .refine((data) => Object.keys(data).length > 0, {
+      path: ['body'],
+      message: 'Provide at least one field to update',
+    }),
+);
 
-export class UserDto extends createZodDto(userSchema) {}
+export class UserDto extends createZodDto(userBaseSchema) {}
 
-export class UpdateUserDto extends createZodDto(updateSchema) {}
+export class UpdateUserBodyDto extends createZodDto(updateSchema) {}

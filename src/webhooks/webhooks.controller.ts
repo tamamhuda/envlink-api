@@ -7,12 +7,13 @@ import {
 } from 'src/common/interfaces/xendit.interface';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OkDto, OkResponse } from 'src/common/dto/response.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import LoggerService from 'src/common/logger/logger.service';
 
 @Controller('webhooks')
+@ApiTags('Webhooks')
 export class WebhooksController {
   constructor(
     private readonly webhooksService: WebhooksService,
@@ -22,6 +23,7 @@ export class WebhooksController {
   @SkipThrottle()
   @Public()
   @Post('xendit/payment_methods')
+  @ApiOperation({ summary: 'Handle Xendit payment methods callback data' })
   @ApiOkResponse({
     type: OkResponse,
     description: 'successfully handling payment methods callback data',
@@ -37,6 +39,7 @@ export class WebhooksController {
   @SkipThrottle()
   @Public()
   @Post('xendit/recurring')
+  @ApiOperation({ summary: 'Handle Xendit recurring plan callback data' })
   @ApiOkResponse({
     type: OkResponse,
     description: 'successfully handling recurring plan callback data',
@@ -48,36 +51,4 @@ export class WebhooksController {
   ): Promise<OkDto> {
     return await this.webhooksService.handleXenditRecurring(body);
   }
-
-  // @SkipThrottle()
-  // @Public()
-  // @Post('midtrans/recurring')
-  // @ApiOkResponse({
-  //   type: OkResponse,
-  //   description: 'successfully handling recurring plan callback data',
-  // })
-  // @HttpCode(HttpStatus.OK)
-  // @ZodSerializerDto(OkDto)
-  // async handleMidtransRecurring(
-  //   @Body() body: Record<string, any>,
-  // ): Promise<OkDto> {
-  //   this.logger.json('retrieved midtrans recurring plan callback data', body);
-  //   return await Promise.resolve({ message: 'OK' });
-  // }
-
-  // @SkipThrottle()
-  // @Public()
-  // @Post('midtrans/notifications')
-  // @ApiOkResponse({
-  //   type: OkResponse,
-  //   description: 'successfully handling notification callback data',
-  // })
-  // @HttpCode(HttpStatus.OK)
-  // @ZodSerializerDto(OkDto)
-  // async handleMidtransNotifications(
-  //   @Body() body: Record<string, any>,
-  // ): Promise<OkDto> {
-  //   this.logger.json('retrieved midtrans notification callback data', body);
-  //   return await Promise.resolve({ message: 'OK' });
-  // }
 }

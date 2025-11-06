@@ -5,22 +5,21 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from 'src/database/entities/user.entity';
-import { UpdateUserDto, UserDto } from './dto/user.dto';
+import { UpdateUserBodyDto } from './dto/user.dto';
 import Session from 'src/database/entities/session.entity';
 import { Account } from 'src/database/entities/account.entity';
-import { EntityManager } from 'typeorm';
 import { UserRepository } from 'src/database/repositories/user.repository';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
-import { providerSchema, UserInfoDto } from 'src/auth/dto/user-info.dto';
+import { UserInfoDto } from 'src/auth/dto/user-info.dto';
 import { Request } from 'express';
 import LoggerService from 'src/common/logger/logger.service';
-import { ZodSerializerDto } from 'nestjs-zod';
 import { AwsS3Util } from 'src/common/utils/aws-s3.util';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import Subscription from 'src/database/entities/subscription.entity';
 import Plan from 'src/database/entities/plan.entity';
-import { PlansEnum } from 'src/common/enums/plans.enum';
+import { PlanEnum } from 'src/common/enums/plans.enum';
+import { XenditService } from 'src/common/xendit/xendit.service';
 
 @Injectable()
 export class UserService {
@@ -28,105 +27,62 @@ export class UserService {
     private readonly userRepository: UserRepository,
     private readonly logger: LoggerService,
     private readonly awsS3Util: AwsS3Util,
+    private readonly xenditService: XenditService,
   ) {}
-
-  @ZodSerializerDto(UserInfoDto)
-  async mapToUserInfoDto(account: Account, user: User): Promise<UserInfoDto> {
-    const providers = providerSchema.parse(account);
-    const { avatar, ...restUser } = user;
-    const avatarUrl = avatar ? await this.awsS3Util.getFileUrl(avatar) : null;
-    return {
-      ...restUser,
-      avatar: avatarUrl,
-      providers,
-      lastLoginAt: account.lastLoginAt,
-    };
-  }
 
   async validateUniqueUser(
     email?: string,
     username?: string,
-  ): Promise<string | null> {
+    user?: User,
+  ): Promise<void> {
     const existingUser =
       await this.userRepository.findByEmailOrUsernameOptional(email, username);
     if (existingUser) {
+      if (user && (user.email == email || user.username == username)) {
+        return;
+      }
       const fieldExist = existingUser.email == email ? 'email' : 'username';
-      return `${fieldExist} already exists`;
+      throw new ConflictException(`${fieldExist} already exists`);
     }
-    return null;
-  }
-
-  async createUniqueUser(manager: EntityManager, userDto: UserDto) {
-    const { email, username } = userDto;
-
-    const existingUser = await manager.findOne(User, {
-      where: [{ email }, { username }],
-    });
-
-    if (existingUser)
-      throw new ConflictException(
-        `${existingUser.email == email ? 'Email' : 'Username'} already exists`,
-      );
-
-    const user = manager.create(User, userDto);
-    return await manager.save(user);
-  }
-
-  private async validateUniqueAccount(
-    providerEmail: string,
-    providerUsername: string,
-    provider: ProviderEnum,
-    manager: EntityManager,
-  ) {
-    const account = await manager.findOne(Account, {
-      where: {
-        providerEmail,
-        providerUsername,
-        provider,
-      },
-    });
-
-    if (account) throw new ConflictException('Account already exists');
-  }
-
-  private async createUniqueLocalAccount(
-    manager: EntityManager,
-    user: User,
-    passwordHash: string,
-  ): Promise<Account> {
-    await this.validateUniqueAccount(
-      user.email,
-      user.username,
-      ProviderEnum.LOCAL,
-      manager,
-    );
-
-    const account = manager.create(Account, {
-      user,
-      providerAccountId: user.id,
-      provider: ProviderEnum.LOCAL,
-      providerEmail: user.email,
-      providerUsername: user.username,
-      passwordHash,
-    });
-
-    return await manager.save(account);
   }
 
   async createUserWithAccountAndSession(
-    userDto: UserDto,
+    data: Partial<User>,
     passwordHash: string,
   ): Promise<{ user: User; account: Account; session: Session }> {
     return this.userRepository.manager.transaction(async (manager) => {
-      // Create user
-      const user = await this.createUniqueUser(manager, userDto);
+      const { email: providerEmail, username: providerUsername } = data;
+
+      // Validate and create user
+      await this.validateUniqueUser(providerEmail, providerUsername);
+
+      const user = manager.create(User, data);
+      const { id: externalId } =
+        await this.xenditService.getOrCreateCustomer(user);
+      user.externalId = externalId;
+
+      await manager.save(user);
+
+      // Validate unique local account
+      const existingAccount = await manager.findOneBy(Account, {
+        providerEmail,
+        providerUsername,
+        provider: ProviderEnum.LOCAL,
+      });
+      if (existingAccount) {
+        throw new ConflictException('Account already exists');
+      }
 
       // Create account
-      const account = await this.createUniqueLocalAccount(
-        manager,
+      const account = manager.create(Account, {
         user,
+        providerAccountId: user.id,
+        provider: ProviderEnum.LOCAL,
+        providerEmail,
+        providerUsername,
         passwordHash,
-      );
+      });
+      await manager.save(account);
 
       // Create session
       const session = manager.create(Session, {
@@ -138,7 +94,7 @@ export class UserService {
       // Create Subscription (Free Plan)
       const plan = await manager.findOne(Plan, {
         where: {
-          name: PlansEnum.FREE,
+          name: PlanEnum.FREE,
         },
       });
 
@@ -164,38 +120,34 @@ export class UserService {
     return user;
   }
 
-  async findUserByExternalId(id: string): Promise<User> {
-    const user = await this.userRepository.findOneById(id);
+  async findUserByExternalId(externalId: string): Promise<User> {
+    const user = await this.userRepository.findOneByExternalId(externalId);
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
-  async updateEmailOrUsername(username?: string, email?: string) {
-    if (username)
-      await Promise.resolve().then(() =>
-        this.logger.debug('Send Email Change Username'),
-      );
-    if (email)
-      await Promise.resolve().then(() =>
-        this.logger.debug('Send Email Change Email'),
-      );
+  async requestEmailChange(user: User, email: string) {
+    await Promise.resolve().then(() =>
+      this.logger.debug(
+        `Requesting email change for user ${user.id} to ${email}`,
+      ),
+    );
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserBodyDto): Promise<User> {
     const { username, email, ...updateUser } = updateUserDto;
     const existingUser = await this.findUserById(id);
 
     if (username || email) {
-      const conflictMessage = await this.validateUniqueUser(email, username);
-      if (conflictMessage) throw new ConflictException(conflictMessage);
-      await this.updateEmailOrUsername(username, email);
+      await this.validateUniqueUser(email, username, existingUser);
+      if (email) await this.requestEmailChange(existingUser, email);
     }
     return await this.userRepository.updateOne(existingUser, updateUser);
   }
 
   async updateUser(
     req: Request,
-    updateUserDto: UpdateUserDto,
+    updateUserDto: UpdateUserBodyDto,
     id: string,
   ): Promise<UserInfoDto> {
     const { providers, lastLoginAt } = req.user;
