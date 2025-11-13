@@ -10,10 +10,16 @@ import { PlanUsage } from './plan-usage.entity';
 import { Transaction } from './transaction.entity';
 import { PaymentMethod } from './payment-method.entity';
 import { SubscriptionHistory } from './subscription-history.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity({ name: 'users' })
 @Index(['username', 'email', 'externalId'], { unique: true })
 export class User extends BaseEntity {
+  constructor() {
+    super();
+    this.id = uuidv4();
+  }
+
   @Column({
     type: 'varchar',
     nullable: true,

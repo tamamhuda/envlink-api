@@ -152,6 +152,7 @@ export class PaymentMethod extends BaseEntity {
       case PaymentMethodType.CARD:
         // Uniqueness by card details
         return [
+          this.user.id,
           this.cardType ?? 'UNKNOWN',
           this.maskedCardNumber ?? '****',
           this.expiryMonth ?? 'MM',

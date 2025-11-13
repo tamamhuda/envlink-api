@@ -37,6 +37,9 @@ export default class Plan extends BaseEntity {
   })
   subscriptions!: Subscription[];
 
+  @Column({ type: 'json', default: [] })
+  features!: string[];
+
   @Column({ type: 'float', default: 0 })
   price!: number;
 }

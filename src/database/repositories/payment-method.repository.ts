@@ -27,10 +27,21 @@ export class PaymentMethodRepository extends Repository<PaymentMethod> {
     });
   }
 
+  async findOneByUserAndExternalId(
+    userId: string,
+    externalId: string,
+  ): Promise<PaymentMethod | null> {
+    return await this.findOne({
+      where: { externalId, user: { id: userId } },
+      relations: ['user'],
+    });
+  }
+
   async findManyByUser(userId: string): Promise<PaymentMethod[]> {
     return await this.find({
       where: { user: { id: userId } },
       relations: ['user'],
+      order: { rank: 'ASC' },
     });
   }
 
