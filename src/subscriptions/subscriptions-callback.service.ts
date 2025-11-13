@@ -26,12 +26,12 @@ import { SubscriptionRepository } from 'src/database/repositories/subscription.r
 import { SubscriptionsService } from './subscriptions.service';
 import LoggerService from 'src/common/logger/logger.service';
 import { SubscriptionHistory } from 'src/database/entities/subscription-history.entity';
-import { SubscriptionsCyclesService } from './subscriptions-cycles.service';
 import { UserService } from 'src/user/user.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { SEND_MAIL_SUBSCRIPTION_QUEUE } from 'src/queue/queue.constans';
 import { SendMailSubscriptionJob } from 'src/queue/interfaces/mail-subscription.interface';
+import { SubscriptionsCyclesService } from './cycles/cycles.service';
 
 @Injectable()
 export class SubscriptionsCallbackService {

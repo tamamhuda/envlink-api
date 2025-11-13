@@ -28,16 +28,9 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import LoggerService from 'src/common/logger/logger.service';
 import {
   UpgradePlanOptionDto,
-  UpgradePlanOptionResponse,
-  UpgradePlanOptionSerializerDto,
+  SubscriptionUpgradeOptionSerializerDto,
+  SubscriptionUpgradeOptionsResponse,
 } from './dto/upgrade-plan-option.dto';
-import {
-  SubscriptionCycleDto,
-  ListSubscriptionCyclesResponse,
-  SubscriptionCycleResponse,
-  SubscriptionCycleSerializerDto,
-} from './dto/subscription-cycle.dto';
-import { SubscriptionsCyclesService } from './subscriptions-cycles.service';
 import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
 
@@ -47,7 +40,6 @@ import { UserInfo } from 'src/auth/dto/user-info.dto';
 export class SubscriptionsController {
   constructor(
     private readonly subscriptionsService: SubscriptionsService,
-    private readonly cyclesService: SubscriptionsCyclesService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -67,21 +59,6 @@ export class SubscriptionsController {
   }
 
   @SkipThrottle()
-  @Get('/active/cycles')
-  @ApiOperation({ summary: 'Get all active subscription cycles' })
-  @ApiOkResponse({
-    type: ListSubscriptionCyclesResponse,
-    description: 'Get all active subscription cycles successfully',
-  })
-  @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto([SubscriptionCycleSerializerDto])
-  async getUserActiveSubscriptionCycles(
-    @AuthenticatedUser() user: UserInfo,
-  ): Promise<SubscriptionCycleDto[]> {
-    return await this.cyclesService.getAllUserActiveSubscriptionCycles(user.id);
-  }
-
-  @SkipThrottle()
   @Get(':id')
   @ApiOperation({ summary: 'Get subscription by id' })
   @ApiOkResponse({
@@ -95,43 +72,6 @@ export class SubscriptionsController {
     @AuthenticatedUser() user: UserInfo,
   ): Promise<SubscriptionInfoDto> {
     return await this.subscriptionsService.getUserSubscriptionById(user.id, id);
-  }
-
-  @SkipThrottle()
-  @Get(':id/cycles')
-  @ApiOperation({ summary: 'Get all subscription cycles' })
-  @ApiOkResponse({
-    type: ListSubscriptionCyclesResponse,
-    description: 'Get all subscription cycles successfully',
-  })
-  @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto([SubscriptionCycleSerializerDto])
-  async getAllUserSubscriptionCycles(
-    @Param('id', ParseUUIDPipe) id: string,
-    @AuthenticatedUser() user: UserInfo,
-  ): Promise<SubscriptionCycleDto[]> {
-    return await this.cyclesService.getAllUserSubscriptionCycles(user.id, id);
-  }
-
-  @SkipThrottle()
-  @Get(':id/cycles/:cycleId')
-  @ApiOperation({ summary: 'Get subscription cycle by id' })
-  @ApiOkResponse({
-    type: SubscriptionCycleResponse,
-    description: 'Get subscription cycle by id successfully',
-  })
-  @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto(SubscriptionCycleSerializerDto)
-  async getUserSubscriptionCycleById(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Param('cycleId', ParseUUIDPipe) cycleId: string,
-    @AuthenticatedUser() user: UserInfo,
-  ): Promise<SubscriptionCycleDto> {
-    return await this.cyclesService.getUserSubscriptionCycleById(
-      user.id,
-      id,
-      cycleId,
-    );
   }
 
   @SkipThrottle()
@@ -151,7 +91,7 @@ export class SubscriptionsController {
   }
 
   @SkipThrottle()
-  @Post(':id/plans/upgrade')
+  @Post(':id/upgrade')
   @ApiOperation({ summary: 'Upgrade subscription plan' })
   @ApiCreatedResponse({
     type: SubscriptionInfoResponse,
@@ -172,13 +112,14 @@ export class SubscriptionsController {
   }
 
   @SkipThrottle()
-  @Get(':id/plans/upgrade/options')
+  @Get(':id/upgrade-options')
+  @ApiOperation({ summary: 'Get subscription upgrade options' })
   @ApiCreatedResponse({
-    type: UpgradePlanOptionResponse,
+    type: SubscriptionUpgradeOptionsResponse,
     description: 'Get subscription upgrade options successfully',
   })
   @HttpCode(HttpStatus.CREATED)
-  @ZodSerializerDto([UpgradePlanOptionSerializerDto])
+  @ZodSerializerDto([SubscriptionUpgradeOptionSerializerDto])
   async getAllUpgradePlanOptions(
     @Param('id', ParseUUIDPipe) id: string,
     @AuthenticatedUser() user: UserInfo,

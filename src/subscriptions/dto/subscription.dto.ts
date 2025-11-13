@@ -6,8 +6,8 @@ import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
 import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
 import { baseSchema } from 'src/common/schemas/base.schema';
 import * as z from 'zod';
-import { planSchema } from './upgrade-plan-option.dto';
 import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { planSchema } from './plan.dto';
 
 export const subscriptionInfoSchema = baseSchema.extend({
   reference_id: z.string().nullable(),

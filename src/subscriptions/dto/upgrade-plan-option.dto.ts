@@ -5,16 +5,7 @@ import { PlanEnum } from 'src/common/enums/plans.enum';
 import { createZodDto } from 'nestjs-zod';
 import { baseSchema } from 'src/common/schemas/base.schema';
 import { zodToCamelCase } from 'src/common/utils/case-transform.util';
-
-export const planSchema = z.object({
-  name: z.nativeEnum(PlanEnum),
-  limit: z.number().min(1),
-  reset_interval: z.string(),
-  cost: z.number().min(1),
-  charge_on_success: z.boolean().default(false),
-  description: z.string().nullable(),
-  price: z.number().min(0),
-});
+import { planSchema } from './plan.dto';
 
 export const upgradeOptionsSchema = z.object({
   strategy: z.nativeEnum(UpgradeStrategy),
@@ -39,12 +30,12 @@ export class UpgradePlanOptionDto extends createZodDto(
   upgradePlanOptionDtoSchema,
 ) {}
 
-export class UpgradePlanOptionSerializerDto extends createZodDto(
+export class SubscriptionUpgradeOptionSerializerDto extends createZodDto(
   upgradePlanOptionSchema,
 ) {}
 
-export class UpgradePlanOptionResponse extends createResponseDto(
-  upgradePlanOptionSchema,
+export class SubscriptionUpgradeOptionsResponse extends createResponseDto(
+  upgradePlanOptionSchema.array(),
 ) {}
 
 const upgradeOptionsDtoSchema = zodToCamelCase(upgradeOptionsSchema);

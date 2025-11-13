@@ -24,7 +24,7 @@ import {
   UpgradePlanOptionDto,
 } from './dto/upgrade-plan-option.dto';
 import { SubscriptionEndReason } from 'src/common/enums/subscription-end-reason.enum';
-import { PaymentMethodsService } from 'src/payment-methods/payment-methods.service';
+import { PaymentMethodRepository } from 'src/database/repositories/payment-method.repository';
 
 @Injectable()
 export class SubscriptionsService {
@@ -32,7 +32,7 @@ export class SubscriptionsService {
     private readonly subscriptionRepository: SubscriptionRepository,
     private readonly planRepository: PlanRepository,
     private readonly xenditService: XenditService,
-    private readonly paymentMethodService: PaymentMethodsService,
+    private readonly paymentMethodRepository: PaymentMethodRepository,
     private readonly logger: LoggerService,
   ) {}
 
@@ -218,7 +218,7 @@ export class SubscriptionsService {
 
         // Get all payment methods for the customer
         const paymentMethods: RecurringPaymentMethod[] = (
-          await this.paymentMethodService.findActiveRecurringByUser(userId)
+          await this.paymentMethodRepository.findManyRecurringByUser(userId)
         ).map(({ externalId, rank }) => {
           return {
             payment_method_id: externalId,
