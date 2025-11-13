@@ -10,12 +10,13 @@ import { SessionRepository } from 'src/database/repositories/session.repository'
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { JwtUtil } from 'src/common/utils/jwt.util';
 import LoggerService from 'src/common/logger/logger.service';
-import { SessionInfoDto, sessionInfoSchema } from './dto/session.dto';
+import { SessionInfoDto } from './dto/session.dto';
 import { TokensDto } from 'src/auth/dto/token.dto';
-import { ZodSerializerDto } from 'nestjs-zod';
 import { IpUtil } from 'src/common/utils/ip.util';
 import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { UserMapper } from 'src/user/mapper/user.mapper';
+import { CacheService } from 'src/common/cache/cache.service';
+import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 
 @Injectable()
 export class SessionService {
@@ -27,6 +28,7 @@ export class SessionService {
     private readonly jwtUtil: JwtUtil,
     private readonly userMapper: UserMapper,
     private readonly logger: LoggerService,
+    private readonly cache: CacheService,
   ) {}
 
   async mapSessionToDto(session: Session): Promise<SessionInfoDto> {
@@ -130,9 +132,13 @@ export class SessionService {
   }
 
   async revokeCurrentSession(req: Request) {
-    const { sessionId } = await this.jwtUtil.extractJwtPayloadFromHeader(
-      req,
-      'access',
+    const { sessionId, jti, ttl } =
+      await this.jwtUtil.extractJwtPayloadFromHeader(req, 'access');
+    await this.cache.set<boolean>(
+      CachePrefix.TOKEN,
+      `BLACKLIST:${jti}`,
+      true,
+      ttl,
     );
     await this.revokeSessionById(sessionId);
   }
@@ -143,6 +149,7 @@ export class SessionService {
       isRevoked: true,
       revokedAt: new Date(),
     });
+    this.logger.log(`Revoking session ${id}`);
   }
 
   async revokeAllSessions(req: Request) {
