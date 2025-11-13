@@ -24,7 +24,7 @@ import { ZodString } from 'zod';
 import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
 import { PolicyScope } from 'src/common/throttle/throttle.constans';
 import { JWT_SECURITY } from 'src/config/jwt.config';
-import { ChangePasswordDto } from 'src/auth/dto/change-password.dto';
+import { ChangePasswordBodyDto } from 'src/auth/dto/change-password.dto';
 import {
   UserInfoDto,
   UserInfoResponse,
@@ -33,17 +33,23 @@ import {
 import { AccountVerifyService } from './account-verify.service';
 import { ClientUrl } from 'src/common/decorators/client-url.decorator';
 import { ZodSerializerDto } from 'nestjs-zod';
+import LoggerService from 'src/common/logger/logger.service';
 
-@ApiBearerAuth(JWT_SECURITY)
 @Controller('account')
+@ApiBearerAuth(JWT_SECURITY)
 export class AccountController {
   constructor(
     private readonly accountService: AccountService,
     private readonly accountVerifyService: AccountVerifyService,
+    private readonly logger: LoggerService,
   ) {}
 
   @SkipThrottle()
   @Post('logout')
+  @InvalidateCache(
+    CachePrefix.SESSION,
+    ({ sessionId, user }) => `${user?.id}:${sessionId}`,
+  )
   @ApiOperation({
     summary: 'Logout user',
   })
@@ -51,10 +57,6 @@ export class AccountController {
     description: 'Logout successful',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @InvalidateCache(
-    CachePrefix.SESSION,
-    ({ sessionId, user }) => `${user?.id}:${sessionId}`,
-  )
   async logout(@Req() req: Request): Promise<void> {
     await this.accountService.logout(req);
   }
@@ -109,7 +111,7 @@ export class AccountController {
     description: 'Change password successful',
   })
   @ApiBody({
-    type: ChangePasswordDto,
+    type: ChangePasswordBodyDto,
     required: true,
   })
   @HttpCode(HttpStatus.OK)
@@ -120,7 +122,7 @@ export class AccountController {
   @ZodSerializerDto(UserInfoSerializer)
   async changePassword(
     @Req() req: Request,
-    @Body() body: ChangePasswordDto,
+    @Body() body: ChangePasswordBodyDto,
   ): Promise<UserInfoDto> {
     return await this.accountService.changePassword(req, body);
   }

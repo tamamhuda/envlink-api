@@ -9,8 +9,9 @@ import { AccountRepository } from 'src/database/repositories/account.repository'
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { SessionService } from 'src/session/session.service';
 import { Request } from 'express';
-import { ChangePasswordDto } from 'src/auth/dto/change-password.dto';
+import { ChangePasswordBodyDto } from 'src/auth/dto/change-password.dto';
 import { UserInfoDto } from 'src/auth/dto/user-info.dto';
+import LoggerService from 'src/common/logger/logger.service';
 
 @Injectable()
 export class AccountService {
@@ -18,6 +19,7 @@ export class AccountService {
   constructor(
     private readonly accountRepository: AccountRepository,
     private readonly sessionService: SessionService,
+    private readonly logger: LoggerService,
   ) {}
 
   async findOneByProviderUsernameOrEmail(
@@ -99,7 +101,7 @@ export class AccountService {
 
   async changePassword(
     req: Request,
-    body: ChangePasswordDto,
+    body: ChangePasswordBodyDto,
   ): Promise<UserInfoDto> {
     const { oldPassword, newPassword } = body;
 

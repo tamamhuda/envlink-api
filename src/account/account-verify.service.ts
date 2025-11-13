@@ -15,6 +15,8 @@ import { Env } from 'src/config/env.config';
 import { AccountRepository } from 'src/database/repositories/account.repository';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
 import { Account } from 'src/database/entities/account.entity';
+import { CacheService } from 'src/common/cache/cache.service';
+import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 
 @Injectable()
 export class AccountVerifyService {
@@ -25,6 +27,7 @@ export class AccountVerifyService {
     @InjectQueue(SEND_MAIL_VERIFY_QUEUE)
     private readonly mailVerifyQueue: Queue<SendMailVerifyJob>,
     private readonly tokenUtil: TokenUtil,
+    private readonly cache: CacheService,
     private readonly configService: ConfigService<Env>,
   ) {
     const APP_URL = this.configService.getOrThrow('APP_URL');
@@ -47,6 +50,8 @@ export class AccountVerifyService {
         token,
       },
     });
+
+    console.log(clientUrl);
 
     if (clientUrl) {
       verifyLink = verifyLink.replace(this.BASE_URL, clientUrl);
@@ -98,8 +103,20 @@ export class AccountVerifyService {
   async verify(token: string): Promise<Account> {
     const payload = this.tokenUtil.verify(token);
     if (!payload) throw new ForbiddenException('Invalid token');
-    const { email, isExpired } = payload;
+    const { email, sub, isExpired } = payload;
     if (isExpired) throw new ForbiddenException('Token expired');
+
+    await this.cache.invalidate([
+      {
+        prefix: CachePrefix.USER,
+        key: sub,
+      },
+      {
+        prefix: CachePrefix.SESSION,
+        key: `${sub}:*`,
+      },
+    ]);
+
     return await this.verifyLocalAccountByProviderEmail(email);
   }
 }
