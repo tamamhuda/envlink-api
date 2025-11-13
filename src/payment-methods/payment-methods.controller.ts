@@ -38,6 +38,11 @@ import LoggerService from 'src/common/logger/logger.service';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
 import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
 import { CreatePaymentMethodDto } from './dto/create-payment-method.dto';
+import { OkDto, OkResponse } from 'src/common/dto/response.dto';
+import { ValidatePaymentMethodDto } from './dto/validate-payment-method.dto';
+import { Cached } from 'src/common/decorators/cached.decorator';
+import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
+import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 
 @SkipThrottle()
 @Controller('payment-methods')
@@ -59,13 +64,31 @@ export class PaymentMethodsController {
   @ZodSerializerDto([PaymentMethodActionDto])
   async requestPaymentMethod(
     @AuthenticatedUser() user: UserInfo,
-    @Query('successReturnUrl') successReturnUrl: string,
-    @Query('failureReturnUrl') failureReturnUrl: string,
+    @Query('success_return_url') successReturnUrl: string,
+    @Query('failure_return_url') failureReturnUrl: string,
   ): Promise<PaymentMethodActionDto[]> {
     return await this.paymentMethodsService.requestPaymentMethod(
       user.id,
       successReturnUrl,
       failureReturnUrl,
+    );
+  }
+
+  @Get(':external_id')
+  @ApiOperation({ summary: 'Get payment method by external id' })
+  @ApiOkResponse({
+    type: PaymentMethodResponse,
+    description: 'Get payment method by external id successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  @ZodSerializerDto(PaymentMethodSerializerDto)
+  async getPaymentMethodByExternalId(
+    @Param('external_id') externalId: string,
+    @AuthenticatedUser() user: UserInfo,
+  ): Promise<PaymentMethodDto> {
+    return await this.paymentMethodsService.getPaymentMethodByExternalId(
+      user.id,
+      externalId,
     );
   }
 
@@ -91,6 +114,7 @@ export class PaymentMethodsController {
     description: 'Get all payment methods successfully',
   })
   @HttpCode(HttpStatus.OK)
+  @Cached(CachePrefix.PAYMENT_METHODS, (req) => `user_${req?.user?.id}`)
   @ZodSerializerDto([PaymentMethodSerializerDto])
   async getAllPaymentMethods(@Req() req: Request): Promise<PaymentMethodDto[]> {
     return await this.paymentMethodsService.getAllPaymentMethods(req.user.id);
@@ -99,10 +123,14 @@ export class PaymentMethodsController {
   @Patch('/sort')
   @ApiOperation({ summary: 'Sort payment methods' })
   @ApiOkResponse({
-    type: PaymentMethodResponse,
+    type: AllPaymentMethodsResponse,
     description: 'Get payment method by id successfully',
   })
   @HttpCode(HttpStatus.OK)
+  @InvalidateCache(
+    CachePrefix.PAYMENT_METHODS,
+    (req) => `user_${req?.user?.id}`,
+  )
   @ZodSerializerDto([PaymentMethodSerializerDto])
   async sortPaymentMethods(
     @Req() req: Request,
@@ -111,6 +139,24 @@ export class PaymentMethodsController {
     return await this.paymentMethodsService.sortPaymentMethods(
       req.user.id,
       body,
+    );
+  }
+
+  @Post('/validate')
+  @ApiOperation({ summary: 'Validate payment method' })
+  @ApiOkResponse({
+    type: OkResponse,
+    description: 'Validate payment method successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  @ZodSerializerDto(OkDto)
+  async validatePaymentMethod(
+    @Body() body: ValidatePaymentMethodDto,
+    @AuthenticatedUser() user: UserInfo,
+  ): Promise<OkDto> {
+    return await this.paymentMethodsService.validatePaymentMethod(
+      body,
+      user.id,
     );
   }
 

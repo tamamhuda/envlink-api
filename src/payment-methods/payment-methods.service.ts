@@ -92,6 +92,7 @@ export class PaymentMethodsService {
           rank,
           isDefault,
           country,
+          customName: metadata?.custom_name,
         });
         paymentMethod.assignPaymentMethodByType(type, data);
         const accountIdentityHash = paymentMethod.getAccountIdentityHash();
@@ -154,6 +155,7 @@ export class PaymentMethodsService {
   async getAllPaymentMethods(userId: string): Promise<PaymentMethodDto[]> {
     const paymentMethods =
       await this.paymentMethodRepository.findManyByUser(userId);
+
     return paymentMethods.map((paymentMethod) =>
       this.paymentMethodMapper.mapToDto(paymentMethod),
     );
@@ -173,6 +175,19 @@ export class PaymentMethodsService {
     id: string,
   ): Promise<PaymentMethodDto> {
     const paymentMethod = await this.getOneByUserAndId(userId, id);
+    return this.paymentMethodMapper.mapToDto(paymentMethod);
+  }
+
+  async getPaymentMethodByExternalId(
+    userId: string,
+    externalId: string,
+  ): Promise<PaymentMethodDto> {
+    const paymentMethod =
+      await this.paymentMethodRepository.findOneByUserAndExternalId(
+        userId,
+        externalId,
+      );
+    if (!paymentMethod) throw new NotFoundException('Payment method not found');
     return this.paymentMethodMapper.mapToDto(paymentMethod);
   }
 
@@ -217,8 +232,8 @@ export class PaymentMethodsService {
 
       if (action === 'ADD_PAYMENT_METHOD') {
         const { error } = requestPaymentMethodParamsSchema.safeParse({
-          successReturnUrl,
-          failureReturnUrl,
+          success_return_url: successReturnUrl,
+          failure_return_url: failureReturnUrl,
         });
         if (error) throw new ZodValidationException(error);
 
@@ -255,19 +270,18 @@ export class PaymentMethodsService {
     token: string,
   ): Promise<OkDto> {
     const userId = this.tokenUtil.verify(token)?.sub;
+
     if (!userId) throw new ForbiddenException('Invalid token');
-    const user = await this.userService.findUserById(userId).catch(() => {
-      throw new ForbiddenException('Unknown Resource');
-    });
-    await this.validatePaymentMethod(body, user);
-    return { message: 'OK' };
+    return await this.validatePaymentMethod(body, userId);
   }
 
   async validatePaymentMethod(
     body: ValidatePaymentMethodDto,
-    user: User,
-  ): Promise<void> {
+    userId: string,
+  ): Promise<OkDto> {
     const { card, directDebit, ewallet, type } = body;
+
+    const user = await this.userService.findUserById(userId);
 
     const requestPaymentMethod = this.paymentMethodRepository.create({
       user,
@@ -281,13 +295,16 @@ export class PaymentMethodsService {
       await this.paymentMethodRepository.findOneByAccountIdentityHash(
         accountIdentityHash,
       );
+
     if (existingIdentity) {
       throw new ConflictException('Payment method already exists');
     }
+    return { message: 'OK' };
   }
 
   async getAllPaymentMethodsOptions(token: string) {
     const userId = this.tokenUtil.verify(token)?.sub;
+
     if (!userId) throw new ForbiddenException('Invalid token');
 
     const user = await this.userService.findUserById(userId).catch(() => {
@@ -403,7 +420,7 @@ export class PaymentMethodsService {
         directDebit: directDebitParams,
         ewallet: ewalletParams,
       },
-      user,
+      user.id,
     );
 
     const { actions } = await this.xenditService.createPaymentMethod({
