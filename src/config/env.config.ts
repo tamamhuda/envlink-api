@@ -40,6 +40,7 @@ const envSchema = z
     AWS_ACCESS_KEY: z.string().nonempty(''),
     AWS_S3_BUCKET: z.string().nonempty(''),
     AWS_S3_REGION: z.string().nonempty(''),
+    AWS_S3_ENDPOINT: z.string().nonempty(''),
 
     MAILTRAP_TOKEN: z.string().nonempty(),
     TEMPLATE_ID_VERIFY_EMAIL: z.string().nonempty(),

@@ -8,8 +8,8 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
     <!-- Xendit SDK -->
     <script src="https://js.xendit.co/v3/xendit.min.js"></script>
@@ -65,27 +65,46 @@
   <body
     class="bg-gradient-to-br from-gray-50 to-gray-100 max-h-screen overflow-y-auto"
   >
-    <div
-      class="container bg-white rounded-2xl shadow-lg min-h-screen mx-auto py-12 px-4 max-w-2xl"
-    >
-      <!-- Header -->
-      <div class="text-center mb-8 fade-in">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Payment Methods</h1>
-        <p class="text-gray-600">Choose and configure your payment method</p>
-      </div>
+    <div id="app">
+      <div
+        class="container bg-white rounded-2xl shadow-lg min-h-screen mx-auto py-12 px-4 max-w-2xl"
+      >
+        <!-- Header -->
+        <div class="text-center mb-8 fade-in">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Payment Methods</h1>
+          <p class="text-gray-600">Choose and configure your payment method</p>
+        </div>
 
-      <!-- Payment Methods Container -->
-      <div id="paymentMethodsContainer" class="space-y-4 fade-in">
-        <!-- Card Payment -->
-        <div class="rounded-2xl border-slate-100 border-2 overflow-hidden">
-          <button
-            type="button"
-            class="payment-method-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
-            data-method="card"
-          >
-            <div class="flex items-center space-x-3">
+        <!-- Payment Methods Container -->
+        <div v-show="!showSuccess" class="space-y-4 fade-in">
+          <!-- Card Payment -->
+          <div class="rounded-2xl border-slate-100 border-2 overflow-hidden">
+            <button
+              type="button"
+              @click="toggleMethod('card')"
+              class="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
+            >
+              <div class="flex items-center space-x-3">
+                <svg
+                  class="w-6 h-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                  />
+                </svg>
+                <span class="text-lg font-semibold text-gray-900"
+                  >Credit/Debit Card</span
+                >
+              </div>
               <svg
-                class="w-6 h-6 text-blue-600"
+                class="w-5 h-5 text-gray-400 transform transition-transform"
+                :class="{ 'rotate-180': currentOpenMethod === 'card' }"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -94,142 +113,242 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                  d="M19 9l-7 7-7-7"
                 />
               </svg>
-              <span class="text-lg font-semibold text-gray-900"
-                >Credit/Debit Card</span
-              >
-            </div>
-            <svg
-              class="w-5 h-5 text-gray-400 transform transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            </button>
+
+            <div
+              class="collapse-content"
+              :class="{ active: currentOpenMethod === 'card' }"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-
-          <div class="collapse-content" id="cardContent">
-            <form id="cardForm" class="px-6 pb-6 space-y-6">
-              <!-- Responsive Card Number / Expiry / CVV -->
-              <div class="grid grid-cols-12 gap-4">
-                <!-- Card Number full width on mobile -->
-                <div class="col-span-12 md:col-span-6">
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                    >Card Number</label
-                  >
-                  <input
-                    id="cardNumberInput"
-                    type="text"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="4111 1111 1111 1111"
-                    value="4000000000001091"
-                    required
-                  />
-                </div>
-                <!-- Month / Year / CVV share a row on desktop, wrap on mobile -->
-                <div class="col-span-4 md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                    >Month</label
-                  >
-                  <input
-                    id="expiryMonthInput"
-                    type="text"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="12"
-                    value="12"
-                    required
-                  />
-                </div>
-                <div class="col-span-4 md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                    >Year</label
-                  >
-                  <input
-                    id="expiryYearInput"
-                    type="text"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="2030"
-                    value="2030"
-                    required
-                  />
-                </div>
-                <div class="col-span-4 md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                    >CVV</label
-                  >
-                  <input
-                    id="cvvInput"
-                    type="text"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="123"
-                    value="123"
-                    required
-                  />
-                </div>
-              </div>
-
-              <!-- Cardholder Name -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                  >Cardholder Name</label
-                >
-                <input
-                  id="cardholderNameInput"
-                  type="text"
-                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  placeholder="John Doe"
-                  value="John Doe"
-                  required
-                />
-              </div>
-
-              <!-- Email and Phone side by side -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                    >Email</label
-                  >
-                  <input
-                    id="cardholderEmailInput"
-                    type="email"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="john@example.com"
-                    value="john.doe@mail.com"
-                    required
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                    >Phone</label
-                  >
-                  <input
-                    id="cardholderPhoneNumberInput"
-                    type="text"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="+62812345678"
-                    value="+6281234567890"
-                    required
-                  />
-                </div>
-              </div>
-
-              <!-- Billing Address -->
-              <div
-                id="billingAddressField"
-                class="border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition"
+              <form
+                @submit.prevent="handleCardSubmit"
+                class="px-6 pb-6 space-y-6"
               >
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-600">Add billing address</span>
+                <!-- Card Number / Expiry / CVV -->
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-12 md:col-span-6">
+                    <label
+                      class="block text-sm font-medium text-gray-700 mb-1.5"
+                      >Card Number</label
+                    >
+                    <input
+                      v-model="cardForm.cardNumber"
+                      type="text"
+                      class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      placeholder="4111 1111 1111 1111"
+                      required
+                    />
+                  </div>
+                  <div class="col-span-4 md:col-span-2">
+                    <label
+                      class="block text-sm font-medium text-gray-700 mb-1.5"
+                      >Month</label
+                    >
+                    <input
+                      v-model="cardForm.expiryMonth"
+                      type="text"
+                      class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      placeholder="12"
+                      required
+                    />
+                  </div>
+                  <div class="col-span-4 md:col-span-2">
+                    <label
+                      class="block text-sm font-medium text-gray-700 mb-1.5"
+                      >Year</label
+                    >
+                    <input
+                      v-model="cardForm.expiryYear"
+                      type="text"
+                      class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      placeholder="2030"
+                      required
+                    />
+                  </div>
+                  <div class="col-span-4 md:col-span-2">
+                    <label
+                      class="block text-sm font-medium text-gray-700 mb-1.5"
+                      >CVV</label
+                    >
+                    <input
+                      v-model="cardForm.cvv"
+                      type="text"
+                      class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      placeholder="123"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <!-- Cardholder Name -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1.5"
+                    >Cardholder Name</label
+                  >
+                  <input
+                    v-model="cardForm.cardholderName"
+                    type="text"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+
+                <!-- Email and Phone -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      class="block text-sm font-medium text-gray-700 mb-1.5"
+                      >Email</label
+                    >
+                    <input
+                      v-model="cardForm.email"
+                      type="email"
+                      class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      placeholder="john@example.com"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-sm font-medium text-gray-700 mb-1.5"
+                      >Phone</label
+                    >
+                    <input
+                      v-model="cardForm.phone"
+                      type="text"
+                      class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      placeholder="+62812345678"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <!-- Billing Address -->
+                <div
+                  v-if="!billingAddressAdded"
+                  @click="showBillingModal = true"
+                  class="border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition"
+                >
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-600">Add billing address</span>
+                    <svg
+                      class="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                <div
+                  v-if="billingAddressAdded"
+                  class="border border-gray-300 rounded-lg p-4"
+                >
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center space-x-2 mb-2">
+                        <svg
+                          class="w-5 h-5 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <span class="font-medium text-gray-900"
+                          >Billing address added</span
+                        >
+                      </div>
+                      <div
+                        class="text-sm text-gray-600 ml-7"
+                        v-html="billingAddressText"
+                      ></div>
+                    </div>
+                    <button
+                      type="button"
+                      @click="showBillingModal = true"
+                      class="text-blue-600 hover:text-blue-700 font-medium text-sm ml-4"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Currency -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1.5"
+                    >Currency</label
+                  >
+                  <input
+                    type="text"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50"
+                    value="IDR"
+                    disabled
+                  />
+                </div>
+
+                <!-- Default Checkbox -->
+                <div class="flex items-center">
+                  <input
+                    v-model="cardForm.isDefault"
+                    type="checkbox"
+                    class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label class="ml-2 block text-sm text-gray-700">
+                    Set as default payment method
+                  </label>
+                </div>
+
+                <!-- Error Message -->
+                <div
+                  v-if="errors.card"
+                  class="bg-red-50 text-red-800 rounded-lg p-3 text-sm"
+                >
+                  <div class="flex items-start space-x-2">
+                    <svg
+                      class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span v-text="errors.card"></span>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                  type="submit"
+                  :disabled="loading.card"
+                  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-lg transition flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  <span
+                    v-text="loading.card ? 'Processing...' : 'Add Card'"
+                  ></span>
                   <svg
-                    class="w-5 h-5 text-gray-400"
+                    v-if="!loading.card"
+                    class="w-5 h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -238,132 +357,262 @@
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
-                      d="M9 5l7 7-7 7"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
                     />
                   </svg>
-                </div>
-              </div>
+                  <svg
+                    v-if="loading.card"
+                    class="w-5 h-5 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                </button>
 
-              <div
-                id="billingAddressSummary"
-                class="hidden border border-gray-300 rounded-lg p-4"
+                <!-- Security Notice -->
+                <div
+                  class="text-center text-sm text-gray-500 flex items-center justify-center space-x-1"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                  <span>Your payment information is encrypted and secure</span>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- E-Wallet Payment -->
+          <div class="rounded-2xl border-slate-100 border-2 overflow-hidden">
+            <button
+              type="button"
+              @click="toggleMethod('ewallet')"
+              class="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
+            >
+              <div class="flex items-center space-x-3">
+                <svg
+                  class="w-6 h-6 text-purple-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span class="text-lg font-semibold text-gray-900"
+                  >E-Wallet</span
+                >
+              </div>
+              <svg
+                class="w-5 h-5 text-gray-400 transform transition-transform"
+                :class="{ 'rotate-180': currentOpenMethod === 'ewallet' }"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div class="flex items-start justify-between">
-                  <div class="flex-1">
-                    <div class="flex items-center space-x-2 mb-2">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+
+            <div
+              class="collapse-content"
+              :class="{ active: currentOpenMethod === 'ewallet' }"
+            >
+              <form
+                @submit.prevent="handleEwalletSubmit"
+                class="px-6 pb-6 space-y-4"
+              >
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-3"
+                    >Select E-Wallet Provider</label
+                  >
+                  <div class="space-y-2">
+                    <label
+                      v-for="option in ewalletOptions"
+                      :key="option.channelCode"
+                      class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
+                      :class="{
+                        'opacity-50 cursor-not-allowed bg-gray-50': !option.isAllowed,
+                        'hover:border-purple-300': option.isAllowed
+                      }"
+                    >
                       <svg
-                        class="w-5 h-5 text-green-600"
+                        v-if="!option.isAllowed"
+                        xmlns="http://www.w3.org/2000/svg"
                         fill="none"
-                        stroke="currentColor"
                         viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        class="w-5 h-5 text-green-600"
                       >
                         <path
                           stroke-linecap="round"
                           stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          d="M4.5 12.75l6 6 9-13.5"
                         />
                       </svg>
-                      <span class="font-medium text-gray-900"
-                        >Billing address added</span
-                      >
-                    </div>
-                    <div
-                      id="billingAddressText"
-                      class="text-sm text-gray-600 ml-7"
-                    ></div>
+                      <input
+                        v-if="option.isAllowed"
+                        v-model="ewalletForm.selectedChannel"
+                        type="radio"
+                        :value="option.channelCode"
+                        class="h-4 w-4 text-purple-600 focus:ring-purple-500"
+                      />
+                      <span
+                        class="font-medium text-gray-900"
+                        v-text="option.channelCode"
+                      ></span>
+                      <span
+                        v-if="!option.isAllowed"
+                        class="text-xs text-amber-600 ml-auto"
+                        v-text="'Linked (' + option.channelCode + ')'"
+                      ></span>
+                    </label>
                   </div>
-                  <button
-                    type="button"
-                    id="editBillingAddress"
-                    class="text-blue-600 hover:text-blue-700 font-medium text-sm ml-4"
-                  >
-                    Edit
-                  </button>
                 </div>
-              </div>
 
-              <!-- Currency -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                  >Currency</label
-                >
-                <input
-                  id="currencyInput"
-                  type="text"
-                  class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50"
-                  value="IDR"
-                  disabled
-                />
-              </div>
-
-              <!-- Default Checkbox -->
-              <div class="flex items-center">
-                <input
-                  id="cardDefaultCheckbox"
-                  type="checkbox"
-                  class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label
-                  for="cardDefaultCheckbox"
-                  class="ml-2 block text-sm text-gray-700"
-                >
-                  Set as default payment method
-                </label>
-              </div>
-
-              <!-- Error Message -->
-              <div
-                id="cardError"
-                class="hidden bg-red-50 text-red-800 rounded-lg p-3 text-sm"
-              ></div>
-
-              <!-- Submit Button -->
-              <button
-                type="submit"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-lg transition flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <span class="submit-text">Add Card</span>
-                <svg
-                  class="submit-icon w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                <div class="flex items-center">
+                  <input
+                    v-model="ewalletForm.isDefault"
+                    type="checkbox"
+                    class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                    :disabled="ewalletAllDisabled"
                   />
-                </svg>
-                <svg
-                  class="loading-icon w-5 h-5 animate-spin hidden"
-                  fill="none"
-                  viewBox="0 0 24 24"
+                  <label class="ml-2 block text-sm text-gray-700"
+                    >Set as default payment method</label
+                  >
+                </div>
+
+                <div
+                  v-if="errors.ewallet"
+                  class="bg-red-50 text-red-800 rounded-lg p-3 text-sm"
                 >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
+                  <div class="flex items-start space-x-2">
+                    <svg
+                      class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span v-text="errors.ewallet"></span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  :disabled="loading.ewallet || ewalletAllDisabled"
+                  class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 rounded-lg transition flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  <span
+                    v-text="ewalletAllDisabled ? 'All Linked' : (loading.ewallet ? 'Processing...' : 'Add E-Wallet')"
+                  ></span>
+                  <svg
+                    v-if="!loading.ewallet && !ewalletAllDisabled"
+                    class="w-5 h-5"
+                    fill="none"
                     stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-              </button>
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
+                  </svg>
+                  <svg
+                    v-if="loading.ewallet"
+                    class="w-5 h-5 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </button>
 
-              <!-- Security Notice -->
-              <div
-                class="text-center text-sm text-gray-500 flex items-center justify-center space-x-1"
-              >
+                <div
+                  class="text-center text-sm text-gray-500 flex items-center justify-center space-x-1"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                  <span>Your payment information is encrypted and secure</span>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Direct Debit Payment -->
+          <div class="rounded-2xl border-slate-100 border-2 overflow-hidden">
+            <button
+              type="button"
+              @click="toggleMethod('directdebit')"
+              class="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
+            >
+              <div class="flex items-center space-x-3">
                 <svg
-                  class="w-4 h-4"
+                  class="w-6 h-6 text-green-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -372,25 +621,16 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"
                   />
                 </svg>
-                <span>Your payment information is encrypted and secure</span>
+                <span class="text-lg font-semibold text-gray-900"
+                  >Direct Debit</span
+                >
               </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- E-Wallet Payment -->
-        <div class="rounded-2xl border-slate-100 border-2 overflow-hidden">
-          <button
-            type="button"
-            class="payment-method-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
-            data-method="ewallet"
-          >
-            <div class="flex items-center space-x-3">
               <svg
-                class="w-6 h-6 text-purple-600"
+                class="w-5 h-5 text-gray-400 transform transition-transform"
+                :class="{ 'rotate-180': currentOpenMethod === 'directdebit' }"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -399,124 +639,180 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  d="M19 9l-7 7-7-7"
                 />
               </svg>
-              <span class="text-lg font-semibold text-gray-900">E-Wallet</span>
-            </div>
-            <svg
-              class="w-5 h-5 text-gray-400 transform transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            </button>
+
+            <div
+              class="collapse-content"
+              :class="{ active: currentOpenMethod === 'directdebit' }"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-
-          <div class="collapse-content" id="ewalletContent">
-            <form id="ewalletForm" class="px-6 pb-6 space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3"
-                  >Select E-Wallet Provider</label
-                >
-                <div id="ewalletOptions" class="space-y-2"></div>
-              </div>
-
-              <div class="flex items-center">
-                <input
-                  id="ewalletDefaultCheckbox"
-                  type="checkbox"
-                  class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                />
-                <label
-                  for="ewalletDefaultCheckbox"
-                  class="ml-2 block text-sm text-gray-700"
-                  >Set as default payment method</label
-                >
-              </div>
-
-              <div
-                id="ewalletError"
-                class="hidden bg-red-50 text-red-800 rounded-lg p-3 text-sm"
-              ></div>
-
-              <button
-                type="submit"
-                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 rounded-lg transition flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+              <form
+                @submit.prevent="handleDirectDebitSubmit"
+                class="px-6 pb-6 space-y-4"
               >
-                <span class="submit-text">Add E-Wallet</span>
-                <svg
-                  class="submit-icon w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-3"
+                    >Select Bank</label
+                  >
+                  <div class="space-y-2">
+                    <label
+                      v-for="option in directDebitOptions"
+                      :key="option.channelCode"
+                      class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
+                      :class="{
+                        'opacity-50 cursor-not-allowed bg-gray-50': !option.isAllowed,
+                        'hover:border-purple-300': option.isAllowed
+                      }"
+                    >
+                      <svg
+                        v-if="!option.isAllowed"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        class="w-5 h-5 text-green-600"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M4.5 12.75l6 6 9-13.5"
+                        />
+                      </svg>
+                      <input
+                        v-if="option.isAllowed"
+                        v-model="directDebitForm.selectedChannel"
+                        type="radio"
+                        :value="option.channelCode"
+                        class="h-4 w-4 text-purple-600 focus:ring-purple-500"
+                      />
+                      <span
+                        class="font-medium text-gray-900"
+                        v-text="option.channelCode"
+                      ></span>
+                      <span
+                        v-if="!option.isAllowed"
+                        class="text-xs text-amber-600 ml-auto"
+                        v-text="'Linked (' + option.channelCode + ')'"
+                      ></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="flex items-center">
+                  <input
+                    v-model="directDebitForm.isDefault"
+                    type="checkbox"
+                    class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    :disabled="directDebitAllDisabled"
                   />
-                </svg>
-                <svg
-                  class="loading-icon w-5 h-5 animate-spin hidden"
-                  fill="none"
-                  viewBox="0 0 24 24"
+                  <label class="ml-2 block text-sm text-gray-700"
+                    >Set as default payment method</label
+                  >
+                </div>
+
+                <div
+                  v-if="errors.directDebit"
+                  class="bg-red-50 text-red-800 rounded-lg p-3 text-sm"
                 >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
+                  <div class="flex items-start space-x-2">
+                    <svg
+                      class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span v-text="errors.directDebit"></span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  :disabled="loading.directDebit || directDebitAllDisabled"
+                  class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-lg transition flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  <span
+                    v-text="directDebitAllDisabled ? 'All Linked' : (loading.directDebit ? 'Processing...' : 'Add Direct Debit')"
+                  ></span>
+                  <svg
+                    v-if="!loading.directDebit && !directDebitAllDisabled"
+                    class="w-5 h-5"
+                    fill="none"
                     stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              </button>
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
+                  </svg>
+                  <svg
+                    v-if="loading.directDebit"
+                    class="w-5 h-5 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </button>
 
-              <div
-                class="text-center text-sm text-gray-500 flex items-center justify-center space-x-1"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <div
+                  class="text-center text-sm text-gray-500 flex items-center justify-center space-x-1"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
-                <span>Your payment information is encrypted and secure</span>
-              </div>
-            </form>
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                  <span>Your payment information is encrypted and secure</span>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
 
-        <!-- Direct Debit Payment -->
-        <div class="rounded-2xl border-slate-100 border-2 overflow-hidden">
-          <button
-            type="button"
-            class="payment-method-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
-            data-method="directdebit"
-          >
-            <div class="flex items-center space-x-3">
+        <!-- Success Container -->
+        <div
+          v-if="showSuccess"
+          class="bg-white rounded-2xl shadow-xl p-8 fade-in"
+        >
+          <div class="text-center">
+            <div
+              class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4"
+            >
               <svg
-                class="w-6 h-6 text-green-600"
+                class="w-8 h-8 text-green-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -525,1041 +821,721 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"
+                  d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span class="text-lg font-semibold text-gray-900"
-                >Direct Debit</span
-              >
             </div>
-            <svg
-              class="w-5 h-5 text-gray-400 transform transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">
+              Payment Method Added!
+            </h2>
+            <p class="text-gray-600 mb-6">
+              Your payment method has been successfully registered.
+            </p>
+            <div
+              class="bg-gray-50 rounded-lg p-4 mb-6 text-left"
+              v-html="successDetails"
+            ></div>
+            <button
+              type="button"
+              @click="resetAllForms"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition shadow-lg hover:shadow-xl"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-
-          <div class="collapse-content" id="directdebitContent">
-            <form id="directDebitForm" class="px-6 pb-6 space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3"
-                  >Select Bank</label
-                >
-                <div id="directDebitOptions" class="space-y-2"></div>
-              </div>
-
-              <div class="flex items-center">
-                <input
-                  id="directDebitDefaultCheckbox"
-                  type="checkbox"
-                  class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                />
-                <label
-                  for="directDebitDefaultCheckbox"
-                  class="ml-2 block text-sm text-gray-700"
-                  >Set as default payment method</label
-                >
-              </div>
-
-              <div
-                id="directDebitError"
-                class="hidden bg-red-50 text-red-800 rounded-lg p-3 text-sm"
-              ></div>
-
-              <button
-                type="submit"
-                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-lg transition flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <span class="submit-text">Add Direct Debit</span>
-                <svg
-                  class="submit-icon w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-                <svg
-                  class="loading-icon w-5 h-5 animate-spin hidden"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              </button>
-
-              <div
-                class="text-center text-sm text-gray-500 flex items-center justify-center space-x-1"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
-                <span>Your payment information is encrypted and secure</span>
-              </div>
-            </form>
+              Add Another Payment Method
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Success Container -->
+      <!-- Billing Address Modal -->
       <div
-        id="successContainer"
-        class="bg-white rounded-2xl shadow-xl p-8 hidden fade-in"
-      >
-        <div class="text-center">
-          <div
-            class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4"
-          >
-            <svg
-              class="w-8 h-8 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">
-            Payment Method Added!
-          </h2>
-          <p class="text-gray-600 mb-6">
-            Your payment method has been successfully registered.
-          </p>
-          <div
-            id="successDetails"
-            class="bg-gray-50 rounded-lg p-4 mb-6 text-left"
-          ></div>
-          <button
-            type="button"
-            id="addAnotherMethod"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition shadow-lg hover:shadow-xl"
-          >
-            Add Another Payment Method
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Billing Address Modal -->
-    <div
-      id="billingAddressModal"
-      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end md:items-center justify-center p-4"
-    >
-      <div
-        class="bg-white rounded-2xl md:rounded-2xl w-full max-w-2xl my-auto max-h-[90vh] overflow-y-auto slide-up"
+        v-if="showBillingModal"
+        @click.self="showBillingModal = false"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center p-4"
       >
         <div
-          class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10"
+          class="bg-white rounded-2xl md:rounded-2xl w-full max-w-2xl my-auto max-h-[90vh] overflow-y-auto slide-up"
         >
-          <h3 class="text-xl font-semibold text-gray-900">Billing Address</h3>
-          <button
-            type="button"
-            id="closeModal"
-            class="text-gray-400 hover:text-gray-600 transition"
+          <div
+            class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10"
           >
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <h3 class="text-xl font-semibold text-gray-900">Billing Address</h3>
+            <button
+              type="button"
+              @click="showBillingModal = false"
+              class="text-gray-400 hover:text-gray-600 transition"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
 
-        <div class="p-6 space-y-4">
-          <div class="grid md:grid-cols-2 gap-4">
+          <div class="p-6 space-y-4">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5"
+                  >Country <span class="text-red-500">*</span></label
+                >
+                <input
+                  v-model="billingAddress.country"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  placeholder="ID"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5"
+                  >Province/State</label
+                >
+                <input
+                  v-model="billingAddress.provinceState"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  placeholder="Jakarta"
+                />
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5"
+                  >City <span class="text-red-500">*</span></label
+                >
+                <input
+                  v-model="billingAddress.city"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  placeholder="Jakarta Selatan"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5"
+                  >Postal Code</label
+                >
+                <input
+                  v-model="billingAddress.postalCode"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  placeholder="12345"
+                />
+              </div>
+            </div>
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                >Country <span class="text-red-500">*</span></label
+                >Street Address <span class="text-red-500">*</span></label
               >
               <input
-                id="countryInput"
+                v-model="billingAddress.streetLine1"
                 type="text"
                 class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="ID"
-                value="ID"
+                placeholder="Jl. Sudirman No.1"
               />
             </div>
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                >Province/State</label
+                >Apartment, suite, etc. (optional)</label
               >
               <input
-                id="provinceStateInput"
+                v-model="billingAddress.streetLine2"
                 type="text"
                 class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="Jakarta"
-                value="Jakarta"
+                placeholder="Apt 4B"
               />
             </div>
           </div>
 
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                >City <span class="text-red-500">*</span></label
-              >
-              <input
-                id="cityInput"
-                type="text"
-                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="Jakarta Selatan"
-                value="Jakarta Selatan"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5"
-                >Postal Code</label
-              >
-              <input
-                id="postalCodeInput"
-                type="text"
-                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="12345"
-                value="12345"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5"
-              >Street Address <span class="text-red-500">*</span></label
+          <div class="sticky bottom-0 bg-white border-t px-6 py-4">
+            <button
+              type="button"
+              @click="saveBillingAddress"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition shadow-lg hover:shadow-xl"
             >
-            <input
-              id="streetLine1Input"
-              type="text"
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder="Jl. Sudirman No.1"
-              value="Jl. Sudirman No.1"
-            />
+              Save Address
+            </button>
           </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5"
-              >Apartment, suite, etc. (optional)</label
-            >
-            <input
-              id="streetLine2Input"
-              type="text"
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder="Apt 4B"
-            />
-          </div>
-        </div>
-
-        <div class="sticky bottom-0 bg-white border-t px-6 py-4">
-          <button
-            type="button"
-            id="saveBillingAddress"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition shadow-lg hover:shadow-xl"
-          >
-            Save Address
-          </button>
         </div>
       </div>
     </div>
 
     <script>
-      // Initialize variables
-      const XENDIT_PUBLIC_KEY = '{{xendit_public_key}}';
-      const customerId = '{{customer_id}}';
+      const { createApp } = Vue;
 
-      // Initialize payment methods url
-      const rawValidateUrl = '{{validate_payment_methods_url}}';
-      const rawCreateUrl = '{{create_payment_methods_url}}';
-      const rawSuccessReturnUrl = '{{success_return_url}}';
-      const rawFailureReturnUrl = '{{failure_return_url}}';
-      const temp = document.createElement('textarea');
-      temp.innerHTML = rawValidateUrl;
-      const validatePaymentMethodsUrl = temp.value;
-      temp.innerHTML = rawCreateUrl;
-      const createPaymentMethodsUrl = temp.value;
-      temp.innerHTML = rawSuccessReturnUrl;
-      const successReturnUrl = temp.value;
-      temp.innerHTML = rawFailureReturnUrl;
-      const failureReturnUrl = temp.value;
+      createApp({
+        data() {
+          return {
+            // Configuration
+            XENDIT_PUBLIC_KEY: '{{xendit_public_key}}',
+            customerId: '{{customer_id}}',
+            validatePaymentMethodsUrl: '',
+            createPaymentMethodsUrl: '',
+            successReturnUrl: '',
+            failureReturnUrl: '',
 
-      // Initialize payment methods options
-      const rawPaymentMethodsOptions = '{{payment_methods_options}}';
-      const decoded = rawPaymentMethodsOptions.replace(/&quot;/g, '"');
-      const paymentMethodsOptions = JSON.parse(decoded);
+            // UI State
+            currentOpenMethod: null,
+            showBillingModal: false,
+            billingAddressAdded: false,
+            billingAddressText: '',
+            showSuccess: false,
+            successDetails: '',
 
-      let billingAddressAdded = false;
-      let currentOpenMethod = null;
-      let lastSelectedMethod = null;
+            // Payment Options
+            paymentMethodsOptions: [],
+            ewalletOptions: [],
+            directDebitOptions: [],
 
-      $(function () {
-        Xendit.setPublishableKey(XENDIT_PUBLIC_KEY);
+            // Forms
+            cardForm: {
+              cardNumber: '4000000000001091',
+              expiryMonth: '12',
+              expiryYear: '2030',
+              cvv: '123',
+              cardholderName: 'John Doe',
+              email: 'john.doe@mail.com',
+              phone: '+6281234567890',
+              isDefault: false,
+            },
+            ewalletForm: {
+              selectedChannel: null,
+              isDefault: false,
+            },
+            directDebitForm: {
+              selectedChannel: null,
+              isDefault: false,
+            },
+            billingAddress: {
+              country: 'ID',
+              provinceState: 'Jakarta',
+              city: 'Jakarta Selatan',
+              postalCode: '12345',
+              streetLine1: 'Jl. Sudirman No.1',
+              streetLine2: '',
+            },
 
-        // Load last selected method from localStorage
-        try {
-          lastSelectedMethod = localStorage.getItem('lastPaymentMethod');
-          if (lastSelectedMethod) {
-            setTimeout(() => {
-              $(
-                `.payment-method-toggle[data-method="${lastSelectedMethod}"]`,
-              ).click();
-            }, 300);
-          }
-        } catch (e) {
-          console.log('localStorage not available');
-        }
+            // Loading & Errors
+            loading: {
+              card: false,
+              ewallet: false,
+              directDebit: false,
+            },
+            errors: {
+              card: null,
+              ewallet: null,
+              directDebit: null,
+            },
+          };
+        },
 
-        // Initialize payment options
-        renderEwalletOptions();
-        renderDirectDebitOptions();
+        computed: {
+          ewalletAllDisabled() {
+            return this.ewalletOptions.every((opt) => !opt.isAllowed);
+          },
+          directDebitAllDisabled() {
+            return this.directDebitOptions.every((opt) => !opt.isAllowed);
+          },
+        },
 
-        // Toggle payment methods
-        $('.payment-method-toggle').click(function () {
-          const method = $(this).data('method');
-          const content = $(`#${method}Content`);
-          const arrow = $(this).find('svg:last-child');
+        mounted() {
+          // Initialize Xendit
+          Xendit.setPublishableKey(this.XENDIT_PUBLIC_KEY);
 
-          if (currentOpenMethod === method) {
-            content.removeClass('active');
-            arrow.removeClass('rotate-180');
-            currentOpenMethod = null;
-          } else {
-            $('.collapse-content').removeClass('active');
-            $('.payment-method-toggle svg:last-child').removeClass(
-              'rotate-180',
+          // Decode URLs
+          this.decodeUrls();
+
+          // Parse payment methods options
+          this.parsePaymentMethodsOptions();
+
+          // Load last selected method
+          this.loadLastSelectedMethod();
+
+          // Prevent body scroll when modal is open
+          this.$watch('showBillingModal', (newVal) => {
+            document.body.style.overflow = newVal ? 'hidden' : 'auto';
+          });
+        },
+
+        methods: {
+          decodeUrls() {
+            const rawValidateUrl = '{{validate_payment_methods_url}}';
+            const rawCreateUrl = '{{create_payment_methods_url}}';
+            const rawSuccessReturnUrl = '{{success_return_url}}';
+            const rawFailureReturnUrl = '{{failure_return_url}}';
+
+            const temp = document.createElement('textarea');
+            temp.innerHTML = rawValidateUrl;
+            this.validatePaymentMethodsUrl = temp.value;
+            temp.innerHTML = rawCreateUrl;
+            this.createPaymentMethodsUrl = temp.value;
+            temp.innerHTML = rawSuccessReturnUrl;
+            this.successReturnUrl = temp.value;
+            temp.innerHTML = rawFailureReturnUrl;
+            this.failureReturnUrl = temp.value;
+          },
+
+          parsePaymentMethodsOptions() {
+            const rawPaymentMethodsOptions = '{{payment_methods_options}}';
+            const decoded = rawPaymentMethodsOptions.replace(/&quot;/g, '"');
+            this.paymentMethodsOptions = JSON.parse(decoded);
+            console.log(this.paymentMethodsOptions);
+
+            // Extract ewallet and direct debit options
+            const ewalletConfig = this.paymentMethodsOptions.find(
+              (opt) => opt.type === 'EWALLET',
+            );
+            const ddConfig = this.paymentMethodsOptions.find(
+              (opt) => opt.type === 'DIRECT_DEBIT',
             );
 
-            content.addClass('active');
-            arrow.addClass('rotate-180');
-            currentOpenMethod = method;
+            this.ewalletOptions = ewalletConfig?.options || [];
+            this.directDebitOptions = ddConfig?.options || [];
+          },
 
-            // Save to localStorage
+          loadLastSelectedMethod() {
             try {
-              localStorage.setItem('lastPaymentMethod', method);
+              const lastMethod = localStorage.getItem('lastPaymentMethod');
+              if (lastMethod) {
+                setTimeout(() => {
+                  this.currentOpenMethod = lastMethod;
+                }, 300);
+              }
             } catch (e) {
               console.log('localStorage not available');
             }
-          }
-        });
+          },
 
-        // Billing address modal handlers
-        $('#billingAddressField').click(function () {
-          openBillingModal();
-        });
+          toggleMethod(method) {
+            if (this.currentOpenMethod === method) {
+              this.currentOpenMethod = null;
+            } else {
+              this.currentOpenMethod = method;
 
-        $('#editBillingAddress').click(function () {
-          openBillingModal();
-        });
+              // Save to localStorage
+              try {
+                localStorage.setItem('lastPaymentMethod', method);
+              } catch (e) {
+                console.log('localStorage not available');
+              }
+            }
+          },
 
-        $('#closeModal').click(function () {
-          closeBillingModal();
-        });
+          saveBillingAddress() {
+            const {
+              country,
+              city,
+              streetLine1,
+              provinceState,
+              postalCode,
+              streetLine2,
+            } = this.billingAddress;
 
-        $('#billingAddressModal').click(function (e) {
-          if (e.target === this) {
-            closeBillingModal();
-          }
-        });
+            if (!country || !city || !streetLine1) {
+              alert(
+                'Please fill in required fields: Country, City, and Street Address',
+              );
+              return;
+            }
 
-        $('#saveBillingAddress').click(function () {
-          const country = $('#countryInput').val().trim();
-          const province = $('#provinceStateInput').val().trim();
-          const city = $('#cityInput').val().trim();
-          const postalCode = $('#postalCodeInput').val().trim();
-          const street1 = $('#streetLine1Input').val().trim();
-          const street2 = $('#streetLine2Input').val().trim();
+            let addressText = `${streetLine1}`;
+            if (streetLine2) addressText += `, ${streetLine2}`;
+            addressText += `<br>${city}`;
+            if (provinceState) addressText += `, ${provinceState}`;
+            if (postalCode) addressText += ` ${postalCode}`;
+            addressText += `<br>${country}`;
 
-          if (!country || !city || !street1) {
-            alert(
-              'Please fill in required fields: Country, City, and Street Address',
-            );
-            return;
-          }
+            this.billingAddressText = addressText;
+            this.billingAddressAdded = true;
+            this.showBillingModal = false;
+          },
 
-          let addressText = `${street1}`;
-          if (street2) addressText += `, ${street2}`;
-          addressText += `<br>${city}`;
-          if (province) addressText += `, ${province}`;
-          if (postalCode) addressText += ` ${postalCode}`;
-          addressText += `<br>${country}`;
+          async validatePaymentMethod(type, payload) {
+            const body = { type };
 
-          $('#billingAddressText').html(addressText);
-          $('#billingAddressField').addClass('hidden');
-          $('#billingAddressSummary').removeClass('hidden');
-          billingAddressAdded = true;
+            if (type === 'CARD') body.card = payload.card;
+            if (type === 'EWALLET') body.ewallet = payload.ewallet;
+            if (type === 'DIRECT_DEBIT') body.directDebit = payload.directDebit;
 
-          closeBillingModal();
-        });
+            console.log('Validating payment method:', body);
 
-        // Form submissions
-        $('#cardForm').submit(function (e) {
-          e.preventDefault();
-          if (!billingAddressAdded) {
-            showError(
-              'cardError',
-              'Please add a billing address before submitting',
-            );
-            $('#billingAddressField')[0].scrollIntoView({
-              behavior: 'smooth',
-              block: 'center',
-            });
-            return;
-          }
-          handleCardSubmit();
-        });
+            try {
+              const res = await fetch(this.validatePaymentMethodsUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json',
+                },
+                body: JSON.stringify(body),
+              });
 
-        $('#ewalletForm').submit(function (e) {
-          e.preventDefault();
-          handleEwalletSubmit();
-        });
+              const data = await res.json();
 
-        $('#directDebitForm').submit(function (e) {
-          e.preventDefault();
-          handleDirectDebitSubmit();
-        });
-
-        $('#addAnotherMethod').click(function () {
-          resetAllForms();
-        });
-      });
-
-      function openBillingModal() {
-        $('#billingAddressModal').removeClass('hidden');
-        $('body').css('overflow', 'hidden');
-      }
-
-      function closeBillingModal() {
-        $('#billingAddressModal').addClass('hidden');
-        $('body').css('overflow', 'auto');
-      }
-
-      function renderEwalletOptions() {
-        const ewalletConfig = paymentMethodsOptions.find(
-          (opt) => opt.type === 'EWALLET',
-        );
-        if (
-          !ewalletConfig ||
-          !ewalletConfig.options ||
-          ewalletConfig.options.length === 0
-        ) {
-          $('#ewalletOptions').html(
-            '<p class="text-gray-500 text-sm">No e-wallet options available</p>',
-          );
-          return;
-        }
-
-        const container = $('#ewalletOptions');
-        container.empty();
-
-        ewalletConfig.options.forEach((option) => {
-          const disabled = !option.isAllowed;
-          const html = `
-          <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition ${
-            disabled
-              ? 'opacity-50 cursor-not-allowed bg-gray-50'
-              : 'hover:border-purple-300'
-          }">
-          ${
-            disabled
-              ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-green-600"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>'
-              : '<input type="radio" name="ewallet" value="' +
-                option.channelCode +
-                '" class="h-4 w-4 text-purple-600 focus:ring-purple-500" />'
-          }
-          <span class="font-medium text-gray-900">${option.channelCode}</span>
-          ${
-            disabled
-              ? `<span class="text-xs text-amber-600 ml-auto">Linked (${option.channelCode})</span>`
-              : ''
-          }
-          </label>
-          `;
-          container.append(html);
-        });
-      }
-
-      function renderDirectDebitOptions() {
-        const ddConfig = paymentMethodsOptions.find(
-          (opt) => opt.type === 'DIRECT_DEBIT',
-        );
-        if (!ddConfig || !ddConfig.options || ddConfig.options.length === 0) {
-          $('#directDebitOptions').html(
-            '<p class="text-gray-500 text-sm">No direct debit options available</p>',
-          );
-          return;
-        }
-
-        const container = $('#directDebitOptions');
-        container.empty();
-
-        ddConfig.options.forEach((option) => {
-          const disabled = !option.isAllowed;
-          const html = `
-          <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition ${
-            disabled
-              ? 'opacity-50 cursor-not-allowed bg-gray-50'
-              : 'hover:border-purple-300'
-          }">
-          ${
-            disabled
-              ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-green-600"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>'
-              : '<input type="radio" name="ewallet" value="' +
-                option.channelCode +
-                '" class="h-4 w-4 text-purple-600 focus:ring-purple-500" />'
-          }
-          <span class="font-medium text-gray-900">${option.channelCode}</span>
-          ${
-            disabled
-              ? `<span class="text-xs text-amber-600 ml-auto">Linked (${option.channelCode})</span>`
-              : ''
-          }
-          </label>
-          `;
-          container.append(html);
-        });
-      }
-
-      function toggleAddButtonState() {
-        const ewalletConfig = paymentMethodsOptions.find(
-          (opt) => opt.type === 'EWALLET',
-        );
-        const ddConfig = paymentMethodsOptions.find(
-          (opt) => opt.type === 'DIRECT_DEBIT',
-        );
-
-        const ewalletAllDisabled = ewalletConfig?.options?.every(
-          (opt) => !opt.isAllowed,
-        );
-        const directDebitAllDisabled = ddConfig?.options?.every(
-          (opt) => !opt.isAllowed,
-        );
-
-        // Helper to disable/enable button with text update
-        function updateButtonState(formId, isDisabled, defaultText) {
-          const form = $(`#${formId}`);
-          const btn = form.find('button[type="submit"]');
-          const text = btn.find('.submit-text');
-
-          if (isDisabled) {
-            btn
-              .prop('disabled', true)
-              .addClass('opacity-50 cursor-not-allowed');
-            text.text('All Linked');
-            form
-              .find('input[type="radio"], input[type="checkbox"]')
-              .prop('disabled', true);
-          } else {
-            btn
-              .prop('disabled', false)
-              .removeClass('opacity-50 cursor-not-allowed');
-            text.text(defaultText);
-            form
-              .find('input[type="radio"], input[type="checkbox"]')
-              .prop('disabled', false);
-          }
-        }
-
-        updateButtonState('ewalletForm', ewalletAllDisabled, 'Add E-Wallet');
-        updateButtonState(
-          'directDebitForm',
-          directDebitAllDisabled,
-          'Add Direct Debit',
-        );
-      }
-
-      // Call after rendering options
-      renderEwalletOptions();
-      renderDirectDebitOptions();
-      toggleAddButtonState();
-
-      async function validatePaymentMethod(type, payload) {
-        const body = { type };
-
-        if (type === 'CARD') body.card = payload.card;
-        if (type === 'EWALLET') body.ewallet = payload.ewallet;
-        if (type === 'DIRECT_DEBIT') body.directDebit = payload.directDebit;
-
-        console.log('Validating payment method:', body);
-
-        try {
-          const res = await fetch(validatePaymentMethodsUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            body: JSON.stringify(body),
-          });
-
-          const data = await res.json();
-
-          if (!res.ok) {
-            console.error('Error response:', data);
-            throw new Error(
-              data.message || `Validation failed with status ${res.status}`,
-            );
-          }
-
-          console.log('Validation successful:', data);
-          return data;
-        } catch (error) {
-          console.error('Validation error:', error);
-          throw error;
-        }
-      }
-
-      async function handleCardSubmit() {
-        const form = $('#cardForm');
-        const btn = form.find('button[type="submit"]');
-
-        showLoading(btn);
-        hideError('cardError');
-
-        try {
-          // Get card details
-          const cardNumber = $('#cardNumberInput').val().replace(/\s/g, '');
-          const expiryMonth = $('#expiryMonthInput').val();
-          const expiryYear = $('#expiryYearInput').val();
-
-          // Determine card type (simple logic)
-          const cardType = cardNumber.startsWith('4')
-            ? 'CREDIT'
-            : cardNumber.startsWith('5')
-              ? 'CREDIT'
-              : 'DEBIT';
-          const maskedCardNumber = cardNumber.replace(
-            /(\d{6})\d+(\d{4})/,
-            '$1XXXXXX$2',
-          );
-
-          // Validate with backend
-          await validatePaymentMethod('CARD', {
-            card: {
-              cardType: cardType,
-              maskedCardNumber: maskedCardNumber,
-              expiryMonth: expiryMonth,
-              expiryYear: expiryYear,
-            },
-          });
-
-          // Proceed with Xendit tokenization
-          const reqData = {
-            type: 'CARD',
-            reusability: 'MULTIPLE_USE',
-            customer_id: customerId,
-            card: {
-              currency: 'IDR',
-              channel_properties: {
-                skip_three_d_secure: true,
-                success_return_url: `${successReturnUrl}?type=card&status=success`,
-                failure_return_url: `${failureReturnUrl}?type=card&status=failure`,
-              },
-              card_information: {
-                card_number: cardNumber,
-                expiry_month: expiryMonth,
-                expiry_year: expiryYear,
-                cvv: $('#cvvInput').val(),
-                cardholder_name: $('#cardholderNameInput').val(),
-                cardholder_email: $('#cardholderEmailInput').val(),
-                cardholder_phone_number: $('#cardholderPhoneNumberInput').val(),
-              },
-              billing_information: {
-                country: $('#countryInput').val(),
-                province_state: $('#provinceStateInput').val(),
-                postal_code: $('#postalCodeInput').val(),
-                city: $('#cityInput').val(),
-                street_line1: $('#streetLine1Input').val(),
-                street_line2: $('#streetLine2Input').val(),
-              },
-            },
-            metadata: {
-              default: $('#cardDefaultCheckbox').is(':checked'),
-            },
-          };
-
-          console.log('Creating Xendit payment method:', reqData);
-
-          Xendit.payment.createPaymentMethod(
-            reqData,
-            function (err, paymentMethod) {
-              hideLoading(btn);
-
-              if (err) {
-                console.error('Xendit error:', err);
-                showError(
-                  'cardError',
-                  err.message || 'Failed to add card. Please try again.',
+              if (!res.ok) {
+                console.error('Error response:', data);
+                throw new Error(
+                  data.message || `Validation failed with status ${res.status}`,
                 );
+              }
+
+              console.log('Validation successful:', data);
+              return data;
+            } catch (error) {
+              console.error('Validation error:', error);
+              throw error;
+            }
+          },
+
+          async handleCardSubmit() {
+            if (!this.billingAddressAdded) {
+              this.errors.card =
+                'Please add a billing address before submitting';
+              return;
+            }
+
+            this.loading.card = true;
+            this.errors.card = null;
+
+            try {
+              const cardNumber = this.cardForm.cardNumber.replace(/\s/g, '');
+              const cardType = cardNumber.startsWith('4')
+                ? 'CREDIT'
+                : cardNumber.startsWith('5')
+                  ? 'CREDIT'
+                  : 'DEBIT';
+
+              const maskedCardNumber = cardNumber.replace(
+                /(\d{6})\d+(\d{4})/,
+                '$1XXXXXX$2',
+              );
+
+              // Validate with backend
+              await this.validatePaymentMethod('CARD', {
+                card: {
+                  card_type: cardType,
+                  masked_card_number: maskedCardNumber,
+                  expiry_month: this.cardForm.expiryMonth,
+                  expiry_year: this.cardForm.expiryYear,
+                },
+              });
+
+              // Proceed with Xendit tokenization
+              const reqData = {
+                type: 'CARD',
+                reusability: 'MULTIPLE_USE',
+                customer_id: this.customerId,
+                card: {
+                  currency: 'IDR',
+                  channel_properties: {
+                    skip_three_d_secure: true,
+                    success_return_url: `${this.successReturnUrl}?type=card&status=success`,
+                    failure_return_url: `${this.failureReturnUrl}?type=card&status=failure`,
+                  },
+                  card_information: {
+                    card_number: cardNumber,
+                    expiry_month: this.cardForm.expiryMonth,
+                    expiry_year: this.cardForm.expiryYear,
+                    cvv: this.cardForm.cvv,
+                    cardholder_name: this.cardForm.cardholderName,
+                    cardholder_email: this.cardForm.email,
+                    cardholder_phone_number: this.cardForm.phone,
+                  },
+                  billing_information: {
+                    country: this.billingAddress.country,
+                    province_state: this.billingAddress.provinceState,
+                    postal_code: this.billingAddress.postalCode,
+                    city: this.billingAddress.city,
+                    street_line1: this.billingAddress.streetLine1,
+                    street_line2: this.billingAddress.streetLine2,
+                  },
+                },
+                metadata: {
+                  default: this.cardForm.isDefault,
+                },
+              };
+
+              console.log('Creating Xendit payment method:', reqData);
+
+              const self = this;
+              Xendit.payment.createPaymentMethod(
+                reqData,
+                function (err, paymentMethod) {
+                  self.loading.card = false;
+
+                  if (err) {
+                    console.error('Xendit error:', err);
+                    self.errors.card =
+                      err.message || 'Failed to add card. Please try again.';
+                    return;
+                  }
+
+                  console.log('Payment method created:', paymentMethod);
+                  self.displaySuccess('CARD', {
+                    cardNumber: '•••• •••• •••• ' + cardNumber.slice(-4),
+                    cardholder: self.cardForm.cardholderName,
+                    cardType: cardType,
+                  });
+                },
+              );
+            } catch (error) {
+              this.loading.card = false;
+              this.errors.card =
+                error.message || 'An error occurred. Please try again.';
+            }
+          },
+
+          async handleEwalletSubmit() {
+            if (!this.ewalletForm.selectedChannel) {
+              this.errors.ewallet = 'Please select an e-wallet provider';
+              return;
+            }
+
+            this.loading.ewallet = true;
+            this.errors.ewallet = null;
+
+            try {
+              const response = await fetch(this.createPaymentMethodsUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json',
+                },
+                body: JSON.stringify({
+                  type: 'EWALLET',
+                  ewallet: { channelCode: this.ewalletForm.selectedChannel },
+                  successReturnUrl: this.successReturnUrl,
+                  failureReturnUrl: this.failureReturnUrl,
+                  default: this.ewalletForm.isDefault,
+                }),
+              });
+
+              const result = await response.json();
+              this.loading.ewallet = false;
+
+              if (!response.ok || !result.success) {
+                const errorMessage =
+                  result.error?.message ||
+                  result.message ||
+                  'Failed to add payment method. Please try again.';
+                this.errors.ewallet = errorMessage;
                 return;
               }
 
-              console.log('Payment method created:', paymentMethod);
-              showSuccess('CARD', {
-                cardNumber: '•••• •••• •••• ' + cardNumber.slice(-4),
-                cardholder: $('#cardholderNameInput').val(),
-                cardType: cardType,
+              console.log('Payment method created:', result);
+
+              if (result.data && result.data.url) {
+                this.displayProceedSuccess('EWALLET', result.data);
+              } else {
+                this.displaySuccess('EWALLET', {
+                  channel: this.ewalletForm.selectedChannel,
+                });
+              }
+            } catch (error) {
+              this.loading.ewallet = false;
+              console.error('Error creating e-wallet payment method:', error);
+              this.errors.ewallet =
+                error.message || 'An error occurred. Please try again.';
+            }
+          },
+
+          async handleDirectDebitSubmit() {
+            if (!this.directDebitForm.selectedChannel) {
+              this.errors.directDebit = 'Please select a bank';
+              return;
+            }
+
+            this.loading.directDebit = true;
+            this.errors.directDebit = null;
+
+            try {
+              const response = await fetch(this.createPaymentMethodsUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json',
+                },
+                body: JSON.stringify({
+                  type: 'DIRECT_DEBIT',
+                  directDebit: {
+                    channelCode: this.directDebitForm.selectedChannel,
+                  },
+                  successReturnUrl: this.successReturnUrl,
+                  failureReturnUrl: this.failureReturnUrl,
+                  default: this.directDebitForm.isDefault,
+                }),
               });
-            },
-          );
-        } catch (error) {
-          hideLoading(btn);
-          showError(
-            'cardError',
-            error.message || 'An error occurred. Please try again.',
-          );
-        }
-      }
 
-      // Helper function to show proceed success UI
-      function showProceedSuccess(type, data) {
-        const html = `
-          <div class="space-y-4 text-center">
-            <h3 class="text-lg font-semibold text-gray-900">${data.action.replace(/_/g, ' ')}</h3>
-            <p class="text-gray-600 text-sm">Please proceed to authorize your ${type.toLowerCase()} payment method.</p>
-            <a href="${data.url}" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-              Proceed Add ${type}
-            </a>
-          </div>
-        `;
-        $('#successDetails').html(html);
-        $('#paymentMethodsContainer').addClass('hidden');
-        $('#successContainer').removeClass('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+              const result = await response.json();
+              this.loading.directDebit = false;
 
-      // Refactored E-Wallet Submit Handler
-      async function handleEwalletSubmit() {
-        const form = $('#ewalletForm');
-        const btn = form.find('button[type="submit"]');
-        const selectedChannel = $('input[name="ewallet"]:checked').val();
+              if (!response.ok || !result.success) {
+                const errorMessage =
+                  result.error?.message ||
+                  result.message ||
+                  'Failed to add payment method. Please try again.';
+                this.errors.directDebit = errorMessage;
+                return;
+              }
 
-        if (!selectedChannel) {
-          showError('ewalletError', 'Please select an e-wallet provider');
-          return;
-        }
+              console.log('Payment method created:', result);
 
-        showLoading(btn);
-        hideError('ewalletError');
+              if (result.data && result.data.url) {
+                this.displayProceedSuccess('DIRECT_DEBIT', result.data);
+              } else {
+                this.displaySuccess('DIRECT_DEBIT', {
+                  channel: this.directDebitForm.selectedChannel,
+                });
+              }
+            } catch (error) {
+              this.loading.directDebit = false;
+              console.error(
+                'Error creating direct debit payment method:',
+                error,
+              );
+              this.errors.directDebit =
+                error.message || 'An error occurred. Please try again.';
+            }
+          },
 
-        try {
-          // Call backend API to create payment method
-          const response = await fetch(createPaymentMethodsUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            body: JSON.stringify({
-              type: 'EWALLET',
-              ewallet: { channelCode: selectedChannel },
-              successReturnUrl: successReturnUrl,
-              failureReturnUrl: failureReturnUrl,
-              default: $('#ewalletDefaultCheckbox').is(':checked'),
-            }),
-          });
+          displayProceedSuccess(type, data) {
+            const html = `
+              <div class="space-y-4 text-center">
+                <h3 class="text-lg font-semibold text-gray-900">${data.action.replace(/_/g, ' ')}</h3>
+                <p class="text-gray-600 text-sm">Please proceed to authorize your ${type.toLowerCase()} payment method.</p>
+                <a href="${data.url}" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                  Proceed Add ${type}
+                </a>
+              </div>
+            `;
+            this.successDetails = html;
+            this.showSuccess = true;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          },
 
-          const result = await response.json();
+          displaySuccess(type, details) {
+            let detailsHtml = '<div class="space-y-2 text-sm">';
 
-          hideLoading(btn);
+            if (type === 'CARD') {
+              detailsHtml += `
+                <div class="flex justify-between py-2 border-b">
+                  <span class="text-gray-600">Type:</span>
+                  <span class="font-medium text-gray-900">Credit/Debit Card</span>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                  <span class="text-gray-600">Card Number:</span>
+                  <span class="font-medium text-gray-900">${details.cardNumber}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                  <span class="text-gray-600">Cardholder:</span>
+                  <span class="font-medium text-gray-900">${details.cardholder}</span>
+                </div>
+                <div class="flex justify-between py-2">
+                  <span class="text-gray-600">Card Type:</span>
+                  <span class="font-medium text-gray-900">${details.cardType}</span>
+                </div>
+              `;
+            } else if (type === 'EWALLET') {
+              detailsHtml += `
+                <div class="flex justify-between py-2 border-b">
+                  <span class="text-gray-600">Type:</span>
+                  <span class="font-medium text-gray-900">E-Wallet</span>
+                </div>
+                <div class="flex justify-between py-2">
+                  <span class="text-gray-600">Provider:</span>
+                  <span class="font-medium text-gray-900">${details.channel}</span>
+                </div>
+              `;
+            } else if (type === 'DIRECT_DEBIT') {
+              detailsHtml += `
+                <div class="flex justify-between py-2 border-b">
+                  <span class="text-gray-600">Type:</span>
+                  <span class="font-medium text-gray-900">Direct Debit</span>
+                </div>
+                <div class="flex justify-between py-2">
+                  <span class="text-gray-600">Bank:</span>
+                  <span class="font-medium text-gray-900">${details.channel}</span>
+                </div>
+              `;
+            }
 
-          // Check if response is successful
-          if (!response.ok || !result.success) {
-            const errorMessage =
-              result.error?.message ||
-              result.message ||
-              'Failed to add payment method. Please try again.';
-            showError('ewalletError', errorMessage);
-            return;
-          }
+            detailsHtml += `
+              <div class="flex justify-between py-2 pt-4">
+                <span class="text-gray-600">Status:</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  Active
+                </span>
+              </div>
+            </div>`;
 
-          console.log('Payment method created:', result);
+            this.successDetails = detailsHtml;
+            this.showSuccess = true;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          },
 
-          // Show proceed success UI with action link
-          if (result.data && result.data.url) {
-            showProceedSuccess('EWALLET', result.data);
-          } else {
-            // Fallback to regular success if no redirect URL
-            showSuccess('EWALLET', {
-              channel: selectedChannel,
-            });
-          }
-        } catch (error) {
-          hideLoading(btn);
-          console.error('Error creating e-wallet payment method:', error);
-          showError(
-            'ewalletError',
-            error.message || 'An error occurred. Please try again.',
-          );
-        }
-      }
+          resetAllForms() {
+            this.showSuccess = false;
 
-      // Refactored Direct Debit Submit Handler
-      async function handleDirectDebitSubmit() {
-        const form = $('#directDebitForm');
-        const btn = form.find('button[type="submit"]');
-        const selectedChannel = $('input[name="directdebit"]:checked').val();
+            // Reset card form
+            this.cardForm = {
+              cardNumber: '4000000000001091',
+              expiryMonth: '12',
+              expiryYear: '2030',
+              cvv: '123',
+              cardholderName: 'John Doe',
+              email: 'john.doe@mail.com',
+              phone: '+6281234567890',
+              isDefault: false,
+            };
 
-        if (!selectedChannel) {
-          showError('directDebitError', 'Please select a bank');
-          return;
-        }
+            // Reset e-wallet form
+            this.ewalletForm = {
+              selectedChannel: null,
+              isDefault: false,
+            };
 
-        showLoading(btn);
-        hideError('directDebitError');
+            // Reset direct debit form
+            this.directDebitForm = {
+              selectedChannel: null,
+              isDefault: false,
+            };
 
-        try {
-          // Call backend API to create payment method
-          const response = await fetch(createPaymentMethodsUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            body: JSON.stringify({
-              type: 'DIRECT_DEBIT',
-              directDebit: { channelCode: selectedChannel },
-              successReturnUrl: successReturnUrl,
-              failureReturnUrl: failureReturnUrl,
-              default: $('#directDebitDefaultCheckbox').is(':checked'),
-            }),
-          });
+            // Reset billing address
+            this.billingAddressAdded = false;
+            this.billingAddress = {
+              country: 'ID',
+              provinceState: 'Jakarta',
+              city: 'Jakarta Selatan',
+              postalCode: '12345',
+              streetLine1: 'Jl. Sudirman No.1',
+              streetLine2: '',
+            };
 
-          const result = await response.json();
+            // Reset errors
+            this.errors = {
+              card: null,
+              ewallet: null,
+              directDebit: null,
+            };
 
-          hideLoading(btn);
+            // Collapse all sections
+            this.currentOpenMethod = null;
 
-          // Check if response is successful
-          if (!response.ok || !result.success) {
-            const errorMessage =
-              result.error?.message ||
-              result.message ||
-              'Failed to add payment method. Please try again.';
-            showError('directDebitError', errorMessage);
-            return;
-          }
-
-          console.log('Payment method created:', result);
-
-          // Show proceed success UI with action link
-          if (result.data && result.data.url) {
-            showProceedSuccess('DIRECT_DEBIT', result.data);
-          } else {
-            // Fallback to regular success if no redirect URL
-            showSuccess('DIRECT_DEBIT', {
-              channel: selectedChannel,
-            });
-          }
-        } catch (error) {
-          hideLoading(btn);
-          console.error('Error creating direct debit payment method:', error);
-          showError(
-            'directDebitError',
-            error.message || 'An error occurred. Please try again.',
-          );
-        }
-      }
-      function showLoading(btn) {
-        btn.prop('disabled', true);
-        btn.find('.submit-text').text('Processing...');
-        btn.find('.submit-icon').addClass('hidden');
-        btn.find('.loading-icon').removeClass('hidden');
-      }
-
-      function hideLoading(btn) {
-        btn.prop('disabled', false);
-        btn.find('.submit-icon').removeClass('hidden');
-        btn.find('.loading-icon').addClass('hidden');
-
-        const form = btn.closest('form');
-        if (form.attr('id') === 'cardForm') {
-          btn.find('.submit-text').text('Add Card');
-        } else if (form.attr('id') === 'ewalletForm') {
-          btn.find('.submit-text').text('Add E-Wallet');
-        } else if (form.attr('id') === 'directDebitForm') {
-          btn.find('.submit-text').text('Add Direct Debit');
-        }
-      }
-
-      function showError(errorId, message) {
-        const errorBox = $(`#${errorId}`);
-        errorBox.html(`
-          <div class="flex items-start space-x-2">
-            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>${message}</span>
-          </div>
-        `);
-        errorBox.removeClass('hidden');
-
-        // Scroll to error
-        errorBox[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      function hideError(errorId) {
-        $(`#${errorId}`).addClass('hidden');
-      }
-
-      function showSuccess(type, details) {
-        let detailsHtml = '<div class="space-y-2 text-sm">';
-
-        if (type === 'CARD') {
-          detailsHtml += `
-            <div class="flex justify-between py-2 border-b">
-              <span class="text-gray-600">Type:</span>
-              <span class="font-medium text-gray-900">Credit/Debit Card</span>
-            </div>
-            <div class="flex justify-between py-2 border-b">
-              <span class="text-gray-600">Card Number:</span>
-              <span class="font-medium text-gray-900">${details.cardNumber}</span>
-            </div>
-            <div class="flex justify-between py-2 border-b">
-              <span class="text-gray-600">Cardholder:</span>
-              <span class="font-medium text-gray-900">${details.cardholder}</span>
-            </div>
-            <div class="flex justify-between py-2">
-              <span class="text-gray-600">Card Type:</span>
-              <span class="font-medium text-gray-900">${details.cardType}</span>
-            </div>
-          `;
-        } else if (type === 'EWALLET') {
-          detailsHtml += `
-            <div class="flex justify-between py-2 border-b">
-              <span class="text-gray-600">Type:</span>
-              <span class="font-medium text-gray-900">E-Wallet</span>
-            </div>
-            <div class="flex justify-between py-2">
-              <span class="text-gray-600">Provider:</span>
-              <span class="font-medium text-gray-900">${details.channel}</span>
-            </div>
-          `;
-        } else if (type === 'DIRECT_DEBIT') {
-          detailsHtml += `
-            <div class="flex justify-between py-2 border-b">
-              <span class="text-gray-600">Type:</span>
-              <span class="font-medium text-gray-900">Direct Debit</span>
-            </div>
-            <div class="flex justify-between py-2">
-              <span class="text-gray-600">Bank:</span>
-              <span class="font-medium text-gray-900">${details.channel}</span>
-            </div>
-          `;
-        }
-
-        detailsHtml += `
-          <div class="flex justify-between py-2 pt-4">
-            <span class="text-gray-600">Status:</span>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Active
-            </span>
-          </div>
-        </div>`;
-
-        $('#successDetails').html(detailsHtml);
-        $('#paymentMethodsContainer').addClass('hidden');
-        $('#successContainer').removeClass('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      function resetAllForms() {
-        $('#successContainer').addClass('hidden');
-        $('#paymentMethodsContainer').removeClass('hidden');
-
-        // Reset all forms
-        $('#cardForm')[0].reset();
-        $('#ewalletForm')[0].reset();
-        $('#directDebitForm')[0].reset();
-
-        // Reset card form default values
-        $('#cardNumberInput').val('4000000000001091');
-        $('#expiryMonthInput').val('12');
-        $('#expiryYearInput').val('2030');
-        $('#cvvInput').val('123');
-        $('#cardholderNameInput').val('John Doe');
-        $('#cardholderEmailInput').val('john.doe@mail.com');
-        $('#cardholderPhoneNumberInput').val('+6281234567890');
-        $('#currencyInput').val('IDR');
-
-        // Reset billing address
-        billingAddressAdded = false;
-        $('#billingAddressSummary').addClass('hidden');
-        $('#billingAddressField').removeClass('hidden');
-
-        // Reset billing address modal values
-        $('#countryInput').val('ID');
-        $('#provinceStateInput').val('Jakarta');
-        $('#cityInput').val('Jakarta Selatan');
-        $('#postalCodeInput').val('12345');
-        $('#streetLine1Input').val('Jl. Sudirman No.1');
-        $('#streetLine2Input').val('');
-
-        // Hide all errors
-        hideError('cardError');
-        hideError('ewalletError');
-        hideError('directDebitError');
-
-        // Uncheck all checkboxes
-        $('#cardDefaultCheckbox').prop('checked', false);
-        $('#ewalletDefaultCheckbox').prop('checked', false);
-        $('#directDebitDefaultCheckbox').prop('checked', false);
-
-        // Uncheck all radio buttons
-        $('input[name="ewallet"]').prop('checked', false);
-        $('input[name="directdebit"]').prop('checked', false);
-
-        // Collapse all sections
-        $('.collapse-content').removeClass('active');
-        $('.payment-method-toggle svg:last-child').removeClass('rotate-180');
-        currentOpenMethod = null;
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          },
+        },
+      }).mount('#app');
     </script>
   </body>
 </html>

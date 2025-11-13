@@ -33,7 +33,7 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { getSignedUrlConfig } from './config/signed-url.config';
 import { ClientUrlMiddleware } from './common/middlewares/client-url.middleware';
-import { SnakeCaseResponseInterceptor } from './common/interceptors/snake-case-transform.interceptor';
+import { SnakeCaseTransformInterceptor } from './common/interceptors/snake-case-transform.interceptor';
 
 @Module({
   imports: [
@@ -120,7 +120,7 @@ import { SnakeCaseResponseInterceptor } from './common/interceptors/snake-case-t
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: SnakeCaseResponseInterceptor, // before serialization
+      useClass: SnakeCaseTransformInterceptor, // before serialization
     },
 
     {
@@ -131,12 +131,10 @@ import { SnakeCaseResponseInterceptor } from './common/interceptors/snake-case-t
       provide: APP_INTERCEPTOR,
       useClass: CacheInterceptor, // before controller
     },
-
     {
       provide: APP_INTERCEPTOR,
       useClass: ThrottleInterceptor, // before controller
     },
-
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
