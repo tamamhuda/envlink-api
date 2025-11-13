@@ -27,7 +27,7 @@ import { XenditService } from './xendit/xendit.service';
 import { XenditUtil } from './utils/xendit.util';
 import { TokenUtil } from './utils/token.util';
 import { ClientUrlMiddleware } from './middlewares/client-url.middleware';
-import { SnakeCaseResponseInterceptor } from './interceptors/snake-case-transform.interceptor';
+import { SnakeCaseTransformInterceptor } from './interceptors/snake-case-transform.interceptor';
 
 @Global()
 @Module({
@@ -47,7 +47,7 @@ import { SnakeCaseResponseInterceptor } from './interceptors/snake-case-transfor
     TransformInterceptor,
     UrlAnalyticInterceptor,
     ThrottleInterceptor,
-    SnakeCaseResponseInterceptor,
+    SnakeCaseTransformInterceptor,
 
     ThrottleGuard,
     ThrottleService,
@@ -83,7 +83,7 @@ import { SnakeCaseResponseInterceptor } from './interceptors/snake-case-transfor
     TransformInterceptor,
     UrlAnalyticInterceptor,
     ThrottleInterceptor,
-    SnakeCaseResponseInterceptor,
+    SnakeCaseTransformInterceptor,
 
     ThrottleGuard,
     ThrottleService,

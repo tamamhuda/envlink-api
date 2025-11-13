@@ -87,11 +87,26 @@ export class CacheService {
     }
 
     const exists = await store.get<T>(key);
-    if (!exists) return;
+    if (!exists) {
+      return;
+    }
 
     await store.delete(key).then(() => {
       this.logger.debug(`[CACHE-INVALIDATE]: ${store.namespace}:${key}`);
     });
+  }
+
+  async invalidate(
+    config:
+      | { prefix: CachePrefix; key: string }
+      | { prefix: CachePrefix; key: string }[],
+  ): Promise<void> {
+    const configs = Array.isArray(config) ? config : [config];
+
+    for (const { prefix, key } of configs) {
+      const store = await this.getStore(prefix);
+      await this.invalidateCache(store, key);
+    }
   }
 
   async invalidateKeys(

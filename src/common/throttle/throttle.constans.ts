@@ -22,7 +22,7 @@ export const THROTTLE_POLICIES: Record<PolicyScope, ThrottlePolicy> = {
     resetInterval: '1h',
     windowMs: ms('1h'),
     cost: 1,
-    chargeOnSuccess: true,
+    chargeOnSuccess: false,
     scope: 'register',
   },
   login: {
@@ -31,7 +31,7 @@ export const THROTTLE_POLICIES: Record<PolicyScope, ThrottlePolicy> = {
     resetInterval: '30m',
     windowMs: ms('30m'),
     cost: 1,
-    chargeOnSuccess: true,
+    chargeOnSuccess: false,
     scope: 'login',
   },
   'resend-email': {
@@ -40,7 +40,7 @@ export const THROTTLE_POLICIES: Record<PolicyScope, ThrottlePolicy> = {
     resetInterval: '5m',
     windowMs: ms('5m'),
     cost: 1,
-    chargeOnSuccess: true,
+    chargeOnSuccess: false,
     scope: 'resend-email',
     delay: {
       base: ms('90s'),
@@ -53,7 +53,7 @@ export const THROTTLE_POLICIES: Record<PolicyScope, ThrottlePolicy> = {
     resetInterval: '1d',
     windowMs: ms('1d'),
     cost: 1,
-    chargeOnSuccess: true,
+    chargeOnSuccess: false,
     scope: 'shorten-public',
   },
   'change-password': {
@@ -62,7 +62,7 @@ export const THROTTLE_POLICIES: Record<PolicyScope, ThrottlePolicy> = {
     resetInterval: '1h',
     windowMs: ms('1h'),
     cost: 1,
-    chargeOnSuccess: true,
+    chargeOnSuccess: false,
     scope: 'change-password',
   },
   'image-upload-user': {
@@ -71,7 +71,7 @@ export const THROTTLE_POLICIES: Record<PolicyScope, ThrottlePolicy> = {
     resetInterval: '1h',
     windowMs: ms('1h'),
     cost: 1,
-    chargeOnSuccess: true,
+    chargeOnSuccess: false,
     scope: 'image-upload-user',
   },
   'update-user': {
@@ -80,7 +80,7 @@ export const THROTTLE_POLICIES: Record<PolicyScope, ThrottlePolicy> = {
     resetInterval: '1h',
     windowMs: ms('1h'),
     cost: 1,
-    chargeOnSuccess: true,
+    chargeOnSuccess: false,
     scope: 'update-user',
   },
   default: {
@@ -89,7 +89,7 @@ export const THROTTLE_POLICIES: Record<PolicyScope, ThrottlePolicy> = {
     resetInterval: '1d',
     windowMs: ms('1d'),
     cost: 1,
-    chargeOnSuccess: true,
+    chargeOnSuccess: false,
     scope: 'default',
   },
 };

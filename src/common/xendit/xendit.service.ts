@@ -159,7 +159,7 @@ export class XenditService {
     );
   }
 
-  async getCustomerById(id: string): Promise<Customer | null> {
+  async getCustomerByReferenceId(id: string): Promise<Customer | null> {
     const { data, hasMore } = await this.xenCustomer.getCustomerByReferenceID({
       referenceId: id,
     });
@@ -170,7 +170,7 @@ export class XenditService {
     return null;
   }
 
-  private async createCustomer(user: User) {
+  async createCustomer(user: User): Promise<Customer> {
     try {
       const { email, fullName, phoneNumber } = user;
       const referenceId = `xen_customer-${user.id}`;
@@ -198,7 +198,7 @@ export class XenditService {
   async getOrCreateCustomer(user: User) {
     try {
       const referenceId = `xen_customer-${user.id}`;
-      let customer = await this.getCustomerById(referenceId);
+      let customer = await this.getCustomerByReferenceId(referenceId);
       if (!customer) {
         customer = await this.createCustomer(user);
       }

@@ -9,6 +9,7 @@ import { mergeMap, catchError } from 'rxjs/operators';
 import { ThrottleService } from '../throttle/throttle.service';
 import { Request, Response } from 'express';
 import LoggerService from '../logger/logger.service';
+import { PolicyScope } from '../throttle/throttle.constans';
 
 @Injectable()
 export class ThrottleInterceptor<T> implements NestInterceptor<T> {
@@ -24,11 +25,16 @@ export class ThrottleInterceptor<T> implements NestInterceptor<T> {
 
     const throttle = request.throttle;
     const policy = throttle?.policy;
+    const isThrottlerScope = Object.values(PolicyScope).includes(
+      policy?.scope as PolicyScope,
+    );
 
     // If no throttle policy — skip throttling entirely
-    if (!policy) {
+    if (!policy || isThrottlerScope) {
       return next.handle();
     }
+
+    console.log(`Throttle Policy: ${JSON.stringify(policy)}`);
 
     const key = throttle.key;
     const cost = throttle.cost ?? policy.cost ?? 1;

@@ -45,6 +45,7 @@ export default class CatchEverythingFilter implements ExceptionFilter {
       message,
       status,
     );
+
     this.logger.error(JSON.stringify(exception, null, 2));
 
     httpAdapter.reply(response, responseBody, status);

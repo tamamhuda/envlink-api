@@ -4,18 +4,25 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import LoggerService from '../logger/logger.service';
+import { instanceToPlain } from 'class-transformer';
 import snakecaseKeys from 'snakecase-keys';
 
 @Injectable()
-export class SnakeCaseResponseInterceptor implements NestInterceptor {
-  constructor(private readonly logger: LoggerService) {}
+export class SnakeCaseTransformInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler) {
+    return next.handle().pipe(
+      map((data) => {
+        if (data == null) return data;
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    return next
-      .handle()
-      .pipe(map((data) => snakecaseKeys(data, { deep: true })));
+        // convert entity or DTO instance to plain object
+        const plainData = Array.isArray(data)
+          ? data.map((item) => instanceToPlain(item))
+          : instanceToPlain(data);
+
+        // now apply snake_case transformation safely
+        return snakecaseKeys(plainData, { deep: true });
+      }),
+    );
   }
 }

@@ -312,6 +312,7 @@ export interface PaymentMethodData {
   updated: string;
   metadata: {
     default?: boolean;
+    custom_name?: string;
     [key: string]: any;
   } | null;
   customer_id: string;

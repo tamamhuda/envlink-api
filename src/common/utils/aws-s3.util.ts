@@ -17,16 +17,17 @@ export class AwsS3Util {
   private s3Client: S3Client;
   private bucket: string;
   constructor(
-    private readonly config: ConfigService<Env>,
+    config: ConfigService<Env>,
     private readonly logger: LoggerService,
   ) {
-    this.bucket = this.config.getOrThrow('AWS_S3_BUCKET');
+    this.bucket = config.getOrThrow('AWS_S3_BUCKET');
     this.s3Client = new S3Client({
       credentials: {
-        accessKeyId: this.config.getOrThrow('AWS_ACCESS_KEY'),
-        secretAccessKey: this.config.getOrThrow('AWS_SECRET_KEY'),
+        accessKeyId: config.getOrThrow('AWS_ACCESS_KEY'),
+        secretAccessKey: config.getOrThrow('AWS_SECRET_KEY'),
       },
-      region: this.config.getOrThrow('AWS_S3_REGION'),
+      endpoint: config.getOrThrow('AWS_S3_ENDPOINT'),
+      region: config.getOrThrow('AWS_S3_REGION'),
     });
   }
 
@@ -48,17 +49,20 @@ export class AwsS3Util {
     }
   }
 
-  async uploadFile(file: Express.Multer.File, key: string) {
+  async uploadFile(file: Express.Multer.File, key: string): Promise<string> {
     try {
       const params: PutObjectCommandInput = {
         Bucket: this.bucket,
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
+        ContentLength: file.size,
       };
+
       await this.s3Client.send(new PutObjectCommand(params));
       return key;
     } catch (error) {
+      console.error(error.message);
       this.logger.error('Failed to upload file to AWS S3', error);
       throw new Error('Failed to upload file to AWS S3');
     }

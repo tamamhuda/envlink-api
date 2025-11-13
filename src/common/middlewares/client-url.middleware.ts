@@ -6,7 +6,7 @@ import * as z from 'zod';
 @Injectable()
 export class ClientUrlMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    const clientUrl = req.headers['X-Client-Url'];
+    const clientUrl = req.headers['x-client-url'];
     if (typeof clientUrl === 'string') {
       if (clientUrl) {
         const { error } = z

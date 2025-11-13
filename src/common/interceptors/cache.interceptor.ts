@@ -44,6 +44,14 @@ export class CacheInterceptor<T> implements NestInterceptor<T, T> {
     const request = context.switchToHttp().getRequest<Request>();
     const authorization = request.headers.authorization;
 
+    const keyOrFn = this.reflector.get<
+      string | ((ctx: CacheKeyContext<T>) => string)
+    >(CACHE_KEY, handler);
+
+    const cachePrefix = this.reflector.get<CachePrefix>(CACHE_PREFIX, handler);
+
+    if (!cachePrefix || !keyOrFn) return next.handle();
+
     const baseCtx: CacheKeyContext<T> = {
       params: request.params,
       query: request.query,
@@ -53,15 +61,6 @@ export class CacheInterceptor<T> implements NestInterceptor<T, T> {
         ? await this.jwtUtil.extractSessionIdFromHeader(request)
         : undefined,
     };
-
-    const cachePrefix = this.reflector.get<CachePrefix>(CACHE_PREFIX, handler);
-    if (!cachePrefix) return next.handle();
-
-    const keyOrFn = this.reflector.get<
-      string | ((ctx: CacheKeyContext<T>) => string)
-    >(CACHE_KEY, handler);
-
-    if (!keyOrFn) return next.handle();
     const key = typeof keyOrFn === 'string' ? keyOrFn : keyOrFn(baseCtx);
 
     const cached = this.cache.getCache<T>(cachePrefix, key);

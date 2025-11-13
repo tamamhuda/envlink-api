@@ -35,7 +35,9 @@ export class JwtUtil {
     );
   }
 
-  async verifyRefreshToken(token: string): Promise<JwtPayload> {
+  async verifyRefreshToken(
+    token: string,
+  ): Promise<JwtPayload & { expiresAt: Date; ttl: number }> {
     return this.jwt.verifyAsync(token, this.jwtOptions('refresh'));
   }
 
@@ -55,15 +57,28 @@ export class JwtUtil {
     return token;
   }
 
-  async verifyAccessToken(token: string): Promise<JwtPayload> {
-    return this.jwt.verifyAsync(token, this.jwtOptions('access'));
+  async verifyAccessToken(
+    token: string,
+  ): Promise<JwtPayload & { expiresAt: Date; ttl: number }> {
+    const payload = await this.jwt.verifyAsync(
+      token,
+      this.jwtOptions('access'),
+    );
+    const expiresAt = new Date(payload.exp * 1000);
+    const now = new Date();
+    const ttl = Math.max(0, expiresAt.getTime() - now.getTime());
+    return { ...payload, expiresAt, ttl };
   }
 
-  async extractJwtPayloadFromHeader(req: Request, type: 'access' | 'refresh') {
+  async extractJwtPayloadFromHeader(
+    req: Request,
+    type: 'access' | 'refresh',
+  ): Promise<JwtPayload & { expiresAt: Date; ttl: number }> {
     const token = this.extractAuthorizationHeader(req);
     if (type === 'access') {
       return await this.verifyAccessToken(token);
     }
+
     return await this.verifyRefreshToken(token);
   }
 

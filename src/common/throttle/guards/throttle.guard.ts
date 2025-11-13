@@ -22,6 +22,7 @@ export class ThrottleGuard implements CanActivate {
     const skipThrottling =
       this.reflector.get<boolean>(SKIP_THROTTLE_KEY, handler) ||
       this.reflector.get<boolean>(SKIP_THROTTLE_KEY, controller);
+
     if (skipThrottling) return true;
 
     //  plan (if applicable)
