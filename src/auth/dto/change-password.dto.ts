@@ -14,4 +14,4 @@ const changePasswordSchema = zodToCamelCase(
     }),
 );
 
-export class ChangePasswordDto extends createZodDto(changePasswordSchema) {}
+export class ChangePasswordBodyDto extends createZodDto(changePasswordSchema) {}

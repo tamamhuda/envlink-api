@@ -34,6 +34,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
       request,
       true,
     );
+
     return user;
   }
 }

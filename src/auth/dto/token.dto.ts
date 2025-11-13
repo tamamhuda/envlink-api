@@ -11,5 +11,6 @@ export const tokensSchema = z.object({
 const tokensDtoSchema = zodToCamelCase(tokensSchema);
 
 export class TokensDto extends createZodDto(tokensDtoSchema) {}
+export class TokensSerializerDto extends createZodDto(tokensSchema) {}
 
 export class TokensResponse extends createResponseDto(tokensSchema) {}

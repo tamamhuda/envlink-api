@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { JWT_ACCESS_STRATEGY } from 'src/config/jwt.config';
@@ -39,6 +39,17 @@ export class JwtStrategy extends PassportStrategy(
     exp: number,
     key: string,
   ): Promise<UserInfoDto> {
+    const jti = payload.jti;
+
+    const isBlacklist = await this.cache.getCache<boolean>(
+      CachePrefix.TOKEN,
+      `BLACKLIST:${jti}`,
+    );
+
+    if (isBlacklist) {
+      throw new UnauthorizedException('Token is revoked');
+    }
+
     const sessionInfo = await this.sessionService.validateCurrentSession(
       payload,
       req,

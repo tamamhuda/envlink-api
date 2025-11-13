@@ -17,7 +17,7 @@ export class JwtRefreshGuard extends AuthGuard(JWT_REFRESH_STRATEGY) {
       throw new UnauthorizedException('Invalid token');
 
     if (err || !user) {
-      throw new UnauthorizedException('Invalid Authorization');
+      throw new UnauthorizedException(err.message || 'Invalid Authorization');
     }
     return user;
   }

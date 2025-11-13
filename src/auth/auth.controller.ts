@@ -27,7 +27,11 @@ import {
 } from './dto/authenticated.dto';
 import { LocalAuthGuard } from './guards/local.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
-import { TokensDto, TokensResponse } from './dto/token.dto';
+import {
+  TokensDto,
+  TokensResponse,
+  TokensSerializerDto,
+} from './dto/token.dto';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { ZodSerializerDto } from 'nestjs-zod';
@@ -42,8 +46,8 @@ import { ClientUrl } from 'src/common/decorators/client-url.decorator';
 import { LoginBodyDto } from './dto/login.dto';
 
 @Controller('auth')
-@Public()
 @ApiTags('Authentication')
+@Public()
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -59,7 +63,7 @@ export class AuthController {
   })
   @ApiHeaders([
     {
-      name: 'X-Client-Url',
+      name: 'x-client-url',
       description: 'Client URL used for email verification',
       required: false,
     },
@@ -96,17 +100,17 @@ export class AuthController {
     return await this.authService.signInLocalAccount(req);
   }
 
-  @SkipThrottle()
   @Post('refresh')
-  @ApiBearerAuth(JWT_REFRESH_SECURITY)
+  @SkipThrottle()
   @UseGuards(JwtRefreshGuard)
+  @ApiBearerAuth(JWT_REFRESH_SECURITY)
   @ApiOperation({ summary: 'Refresh token' })
   @ApiOkResponse({
     type: TokensResponse,
     description: 'Refresh token successful',
   })
   @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto(TokensDto)
+  @ZodSerializerDto(TokensSerializerDto)
   async refreshToken(@Req() req: Request): Promise<TokensDto> {
     return await this.authService.refresh(req.user, req);
   }

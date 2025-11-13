@@ -13,6 +13,7 @@ import { UserInfoDto } from './dto/user-info.dto';
 import { IpUtil } from 'src/common/utils/ip.util';
 import { AccountVerifyService } from 'src/account/account-verify.service';
 import { UserMapper } from 'src/user/mapper/user.mapper';
+import { CacheService } from 'src/common/cache/cache.service';
 
 @Injectable()
 export class AuthService {
@@ -122,6 +123,7 @@ export class AuthService {
 
   async verify(token: string): Promise<UserInfoDto> {
     const account = await this.accountVerifyService.verify(token);
+
     return this.userMapper.mapToUserInfoDto(account, account.user);
   }
 }
