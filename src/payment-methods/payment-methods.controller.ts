@@ -28,7 +28,7 @@ import {
 } from '@nestjs/swagger';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { SortPaymentMethodsDto } from './dto/sort-payment-methods.dto';
+import { SortPaymentMethodsBodyDto } from './dto/sort-payment-methods.dto';
 import {
   PaymentMethodActionDto,
   ListPaymentMethodActionResponse,
@@ -37,9 +37,9 @@ import {
 import LoggerService from 'src/common/logger/logger.service';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
 import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
-import { CreatePaymentMethodDto } from './dto/create-payment-method.dto';
+import { CreatePaymentMethodBodyDto } from './dto/create-payment-method.dto';
 import { OkDto, OkResponse } from 'src/common/dto/response.dto';
-import { ValidatePaymentMethodDto } from './dto/validate-payment-method.dto';
+import { ValidatePaymentMethodBodyDto } from './dto/validate-payment-method.dto';
 import { Cached } from 'src/common/decorators/cached.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
@@ -134,7 +134,7 @@ export class PaymentMethodsController {
   @ZodSerializerDto([PaymentMethodSerializerDto])
   async sortPaymentMethods(
     @Req() req: Request,
-    @Body() body: SortPaymentMethodsDto,
+    @Body() body: SortPaymentMethodsBodyDto,
   ): Promise<PaymentMethodDto[]> {
     return await this.paymentMethodsService.sortPaymentMethods(
       req.user.id,
@@ -151,7 +151,7 @@ export class PaymentMethodsController {
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(OkDto)
   async validatePaymentMethod(
-    @Body() body: ValidatePaymentMethodDto,
+    @Body() body: ValidatePaymentMethodBodyDto,
     @AuthenticatedUser() user: UserInfo,
   ): Promise<OkDto> {
     return await this.paymentMethodsService.validatePaymentMethod(
@@ -169,7 +169,7 @@ export class PaymentMethodsController {
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(PaymentMethodActionDto)
   async createPaymentMethod(
-    @Body() body: CreatePaymentMethodDto,
+    @Body() body: CreatePaymentMethodBodyDto,
     @AuthenticatedUser() user: UserInfo,
   ): Promise<PaymentMethodActionDto> {
     return await this.paymentMethodsService.createPaymentMethod(user.id, body);

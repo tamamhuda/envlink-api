@@ -16,7 +16,7 @@ import { PaymentMethodRepository } from 'src/database/repositories/payment-metho
 import { UserService } from 'src/user/user.service';
 import { PaymentMethodDto } from './dto/payment-method.dto';
 import { PaymentMethodsMapper } from './mapper/payment-methods.mapper';
-import { SortPaymentMethodsDto } from './dto/sort-payment-methods.dto';
+import { SortPaymentMethodsBodyDto } from './dto/sort-payment-methods.dto';
 import { XenditService } from 'src/common/xendit/xendit.service';
 import { UrlGeneratorService } from 'nestjs-url-generator';
 import LoggerService from 'src/common/logger/logger.service';
@@ -24,9 +24,9 @@ import {
   PaymentMethodActionDto,
   requestPaymentMethodParamsSchema,
 } from './dto/request-payment-method.dto';
-import { ValidatePaymentMethodDto } from './dto/validate-payment-method.dto';
+import { ValidatePaymentMethodBodyDto } from './dto/validate-payment-method.dto';
 import { TokenUtil } from 'src/common/utils/token.util';
-import { CreatePaymentMethodDto } from './dto/create-payment-method.dto';
+import { CreatePaymentMethodBodyDto } from './dto/create-payment-method.dto';
 import { ZodValidationException } from 'nestjs-zod';
 import { User } from 'src/database/entities/user.entity';
 
@@ -193,7 +193,7 @@ export class PaymentMethodsService {
 
   async sortPaymentMethods(
     userId: string,
-    body: SortPaymentMethodsDto,
+    body: SortPaymentMethodsBodyDto,
   ): Promise<PaymentMethodDto[]> {
     return this.paymentMethodRepository.manager.transaction(async (manager) => {
       return await Promise.all(
@@ -266,7 +266,7 @@ export class PaymentMethodsService {
   }
 
   async validatePaymentMethodWithToken(
-    body: ValidatePaymentMethodDto,
+    body: ValidatePaymentMethodBodyDto,
     token: string,
   ): Promise<OkDto> {
     const userId = this.tokenUtil.verify(token)?.sub;
@@ -276,7 +276,7 @@ export class PaymentMethodsService {
   }
 
   async validatePaymentMethod(
-    body: ValidatePaymentMethodDto,
+    body: ValidatePaymentMethodBodyDto,
     userId: string,
   ): Promise<OkDto> {
     const { card, directDebit, ewallet, type } = body;
@@ -380,7 +380,7 @@ export class PaymentMethodsService {
 
   async createPaymentMethodWithToken(
     token: string,
-    body: CreatePaymentMethodDto,
+    body: CreatePaymentMethodBodyDto,
   ): Promise<PaymentMethodActionDto> {
     const userId = this.tokenUtil.verify(token)?.sub;
     if (!userId) throw new ForbiddenException('Invalid Resource');
@@ -389,7 +389,7 @@ export class PaymentMethodsService {
 
   async createPaymentMethod(
     userId: string,
-    body: CreatePaymentMethodDto,
+    body: CreatePaymentMethodBodyDto,
   ): Promise<PaymentMethodActionDto> {
     const user = await this.userService.findUserById(userId);
     const { type, ewallet, directDebit, successReturnUrl, failureReturnUrl } =

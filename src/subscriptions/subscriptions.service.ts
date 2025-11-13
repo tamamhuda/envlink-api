@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UpgradeSubscriptionDto } from './dto/upgrade-subscription';
+import { UpgradeSubscriptionBodyDto } from './dto/upgrade-subscription';
 import { SubscriptionRepository } from 'src/database/repositories/subscription.repository';
 import Subscription from 'src/database/entities/subscription.entity';
 import Plan from 'src/database/entities/plan.entity';
@@ -175,7 +175,7 @@ export class SubscriptionsService {
   async upgradeSubscriptionPlan(
     userId: string,
     id: string,
-    body: UpgradeSubscriptionDto,
+    body: UpgradeSubscriptionBodyDto,
   ): Promise<SubscriptionInfoDto> {
     return await this.subscriptionRepository.manager.transaction(
       async (manager) => {

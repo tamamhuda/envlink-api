@@ -24,6 +24,6 @@ export const upgradeSubscriptionDtoSchema = zodToCamelCase(
   }),
 );
 
-export class UpgradeSubscriptionDto extends createZodDto(
+export class UpgradeSubscriptionBodyDto extends createZodDto(
   upgradeSubscriptionDtoSchema,
 ) {}

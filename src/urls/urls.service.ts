@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { UrlRepository } from 'src/database/repositories/url.repository';
 import LoggerService from 'src/common/logger/logger.service';
-import { ShortenUrlDto } from './dto/shorten.dto';
-import { UnlockUrlDto, UpdateUrlDto, UrlDto } from './dto/url.dto';
+import { ShortenUrlBodyDto } from './dto/shorten.dto';
+import { UnlockUrlBodyDto, UpdateUrlBodyDto, UrlDto } from './dto/url.dto';
 import { UserService } from 'src/user/user.service';
 import { Url } from 'src/database/entities/url.entity';
 import { Request } from 'express';
@@ -64,7 +64,10 @@ export class UrlsService {
     if (url) throw new ConflictException('Code already exists');
   }
 
-  async createUrl(body: ShortenUrlDto, userInfo?: UserInfo): Promise<UrlDto> {
+  async createUrl(
+    body: ShortenUrlBodyDto,
+    userInfo?: UserInfo,
+  ): Promise<UrlDto> {
     return this.urlRepository.manager.transaction(async (manager) => {
       const { code, isProtected, accessCode, channelIds, ...restOfBody } = body;
       const alias = code ?? this.shortCodeUtil.generate(6);
@@ -113,7 +116,7 @@ export class UrlsService {
     });
   }
 
-  async updateUrl(id: string, body: UpdateUrlDto): Promise<UrlDto> {
+  async updateUrl(id: string, body: UpdateUrlBodyDto): Promise<UrlDto> {
     const existingUrl = await this.findUrlByIdOrCode(id);
     const { code } = body;
     if (code) await this.validateCode(code);
@@ -125,7 +128,7 @@ export class UrlsService {
     if (result.affected === 0) throw new NotFoundException('Url not found');
   }
 
-  async unlockUrlByCode(code: string, body: UnlockUrlDto): Promise<UrlDto> {
+  async unlockUrlByCode(code: string, body: UnlockUrlBodyDto): Promise<UrlDto> {
     const url = await this.findUrlByIdOrCode(code);
     const isValidate =
       url.accessCode &&

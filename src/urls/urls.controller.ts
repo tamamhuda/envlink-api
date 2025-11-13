@@ -12,10 +12,10 @@ import {
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
 import LoggerService from 'src/common/logger/logger.service';
-import { ShortenUrlDto } from './dto/shorten.dto';
+import { ShortenUrlBodyDto } from './dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
-  UpdateUrlDto,
+  UpdateUrlBodyDto,
   UrlDto,
   UrlResponse,
   AllUrlsResponse,
@@ -57,7 +57,7 @@ export class UrlsController {
   @ZodSerializerDto(UrlSerializerDto)
   async createUrls(
     @Req() req: Request,
-    @Body() body: ShortenUrlDto,
+    @Body() body: ShortenUrlBodyDto,
   ): Promise<UrlDto> {
     return await this.urlsService.createUrl(body, req.user);
   }
@@ -99,7 +99,7 @@ export class UrlsController {
   @ZodSerializerDto(UrlSerializerDto)
   async updateUrl(
     @Param('id') id: string,
-    @Body() body: UpdateUrlDto,
+    @Body() body: UpdateUrlBodyDto,
   ): Promise<UrlDto> {
     return await this.urlsService.updateUrl(id, body);
   }

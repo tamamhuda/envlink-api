@@ -9,7 +9,7 @@ import {
   Get,
 } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
-import { UpgradeSubscriptionDto } from './dto/upgrade-subscription';
+import { UpgradeSubscriptionBodyDto } from './dto/upgrade-subscription';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -101,7 +101,7 @@ export class SubscriptionsController {
   @ZodSerializerDto(SubscriptionInfoSerializerDto)
   async upgradeSubscriptionPlan(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() body: UpgradeSubscriptionDto,
+    @Body() body: UpgradeSubscriptionBodyDto,
     @AuthenticatedUser() user: UserInfo,
   ): Promise<SubscriptionInfoDto> {
     return await this.subscriptionsService.upgradeSubscriptionPlan(

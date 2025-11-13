@@ -25,4 +25,4 @@ export const shortenUrlSchema = zodToCamelCase(
     ),
 );
 
-export class ShortenUrlDto extends createZodDto(shortenUrlSchema) {}
+export class ShortenUrlBodyDto extends createZodDto(shortenUrlSchema) {}

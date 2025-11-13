@@ -15,6 +15,7 @@ import {
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
@@ -37,6 +38,7 @@ import LoggerService from 'src/common/logger/logger.service';
 
 @Controller('account')
 @ApiBearerAuth(JWT_SECURITY)
+@ApiTags('Session')
 export class AccountController {
   constructor(
     private readonly accountService: AccountService,

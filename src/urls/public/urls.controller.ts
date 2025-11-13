@@ -10,13 +10,13 @@ import {
 } from '@nestjs/common';
 import { UrlsService } from '../urls.service';
 import LoggerService from 'src/common/logger/logger.service';
-import { ShortenUrlDto } from '../dto/shorten.dto';
+import { ShortenUrlBodyDto } from '../dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
   PublicUrlDto,
   PublicUrlResponse,
   PublicUrlSerializerDto,
-  UnlockUrlDto,
+  UnlockUrlBodyDto,
 } from '../dto/url.dto';
 import {
   ApiCreatedResponse,
@@ -49,7 +49,7 @@ export class PublicUrlsController {
     description: 'Created a new public short URL successfully',
   })
   @ZodSerializerDto(PublicUrlSerializerDto)
-  async shortenUrl(@Body() body: ShortenUrlDto): Promise<PublicUrlDto> {
+  async shortenUrl(@Body() body: ShortenUrlBodyDto): Promise<PublicUrlDto> {
     return await this.urlsService.createUrl(body);
   }
 
@@ -82,7 +82,7 @@ export class PublicUrlsController {
   @ZodSerializerDto(PublicUrlSerializerDto)
   async unlockUrl(
     @Param('code') code: string,
-    @Body() body: UnlockUrlDto,
+    @Body() body: UnlockUrlBodyDto,
   ): Promise<PublicUrlDto> {
     return await this.urlsService.unlockUrlByCode(code, body);
   }

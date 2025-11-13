@@ -62,7 +62,7 @@ const unlockUrlDtoSchema = zodToCamelCase(
   }),
 );
 
-export class UnlockUrlDto extends createZodDto(unlockUrlDtoSchema) {}
+export class UnlockUrlBodyDto extends createZodDto(unlockUrlDtoSchema) {}
 
 export class PublicUrlDto extends createZodDto(publicUrlDtoSchema) {}
 
@@ -70,7 +70,7 @@ export class PublicUrlSerializerDto extends createZodDto(publicUrlSchema) {}
 
 export class PublicUrlResponse extends createResponseDto(publicUrlSchema) {}
 
-export class UpdateUrlDto extends createZodDto(updateUrlDtoSchema) {}
+export class UpdateUrlBodyDto extends createZodDto(updateUrlDtoSchema) {}
 
 export class UpdateMetadataDto extends createZodDto(updateMetadataDtoSchema) {}
 

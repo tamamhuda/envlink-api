@@ -21,12 +21,12 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OkDto, OkResponse } from 'src/common/dto/response.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 
-import { ValidatePaymentMethodDto } from '../dto/validate-payment-method.dto';
+import { ValidatePaymentMethodBodyDto } from '../dto/validate-payment-method.dto';
 import {
   PaymentMethodActionDto,
   PaymentMethodActionResponse,
 } from '../dto/request-payment-method.dto';
-import { CreatePaymentMethodDto } from '../dto/create-payment-method.dto';
+import { CreatePaymentMethodBodyDto } from '../dto/create-payment-method.dto';
 
 @Controller('public/payment-methods')
 @SkipThrottle()
@@ -86,7 +86,7 @@ export class PublicPaymentMethodsController {
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(OkDto)
   async validatePaymentMethod(
-    @Body() body: ValidatePaymentMethodDto,
+    @Body() body: ValidatePaymentMethodBodyDto,
     @Query('token') token: string,
   ): Promise<OkDto> {
     return await this.paymentMethodsService.validatePaymentMethodWithToken(
@@ -105,7 +105,7 @@ export class PublicPaymentMethodsController {
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(PaymentMethodActionDto)
   async createPaymentMethod(
-    @Body() body: CreatePaymentMethodDto,
+    @Body() body: CreatePaymentMethodBodyDto,
     @Query('token') token: string,
   ): Promise<PaymentMethodActionDto> {
     return await this.paymentMethodsService.createPaymentMethodWithToken(
