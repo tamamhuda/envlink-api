@@ -15,10 +15,11 @@ export class UserMapper {
 
   async mapToUserInfoDto(account: Account, user: User): Promise<UserInfo> {
     const { provider, isVerified, lastLoginAt } = account;
-    const { avatar, ...restUser } = user;
+    const { avatar, externalId, ...restUser } = user;
     const avatarUrl = avatar ? await this.awsS3Util.getFileUrl(avatar) : null;
     return {
       ...restUser,
+      customerId: externalId,
       avatar: avatarUrl,
       providers: {
         isVerified,

@@ -5,8 +5,8 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
-  Put,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -38,6 +38,8 @@ import { AwsS3Util } from 'src/common/utils/aws-s3.util';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
 import { PolicyScope } from 'src/common/throttle/throttle.constans';
+import { ClientUrl } from 'src/common/decorators/client-url.decorator';
+import multer from 'multer';
 
 @Controller('user')
 @ApiBearerAuth(JWT_SECURITY)
@@ -50,27 +52,37 @@ export class UserController {
 
   @SkipThrottle()
   @Get('me')
+  @Cached(CachePrefix.USER, (req) => `${req.user?.id}`)
   @ApiOperation({ summary: 'Get user information' })
   @ApiOkResponse({
     type: UserInfoResponse,
     description: 'Get user information successfully',
   })
   @HttpCode(HttpStatus.OK)
-  @Cached(CachePrefix.USER, (req) => `${req.user?.id}`)
   @ZodSerializerDto(UserInfoSerializer)
-  userInfo(@Req() req: Request): UserInfoDto {
+  userInfo(@Req() req: Request, @ClientUrl() clientUrl: string): UserInfoDto {
+    console.log(clientUrl);
     return req.user;
   }
 
-  @Put('update/:id')
+  @Patch(':id')
   @ThrottleScope(PolicyScope.UPDATE_USER)
+  @InvalidateCache([
+    {
+      prefix: CachePrefix.SESSION,
+      key: (req) => `${req.user?.id}:*`,
+    },
+    {
+      prefix: CachePrefix.USER,
+      key: (req) => `${req.user?.id}`,
+    },
+  ])
   @ApiOperation({ summary: 'Update user information' })
   @ApiOkResponse({
     type: UserInfoResponse,
     description: 'Update user information successfully',
   })
   @HttpCode(HttpStatus.OK)
-  @InvalidateCache(CachePrefix.USER, (req) => `${req.user?.id}`)
   @ZodSerializerDto(UserInfoSerializer)
   async updateUser(
     @Req() req: Request,
@@ -82,6 +94,16 @@ export class UserController {
 
   @Post('image/upload')
   @ThrottleScope(PolicyScope.IMAGE_UPLOAD_USER)
+  @InvalidateCache([
+    {
+      prefix: CachePrefix.SESSION,
+      key: (req) => `${req.user?.id}:*`,
+    },
+    {
+      prefix: CachePrefix.USER,
+      key: (req) => `${req.user?.id}`,
+    },
+  ])
   @ApiOperation({ summary: 'Upload user image' })
   @ApiOkResponse({
     type: UserInfoResponse,
@@ -101,7 +123,7 @@ export class UserController {
   })
   @HttpCode(HttpStatus.OK)
   @InvalidateCache(CachePrefix.USER, (req) => `${req.user?.id}`)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { storage: multer.memoryStorage() }))
   @ZodSerializerDto(UserInfoSerializer)
   async imageUpload(
     @Req() req: Request,

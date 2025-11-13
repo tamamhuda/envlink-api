@@ -57,10 +57,8 @@ export class UserService {
       await this.validateUniqueUser(providerEmail, providerUsername);
 
       const user = manager.create(User, data);
-      const { id: externalId } =
-        await this.xenditService.getOrCreateCustomer(user);
+      const { id: externalId } = await this.xenditService.createCustomer(user);
       user.externalId = externalId;
-
       await manager.save(user);
 
       // Validate unique local account
@@ -142,7 +140,8 @@ export class UserService {
       await this.validateUniqueUser(email, username, existingUser);
       if (email) await this.requestEmailChange(existingUser, email);
     }
-    return await this.userRepository.updateOne(existingUser, updateUser);
+    const user = await this.userRepository.updateOne(existingUser, updateUser);
+    return user;
   }
 
   async updateUser(
@@ -151,9 +150,10 @@ export class UserService {
     id: string,
   ): Promise<UserInfoDto> {
     const { providers, lastLoginAt } = req.user;
-    const user = await this.update(id, updateUserDto);
+    const { externalId, ...user } = await this.update(id, updateUserDto);
     return {
       ...user,
+      customerId: externalId,
       providers,
       lastLoginAt,
     };
@@ -180,12 +180,13 @@ export class UserService {
     const { providers, lastLoginAt } = req.user;
     const imageKey = `users/${req.user.id}/avatars/${randomUUID()}${path.extname(file.originalname)}`;
     const avatar = await this.uploadImageAndGetUrl(file, imageKey);
-    const user = await this.update(req.user.id, {
+    const { externalId, ...user } = await this.update(req.user.id, {
       avatar: imageKey,
     });
-    user.avatar = avatar;
+
     return {
       ...user,
+      customerId: externalId,
       avatar,
       providers,
       lastLoginAt,
