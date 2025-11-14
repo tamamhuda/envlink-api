@@ -1,0 +1,3907 @@
+openapi: 3.1.0
+paths:
+  /api/v1/account/logout:
+    post:
+      operationId: Logout
+      parameters: []
+      responses:
+        '204':
+          description: Logout successful
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Logout user
+      tags:
+        - Account
+  /api/v1/account/verify/resend:
+    post:
+      operationId: Verify-Resend
+      parameters:
+        - name: x-client-url
+          in: header
+          description: Client URL
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resend verify email successful
+          content:
+            application/json:
+              schema:
+                type: string
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Resend verification email
+      tags:
+        - Account
+  /api/v1/account/change-password:
+    post:
+      operationId: Change-Password
+      parameters: []
+      requestBody:
+        required: true
+        description: Request body for changing password
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Change password successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Change password
+      tags:
+        - Account
+  /api/v1/session/{id}:
+    get:
+      operationId: GetById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get session by id successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get session by id
+      tags:
+        - Sessions
+  /api/v1/session:
+    get:
+      operationId: GetAll
+      parameters:
+        - name: isActive
+          required: true
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Get all user sessions successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllSessionsInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get all user sessions
+      tags:
+        - Sessions
+  /api/v1/session/revoke/{id}:
+    post:
+      operationId: RevokeById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Revoke a user session
+      tags:
+        - Sessions
+  /api/v1/session/revoke:
+    post:
+      operationId: RevokeAll
+      parameters: []
+      responses:
+        '204':
+          description: No content
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Revoke all user sessions
+      tags:
+        - Sessions
+  /api/v1/user/me:
+    get:
+      operationId: GetInfo
+      parameters: []
+      responses:
+        '200':
+          description: Get user information successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get user information
+      tags:
+        - User
+  /api/v1/user/{id}:
+    patch:
+      operationId: Update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Request body for updating user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Update user information successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Update user information
+      tags:
+        - User
+  /api/v1/user/image/upload:
+    post:
+      operationId: UploadAvatar
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload user image successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Upload user image
+      tags:
+        - User
+  /api/v1/auth/register:
+    post:
+      operationId: Register
+      parameters:
+        - name: x-client-url
+          in: header
+          description: Client URL used for email verification
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Request body for registering a new account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticatedResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Register a new account
+      tags:
+        - Authentication
+  /api/v1/auth/login:
+    post:
+      operationId: Login
+      parameters: []
+      requestBody:
+        required: true
+        description: Request body for logging in an account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticatedResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Login an account
+      tags:
+        - Authentication
+  /api/v1/auth/refresh:
+    post:
+      operationId: Refresh
+      parameters: []
+      responses:
+        '200':
+          description: Refresh token successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokensResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-refresh: []
+      summary: Refresh token
+      tags:
+        - Authentication
+  /api/v1/auth/verify:
+    get:
+      operationId: Verify
+      parameters:
+        - name: token
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Verify email successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoDto'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Verify email
+      tags:
+        - Authentication
+  /api/v1/health:
+    get:
+      operationId: Health-Check
+      parameters: []
+      responses:
+        '200':
+          description: The Health Check is successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  info:
+                    type: object
+                    example:
+                      database:
+                        status: up
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+                    nullable: true
+                  error:
+                    type: object
+                    example: {}
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+                    nullable: true
+                  details:
+                    type: object
+                    example:
+                      database:
+                        status: up
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+        '503':
+          description: The Health Check is not successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  info:
+                    type: object
+                    example:
+                      database:
+                        status: up
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+                    nullable: true
+                  error:
+                    type: object
+                    example:
+                      redis:
+                        status: down
+                        message: Could not connect
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+                    nullable: true
+                  details:
+                    type: object
+                    example:
+                      database:
+                        status: up
+                      redis:
+                        status: down
+                        message: Could not connect
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Check health status
+      tags:
+        - Health
+  /api/v1/urls:
+    post:
+      operationId: Shorten
+      parameters: []
+      requestBody:
+        required: true
+        description: Request body to shorten a URL
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShortenUrlRequest'
+      responses:
+        '201':
+          description: Created a new short URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Create a new short URL
+      tags:
+        - Urls
+    get:
+      operationId: GetAll
+      parameters: []
+      responses:
+        '200':
+          description: Get all short URLs for a user successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllUrlsResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get all short URLs for a user
+      tags:
+        - Urls
+  /api/v1/urls/{id}:
+    get:
+      operationId: GetById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get a short URL by id successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get a short URL by id
+      tags:
+        - Urls
+    put:
+      operationId: Update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Request body to update a URL
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUrlRequest'
+      responses:
+        '200':
+          description: Update a short URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Update a short URL
+      tags:
+        - Urls
+    delete:
+      operationId: Delete
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Delete a short URL successfully
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Delete a short URL
+      tags:
+        - Urls
+  /api/v1/public/urls/shorten:
+    post:
+      operationId: Shorten
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicShortenUrlRequest'
+      responses:
+        '201':
+          description: Created a new public short URL successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUrlResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Shorten a URL for public access
+      tags:
+        - Public URLs
+  /api/v1/public/urls/{code}:
+    get:
+      operationId: GetByCode
+      parameters:
+        - name: code
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get a short URL for a public access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUrlResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Get a short URL for public access
+      tags:
+        - Public URLs
+  /api/v1/public/urls/unlock/{code}:
+    post:
+      operationId: Unlock
+      parameters:
+        - name: code
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Request body for unlocking a short URL
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnlockUrlRequest'
+      responses:
+        '200':
+          description: Unlock a short URL for a public access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUrlResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Unlock a short URL for public access
+      tags:
+        - Public URLs
+  /api/v1/subscriptions/active:
+    get:
+      operationId: GetActive
+      parameters: []
+      responses:
+        '200':
+          description: Get user active subscription successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get current user active subscription
+      tags:
+        - Subscriptions
+  /api/v1/subscriptions/{id}:
+    get:
+      operationId: GetById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get subscription by id successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get subscription by id
+      tags:
+        - Subscriptions
+  /api/v1/subscriptions/{id}/deactivate:
+    post:
+      operationId: Deactivate
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deactivate Subscription plan successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Deactivate subscription plan
+      tags:
+        - Subscriptions
+  /api/v1/subscriptions/{id}/upgrade:
+    post:
+      operationId: Upgrade
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Request body for upgrading subscription plan
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpgradeSubscriptionRequest'
+      responses:
+        '201':
+          description: Upgrade subscription plan successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionInfoResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Upgrade subscription plan
+      tags:
+        - Subscriptions
+  /api/v1/subscriptions/{id}/upgrade-options:
+    get:
+      operationId: GetUpgradeOptions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Get subscription upgrade options successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionUpgradeOptionsResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get subscription upgrade options
+      tags:
+        - Subscriptions
+  /api/v1/public/subscriptions/plans:
+    get:
+      operationId: GetAll
+      parameters: []
+      responses:
+        '200':
+          description: 'Get all plan details suc '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllPlansResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Get all plan details
+      tags:
+        - Public Subscriptions Plans
+  /api/v1/public/subscriptions/plans/{name}:
+    get:
+      operationId: GetByName
+      parameters:
+        - name: name
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Get plan details successfully '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Get plan details by name
+      tags:
+        - Public Subscriptions Plans
+  /api/v1/subscriptions/active/cycles:
+    get:
+      operationId: SubscriptionsCyclesController_getUserActiveSubscriptionCycles
+      parameters: []
+      responses:
+        '200':
+          description: Get all active subscription cycles successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllSubscriptionCyclesResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get all active subscription cycles
+      tags:
+        - Subscriptions
+  /api/v1/subscriptions/{id}/cycles:
+    get:
+      operationId: SubscriptionsCyclesController_getAllUserSubscriptionCycles
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get all subscription cycles successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllSubscriptionCyclesResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get all subscription cycles
+      tags:
+        - Subscriptions
+  /api/v1/subscriptions/{id}/cycles/{cycleId}:
+    get:
+      operationId: SubscriptionsCyclesController_getUserSubscriptionCycleById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cycleId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get subscription cycle by id successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionCycleResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get subscription cycle by id
+      tags:
+        - Subscriptions
+  /api/v1/webhooks/xendit/payment_methods:
+    post:
+      operationId: WebhooksController_handleXenditPaymentMethods
+      parameters: []
+      requestBody:
+        required: true
+        description: Xendit payment methods callback data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRequest'
+      responses:
+        '200':
+          description: successfully handling payment methods callback data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Handle Xendit payment methods callback data
+      tags:
+        - Webhooks
+  /api/v1/webhooks/xendit/recurring:
+    post:
+      operationId: WebhooksController_handleXenditRecurring
+      parameters: []
+      requestBody:
+        required: true
+        description: Xendit recurring plan callback data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRequest'
+      responses:
+        '200':
+          description: successfully handling recurring plan callback data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Handle Xendit recurring plan callback data
+      tags:
+        - Webhooks
+  /api/v1/payment-methods/requests:
+    get:
+      operationId: Request
+      parameters:
+        - name: success_return_url
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: failure_return_url
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get requested payment method successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllPaymentMethodActionResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get requested payment methods
+      tags:
+        - Payment Methods
+  /api/v1/payment-methods/{id}:
+    get:
+      operationId: GetById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get payment method by id successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethodResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get payment method by id
+      tags:
+        - Payment Methods
+  /api/v1/payment-methods:
+    get:
+      operationId: GetAll
+      parameters: []
+      responses:
+        '200':
+          description: Get all payment methods successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllPaymentMethodsResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get all payment methods
+      tags:
+        - Payment Methods
+    post:
+      operationId: Create
+      parameters: []
+      requestBody:
+        required: true
+        description: Request body create payment method
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentMethodRequest'
+      responses:
+        '200':
+          description: Create payment method successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethodActionResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Create payment method
+      tags:
+        - Payment Methods
+  /api/v1/payment-methods/sort:
+    patch:
+      operationId: Sort
+      parameters: []
+      requestBody:
+        required: true
+        description: Request body sort payment methods
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SortPaymentMethodsRequest'
+      responses:
+        '200':
+          description: Get payment method by id successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllPaymentMethodsResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Sort payment methods
+      tags:
+        - Payment Methods
+  /api/v1/payment-methods/validate:
+    post:
+      operationId: Validate
+      parameters: []
+      requestBody:
+        required: true
+        description: Request body validate payment method
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidatePaymentMethodRequest'
+      responses:
+        '200':
+          description: Validate payment method successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Validate payment method
+      tags:
+        - Payment Methods
+  /api/v1/public/payment-methods/add:
+    get:
+      operationId: Add
+      parameters:
+        - name: token
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: successReturnUrl
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: failureReturnUrl
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Add payment method
+      tags:
+        - 'Public Payment Methods '
+  /api/v1/public/payment-methods/validate:
+    post:
+      operationId: Validate
+      parameters:
+        - name: token
+          required: true
+          in: query
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Request body for validating a payment method
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidatePaymentMethodRequest'
+      responses:
+        '200':
+          description: Validate payment method successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Validate payment method
+      tags:
+        - 'Public Payment Methods '
+  /api/v1/public/payment-methods:
+    post:
+      operationId: Create
+      parameters:
+        - name: token
+          required: true
+          in: query
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Request body for creating a payment method
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentMethodRequest'
+      responses:
+        '200':
+          description: Create payment method successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethodActionResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: Create payment method
+      tags:
+        - 'Public Payment Methods '
+  /api/v1/transactions:
+    get:
+      operationId: GetAll
+      parameters:
+        - name: startDate
+          required: false
+          in: query
+          description: Start date filter (YYYY-MM-DD)
+          schema:
+            type: string
+        - name: endDate
+          required: false
+          in: query
+          description: End date filter (YYYY-MM-DD)
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          description: Transaction status filter (can include multiple)
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Get all transactions successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get all transactions
+      tags:
+        - Transactions
+  /api/v1/transactions/{id}:
+    get:
+      operationId: GetById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: get transaction by id successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsResponse'
+        4XX:
+          description: API Error Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - jwt-access: []
+      summary: Get transaction by id
+      tags:
+        - Transactions
+info:
+  title: envlink
+  description: >-
+    A fast and reliable URL shortening service built with NestJS, enabling easy
+    link generation, management, and usage tracking.
+  version: v1.0
+  contact: {}
+tags: []
+servers:
+  - url: https://local-nest.utadev.app
+    description: Development
+  - url: https://api.envlink.one
+    description: Production
+components:
+  securitySchemes:
+    jwt-access:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access Token authentication
+    jwt-refresh:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Refresh Token authentication
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: false
+        status:
+          type: number
+          default: 404
+        message:
+          type: string
+        error:
+          oneOf:
+            - {}
+            - type: string
+          default: Not Found Exception
+        path:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - path
+        - timestamp
+    ChangePasswordRequest:
+      type: object
+      properties:
+        old_password:
+          type: string
+          minLength: 1
+          maxLength: 100
+        new_password:
+          type: string
+          minLength: 1
+          maxLength: 100
+        confirm_password:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+        - old_password
+        - new_password
+        - confirm_password
+    UserInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              minLength: 1
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+            customer_id:
+              type: string
+              nullable: true
+            email:
+              type: string
+              format: email
+              minLength: 1
+            username:
+              type: string
+              minLength: 1
+            full_name:
+              type: string
+              minLength: 1
+            phone_number:
+              type: string
+              nullable: true
+            role:
+              type: string
+              enum:
+                - admin
+                - user
+              x-enumNames:
+                - ADMIN
+                - USER
+              default: user
+            avatar:
+              type: string
+              format: uri
+              nullable: true
+            providers:
+              type: object
+              properties:
+                provider:
+                  type: string
+                  enum:
+                    - local
+                    - google
+                  x-enumNames:
+                    - LOCAL
+                    - GOOGLE
+                  default: local
+                is_verified:
+                  type: boolean
+                  default: false
+            last_login_at:
+              type: string
+              format: date-time
+          required:
+            - id
+            - created_at
+            - updated_at
+            - customer_id
+            - email
+            - username
+            - full_name
+            - providers
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.002Z'
+      required:
+        - success
+        - path
+        - data
+    SessionInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              minLength: 1
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+            user_agent:
+              type: string
+              maxLength: 255
+              nullable: true
+            ip_location:
+              type: string
+              maxLength: 255
+              nullable: true
+            is_revoked:
+              type: boolean
+              default: false
+            revoked_at:
+              nullable: true
+            expires_at:
+              nullable: true
+            user:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  minLength: 1
+                created_at:
+                  type: string
+                  format: date-time
+                updated_at:
+                  type: string
+                  format: date-time
+                customer_id:
+                  type: string
+                  nullable: true
+                email:
+                  type: string
+                  format: email
+                  minLength: 1
+                username:
+                  type: string
+                  minLength: 1
+                full_name:
+                  type: string
+                  minLength: 1
+                phone_number:
+                  type: string
+                  nullable: true
+                role:
+                  type: string
+                  enum:
+                    - admin
+                    - user
+                  x-enumNames:
+                    - ADMIN
+                    - USER
+                  default: user
+                avatar:
+                  type: string
+                  format: uri
+                  nullable: true
+                providers:
+                  type: object
+                  properties:
+                    provider:
+                      type: string
+                      enum:
+                        - local
+                        - google
+                      x-enumNames:
+                        - LOCAL
+                        - GOOGLE
+                      default: local
+                    is_verified:
+                      type: boolean
+                      default: false
+                last_login_at:
+                  type: string
+                  format: date-time
+              required:
+                - id
+                - created_at
+                - updated_at
+                - customer_id
+                - email
+                - username
+                - full_name
+                - providers
+          required:
+            - id
+            - created_at
+            - updated_at
+            - user_agent
+            - ip_location
+            - revoked_at
+            - expires_at
+            - user
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.121Z'
+      required:
+        - success
+        - path
+        - data
+    AllSessionsInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                minLength: 1
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              user_agent:
+                type: string
+                maxLength: 255
+                nullable: true
+              ip_location:
+                type: string
+                maxLength: 255
+                nullable: true
+              is_revoked:
+                type: boolean
+                default: false
+              revoked_at:
+                nullable: true
+              expires_at:
+                nullable: true
+              user:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    minLength: 1
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  customer_id:
+                    type: string
+                    nullable: true
+                  email:
+                    type: string
+                    format: email
+                    minLength: 1
+                  username:
+                    type: string
+                    minLength: 1
+                  full_name:
+                    type: string
+                    minLength: 1
+                  phone_number:
+                    type: string
+                    nullable: true
+                  role:
+                    type: string
+                    enum:
+                      - admin
+                      - user
+                    x-enumNames:
+                      - ADMIN
+                      - USER
+                    default: user
+                  avatar:
+                    type: string
+                    format: uri
+                    nullable: true
+                  providers:
+                    type: object
+                    properties:
+                      provider:
+                        type: string
+                        enum:
+                          - local
+                          - google
+                        x-enumNames:
+                          - LOCAL
+                          - GOOGLE
+                        default: local
+                      is_verified:
+                        type: boolean
+                        default: false
+                  last_login_at:
+                    type: string
+                    format: date-time
+                required:
+                  - id
+                  - created_at
+                  - updated_at
+                  - customer_id
+                  - email
+                  - username
+                  - full_name
+                  - providers
+            required:
+              - id
+              - created_at
+              - updated_at
+              - user_agent
+              - ip_location
+              - revoked_at
+              - expires_at
+              - user
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.121Z'
+      required:
+        - success
+        - path
+        - data
+    UpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+        full_name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone_number:
+          type: string
+          nullable: true
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+    RegisterRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+        username:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+          maxLength: 100
+        confirm_password:
+          description: '*confirm password must match with the password field'
+          type: string
+          minLength: 1
+          maxLength: 100
+        phone_number:
+          type: string
+          nullable: true
+      required:
+        - full_name
+        - username
+        - email
+        - password
+        - confirm_password
+    AuthenticatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            tokens:
+              type: object
+              properties:
+                access_token:
+                  type: string
+                refresh_token:
+                  type: string
+              required:
+                - access_token
+                - refresh_token
+            user:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  minLength: 1
+                created_at:
+                  type: string
+                  format: date-time
+                updated_at:
+                  type: string
+                  format: date-time
+                customer_id:
+                  type: string
+                  nullable: true
+                email:
+                  type: string
+                  format: email
+                  minLength: 1
+                username:
+                  type: string
+                  minLength: 1
+                full_name:
+                  type: string
+                  minLength: 1
+                phone_number:
+                  type: string
+                  nullable: true
+                role:
+                  type: string
+                  enum:
+                    - admin
+                    - user
+                  x-enumNames:
+                    - ADMIN
+                    - USER
+                  default: user
+                avatar:
+                  type: string
+                  format: uri
+                  nullable: true
+                providers:
+                  type: object
+                  properties:
+                    provider:
+                      type: string
+                      enum:
+                        - local
+                        - google
+                      x-enumNames:
+                        - LOCAL
+                        - GOOGLE
+                      default: local
+                    is_verified:
+                      type: boolean
+                      default: false
+                last_login_at:
+                  type: string
+                  format: date-time
+              required:
+                - id
+                - created_at
+                - updated_at
+                - customer_id
+                - email
+                - username
+                - full_name
+                - providers
+          required:
+            - tokens
+            - user
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.343Z'
+      required:
+        - success
+        - path
+        - data
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+        - username
+        - password
+    TokensResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            access_token:
+              type: string
+            refresh_token:
+              type: string
+          required:
+            - access_token
+            - refresh_token
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.343Z'
+      required:
+        - success
+        - path
+        - data
+    UserInfoDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          minLength: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        customer_id:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          minLength: 1
+        username:
+          type: string
+          minLength: 1
+        full_name:
+          type: string
+          minLength: 1
+        phone_number:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum:
+            - admin
+            - user
+          x-enumNames:
+            - ADMIN
+            - USER
+          default: user
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+        providers:
+          type: object
+          properties:
+            provider:
+              type: string
+              enum:
+                - local
+                - google
+              x-enumNames:
+                - LOCAL
+                - GOOGLE
+              default: local
+            is_verified:
+              type: boolean
+              default: false
+        last_login_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - created_at
+        - updated_at
+        - customer_id
+        - email
+        - username
+        - full_name
+        - providers
+    ShortenUrlRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 64
+        original_url:
+          type: string
+          format: uri
+          minLength: 1
+        is_protected:
+          type: boolean
+          default: false
+        access_code:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        channel_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+            minLength: 1
+      required:
+        - original_url
+    UrlResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              minLength: 1
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+            code:
+              type: string
+              maxLength: 64
+            original_url:
+              type: string
+              format: uri
+              minLength: 1
+            is_anonymous:
+              type: boolean
+              default: true
+            is_protected:
+              type: boolean
+              default: false
+            access_code:
+              type: string
+              nullable: true
+            expires_at:
+              nullable: true
+            click_count:
+              type: number
+              minimum: 0
+              exclusiveMinimum: false
+              default: 0
+            metadata:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 255
+                description:
+                  type: string
+                image:
+                  type: string
+                  format: uri
+                favicon:
+                  type: string
+                  format: uri
+                site_name:
+                  type: string
+                  maxLength: 255
+              nullable: true
+            channels:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    minLength: 1
+                  name:
+                    type: string
+                    minLength: 1
+                  description:
+                    type: string
+                    nullable: true
+                required:
+                  - id
+                  - name
+                  - description
+          required:
+            - id
+            - created_at
+            - updated_at
+            - code
+            - original_url
+            - access_code
+            - expires_at
+            - metadata
+            - channels
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.426Z'
+      required:
+        - success
+        - path
+        - data
+    AllUrlsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                minLength: 1
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              code:
+                type: string
+                maxLength: 64
+              original_url:
+                type: string
+                format: uri
+                minLength: 1
+              is_anonymous:
+                type: boolean
+                default: true
+              is_protected:
+                type: boolean
+                default: false
+              access_code:
+                type: string
+                nullable: true
+              expires_at:
+                nullable: true
+              click_count:
+                type: number
+                minimum: 0
+                exclusiveMinimum: false
+                default: 0
+              metadata:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    maxLength: 255
+                  description:
+                    type: string
+                  image:
+                    type: string
+                    format: uri
+                  favicon:
+                    type: string
+                    format: uri
+                  site_name:
+                    type: string
+                    maxLength: 255
+                nullable: true
+              channels:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                      minLength: 1
+                    name:
+                      type: string
+                      minLength: 1
+                    description:
+                      type: string
+                      nullable: true
+                  required:
+                    - id
+                    - name
+                    - description
+            required:
+              - id
+              - created_at
+              - updated_at
+              - code
+              - original_url
+              - access_code
+              - expires_at
+              - metadata
+              - channels
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.426Z'
+      required:
+        - success
+        - path
+        - data
+    UpdateUrlRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 64
+        original_url:
+          type: string
+          format: uri
+          minLength: 1
+        is_anonymous:
+          type: boolean
+          default: true
+        is_protected:
+          type: boolean
+          default: false
+        access_code:
+          type: string
+          nullable: true
+        expires_at:
+          nullable: true
+        metadata:
+          type: object
+          properties:
+            title:
+              type: string
+              maxLength: 255
+            description:
+              type: string
+            image:
+              type: string
+              format: uri
+            favicon:
+              type: string
+              format: uri
+            site_name:
+              type: string
+              maxLength: 255
+          nullable: true
+        channels:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                minLength: 1
+              name:
+                type: string
+                minLength: 1
+              description:
+                type: string
+                nullable: true
+            required:
+              - id
+              - name
+              - description
+    PublicShortenUrlRequest:
+      type: object
+      properties:
+        original_url:
+          type: string
+          format: uri
+          minLength: 1
+      required:
+        - original_url
+    PublicUrlResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+            code:
+              type: string
+              maxLength: 64
+            original_url:
+              type: string
+              format: uri
+              minLength: 1
+            is_anonymous:
+              type: boolean
+              default: true
+            is_protected:
+              type: boolean
+              default: false
+            expires_at:
+              nullable: true
+            click_count:
+              type: number
+              minimum: 0
+              exclusiveMinimum: false
+              default: 0
+            metadata:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 255
+                description:
+                  type: string
+                image:
+                  type: string
+                  format: uri
+                favicon:
+                  type: string
+                  format: uri
+                site_name:
+                  type: string
+                  maxLength: 255
+              nullable: true
+          required:
+            - created_at
+            - updated_at
+            - code
+            - original_url
+            - expires_at
+            - metadata
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.426Z'
+      required:
+        - success
+        - path
+        - data
+    UnlockUrlRequest:
+      type: object
+      properties:
+        access_code:
+          type: string
+          minLength: 1
+      required:
+        - access_code
+    SubscriptionInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              minLength: 1
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+            reference_id:
+              type: string
+              nullable: true
+            external_id:
+              type: string
+              nullable: true
+            user_id:
+              type: string
+              format: uuid
+            plan:
+              type: object
+              properties:
+                name:
+                  type: string
+                  enum:
+                    - Free
+                    - Pro
+                    - Starter
+                    - Enterprise
+                  x-enumNames:
+                    - FREE
+                    - PRO
+                    - STARTER
+                    - ENTERPRISE
+                limit:
+                  type: number
+                  minimum: 1
+                  exclusiveMinimum: false
+                reset_interval:
+                  type: string
+                cost:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: false
+                charge_on_success:
+                  type: boolean
+                  default: false
+                description:
+                  type: string
+                  nullable: true
+                price:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: false
+                features:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+              required:
+                - name
+                - limit
+                - reset_interval
+                - cost
+                - description
+                - price
+                - features
+            started_at:
+              type: string
+              format: date-time
+              nullable: true
+            expires_at:
+              type: string
+              format: date-time
+              nullable: true
+            remaining:
+              type: number
+              minimum: 0
+              exclusiveMinimum: false
+            status:
+              type: string
+              enum:
+                - ACTIVE
+                - INACTIVE
+                - CANCELED
+                - PENDING
+                - EXPIRED
+                - SUSPENDED
+              x-enumNames:
+                - ACTIVE
+                - INACTIVE
+                - CANCELED
+                - PENDING
+                - EXPIRED
+                - SUSPENDED
+            is_trial:
+              type: boolean
+              default: false
+            schedule:
+              type: object
+              properties:
+                interval:
+                  type: string
+                  enum:
+                    - DAY
+                    - WEEK
+                    - MONTH
+                    - YEAR
+                  x-enumNames:
+                    - DAY
+                    - WEEK
+                    - MONTH
+                    - YEAR
+                interval_count:
+                  type: number
+                  minimum: 1
+                  exclusiveMinimum: false
+                total_recurrence:
+                  type: number
+                  minimum: 1
+                  exclusiveMinimum: false
+              required:
+                - interval
+                - interval_count
+                - total_recurrence
+              nullable: true
+            metadata:
+              type: object
+              properties:
+                strategy:
+                  type: string
+                  enum:
+                    - UPGRADE_IMMEDIATELY
+                    - FINISH_CURRENT_CYCLE
+                  x-enumNames:
+                    - UPGRADE_IMMEDIATELY
+                    - FINISH_CURRENT_CYCLE
+                previous_plan:
+                  type: string
+                  enum:
+                    - Free
+                    - Pro
+                    - Starter
+                    - Enterprise
+                  x-enumNames:
+                    - FREE
+                    - PRO
+                    - STARTER
+                    - ENTERPRISE
+                new_plan:
+                  type: string
+                  enum:
+                    - Free
+                    - Pro
+                    - Starter
+                    - Enterprise
+                  x-enumNames:
+                    - FREE
+                    - PRO
+                    - STARTER
+                    - ENTERPRISE
+              required:
+                - strategy
+                - previous_plan
+                - new_plan
+              nullable: true
+            transaction_status:
+              type: string
+              nullable: true
+            next_billing_date:
+              type: string
+              format: date-time
+              nullable: true
+            actions:
+              type: array
+              items:
+                type: object
+                properties:
+                  action:
+                    type: string
+                  url_type:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                  method:
+                    type: string
+                    default: GET
+                required:
+                  - action
+                  - url_type
+                  - url
+          required:
+            - id
+            - created_at
+            - updated_at
+            - reference_id
+            - external_id
+            - user_id
+            - plan
+            - started_at
+            - expires_at
+            - remaining
+            - status
+            - schedule
+            - metadata
+            - transaction_status
+            - next_billing_date
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.820Z'
+      required:
+        - success
+        - path
+        - data
+    UpgradeSubscriptionRequest:
+      type: object
+      properties:
+        plan:
+          type: string
+          enum:
+            - Free
+            - Pro
+            - Starter
+            - Enterprise
+          x-enumNames:
+            - FREE
+            - PRO
+            - STARTER
+            - ENTERPRISE
+        strategy:
+          type: string
+          enum:
+            - UPGRADE_IMMEDIATELY
+            - FINISH_CURRENT_CYCLE
+          x-enumNames:
+            - UPGRADE_IMMEDIATELY
+            - FINISH_CURRENT_CYCLE
+          default: UPGRADE_IMMEDIATELY
+        amount:
+          type: number
+          minimum: 0
+          exclusiveMinimum: false
+        discount:
+          type: number
+          minimum: 0
+          exclusiveMinimum: false
+        schedule:
+          type: object
+          properties:
+            interval:
+              type: string
+              enum:
+                - DAY
+                - WEEK
+                - MONTH
+                - YEAR
+              x-enumNames:
+                - DAY
+                - WEEK
+                - MONTH
+                - YEAR
+              default: MONTH
+            interval_count:
+              type: number
+              minimum: 1
+              exclusiveMinimum: false
+              default: 1
+            total_recurrence:
+              type: number
+              minimum: 1
+              exclusiveMinimum: false
+              default: 12
+        description:
+          type: string
+          minLength: 1
+        metadata:
+          type: object
+          additionalProperties: {}
+      required:
+        - plan
+        - schedule
+        - description
+    SubscriptionUpgradeOptionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                minLength: 1
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              name:
+                type: string
+                enum:
+                  - Free
+                  - Pro
+                  - Starter
+                  - Enterprise
+                x-enumNames:
+                  - FREE
+                  - PRO
+                  - STARTER
+                  - ENTERPRISE
+              limit:
+                type: number
+                minimum: 1
+                exclusiveMinimum: false
+              reset_interval:
+                type: string
+              cost:
+                type: number
+                minimum: 0
+                exclusiveMinimum: false
+              charge_on_success:
+                type: boolean
+                default: false
+              description:
+                type: string
+                nullable: true
+              price:
+                type: number
+                minimum: 0
+                exclusiveMinimum: false
+              features:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+              upgradable:
+                type: boolean
+              options:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    strategy:
+                      type: string
+                      enum:
+                        - UPGRADE_IMMEDIATELY
+                        - FINISH_CURRENT_CYCLE
+                      x-enumNames:
+                        - UPGRADE_IMMEDIATELY
+                        - FINISH_CURRENT_CYCLE
+                    upgradable:
+                      type: boolean
+                    current_plan:
+                      type: string
+                      enum:
+                        - Free
+                        - Pro
+                        - Starter
+                        - Enterprise
+                      x-enumNames:
+                        - FREE
+                        - PRO
+                        - STARTER
+                        - ENTERPRISE
+                    new_plan:
+                      type: string
+                      enum:
+                        - Free
+                        - Pro
+                        - Starter
+                        - Enterprise
+                      x-enumNames:
+                        - FREE
+                        - PRO
+                        - STARTER
+                        - ENTERPRISE
+                    amount:
+                      type: number
+                      minimum: 0
+                      exclusiveMinimum: false
+                    discount:
+                      type: number
+                      minimum: 0
+                      exclusiveMinimum: false
+                    remaining_days:
+                      type: number
+                      minimum: 0
+                      exclusiveMinimum: false
+                    remaining_credit:
+                      type: number
+                      minimum: 0
+                      exclusiveMinimum: false
+                    net_amount:
+                      type: number
+                      minimum: 0
+                      exclusiveMinimum: false
+                  required:
+                    - strategy
+                    - upgradable
+                    - current_plan
+                    - new_plan
+                    - amount
+                    - discount
+                    - remaining_days
+                    - remaining_credit
+                    - net_amount
+            required:
+              - id
+              - created_at
+              - updated_at
+              - name
+              - limit
+              - reset_interval
+              - cost
+              - description
+              - price
+              - features
+              - upgradable
+              - options
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.821Z'
+      required:
+        - success
+        - path
+        - data
+    AllPlansResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                enum:
+                  - Free
+                  - Pro
+                  - Starter
+                  - Enterprise
+                x-enumNames:
+                  - FREE
+                  - PRO
+                  - STARTER
+                  - ENTERPRISE
+              limit:
+                type: number
+                minimum: 1
+                exclusiveMinimum: false
+              reset_interval:
+                type: string
+              cost:
+                type: number
+                minimum: 0
+                exclusiveMinimum: false
+              charge_on_success:
+                type: boolean
+                default: false
+              description:
+                type: string
+                nullable: true
+              price:
+                type: number
+                minimum: 0
+                exclusiveMinimum: false
+              features:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+            required:
+              - name
+              - limit
+              - reset_interval
+              - cost
+              - description
+              - price
+              - features
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.820Z'
+      required:
+        - success
+        - path
+        - data
+    PlanResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            name:
+              type: string
+              enum:
+                - Free
+                - Pro
+                - Starter
+                - Enterprise
+              x-enumNames:
+                - FREE
+                - PRO
+                - STARTER
+                - ENTERPRISE
+            limit:
+              type: number
+              minimum: 1
+              exclusiveMinimum: false
+            reset_interval:
+              type: string
+            cost:
+              type: number
+              minimum: 0
+              exclusiveMinimum: false
+            charge_on_success:
+              type: boolean
+              default: false
+            description:
+              type: string
+              nullable: true
+            price:
+              type: number
+              minimum: 0
+              exclusiveMinimum: false
+            features:
+              type: array
+              minItems: 1
+              items:
+                type: string
+          required:
+            - name
+            - limit
+            - reset_interval
+            - cost
+            - description
+            - price
+            - features
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.820Z'
+      required:
+        - success
+        - path
+        - data
+    AllSubscriptionCyclesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                minLength: 1
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              subscription_id:
+                type: string
+                format: uuid
+                minLength: 1
+              action_ids:
+                type: array
+                items:
+                  type: string
+              transaction_id:
+                type: string
+                format: uuid
+                nullable: true
+              type:
+                type: string
+                minLength: 1
+              status:
+                type: string
+                enum:
+                  - SCHEDULED
+                  - RETRYING
+                  - FAILED
+                  - SUCCEEDED
+                  - CANCELLED
+                x-enumNames:
+                  - SCHEDULED
+                  - RETRYING
+                  - FAILED
+                  - SUCCEEDED
+                  - CANCELLED
+              payment_link_failed_retry:
+                type: string
+                nullable: true
+              cycle_number:
+                type: number
+                minimum: 1
+                exclusiveMinimum: false
+              attempt_count:
+                type: number
+                minimum: 0
+                exclusiveMinimum: false
+              failure_code:
+                type: string
+                nullable: true
+              scheduled_date:
+                type: string
+                format: date-time
+            required:
+              - id
+              - created_at
+              - updated_at
+              - subscription_id
+              - action_ids
+              - transaction_id
+              - type
+              - status
+              - payment_link_failed_retry
+              - cycle_number
+              - attempt_count
+              - failure_code
+              - scheduled_date
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.825Z'
+      required:
+        - success
+        - path
+        - data
+    SubscriptionCycleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                minLength: 1
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              subscription_id:
+                type: string
+                format: uuid
+                minLength: 1
+              action_ids:
+                type: array
+                items:
+                  type: string
+              transaction_id:
+                type: string
+                format: uuid
+                nullable: true
+              type:
+                type: string
+                minLength: 1
+              status:
+                type: string
+                enum:
+                  - SCHEDULED
+                  - RETRYING
+                  - FAILED
+                  - SUCCEEDED
+                  - CANCELLED
+                x-enumNames:
+                  - SCHEDULED
+                  - RETRYING
+                  - FAILED
+                  - SUCCEEDED
+                  - CANCELLED
+              payment_link_failed_retry:
+                type: string
+                nullable: true
+              cycle_number:
+                type: number
+                minimum: 1
+                exclusiveMinimum: false
+              attempt_count:
+                type: number
+                minimum: 0
+                exclusiveMinimum: false
+              failure_code:
+                type: string
+                nullable: true
+              scheduled_date:
+                type: string
+                format: date-time
+            required:
+              - id
+              - created_at
+              - updated_at
+              - subscription_id
+              - action_ids
+              - transaction_id
+              - type
+              - status
+              - payment_link_failed_retry
+              - cycle_number
+              - attempt_count
+              - failure_code
+              - scheduled_date
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.825Z'
+      required:
+        - success
+        - path
+        - data
+    WebhookRequest:
+      type: object
+      properties:
+        string: {}
+      required:
+        - string
+    OkResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              default: OK
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:57.998Z'
+      required:
+        - success
+        - path
+        - data
+    AllPaymentMethodActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              action:
+                type: string
+              url:
+                type: string
+                format: uri
+                minLength: 1
+              method:
+                type: string
+                enum:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                default: GET
+            required:
+              - action
+              - url
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.830Z'
+      required:
+        - success
+        - path
+        - data
+    PaymentMethodResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              minLength: 1
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+            user_id:
+              type: string
+              format: uuid
+              minLength: 1
+            external_id:
+              type: string
+            type:
+              type: string
+              enum:
+                - CARD
+                - EWALLET
+                - DIRECT_DEBIT
+                - VIRTUAL_ACCOUNT
+                - QRCODE
+                - OTC
+                - OTHER
+              x-enumNames:
+                - CARD
+                - EWALLET
+                - DIRECT_DEBIT
+                - VA
+                - QRCODE
+                - OTC
+                - OTHER
+            reusability:
+              type: string
+              nullable: true
+            country:
+              type: string
+              nullable: true
+            currency:
+              type: string
+              nullable: true
+            status:
+              type: string
+              nullable: true
+            channel_code:
+              type: string
+              nullable: true
+            provider:
+              type: string
+              nullable: true
+            failure_code:
+              type: string
+              nullable: true
+            custom_name:
+              type: string
+              nullable: true
+            card:
+              type: object
+              properties:
+                network:
+                  type: string
+                  nullable: true
+                issuer:
+                  type: string
+                  nullable: true
+                card_type:
+                  type: string
+                  nullable: true
+                masked_card_number:
+                  type: string
+                  nullable: true
+                expiry_month:
+                  type: string
+                  nullable: true
+                expiry_year:
+                  type: string
+                  nullable: true
+                card_holder_name:
+                  type: string
+                  nullable: true
+              required:
+                - network
+                - issuer
+                - card_type
+                - masked_card_number
+                - expiry_month
+                - expiry_year
+                - card_holder_name
+              nullable: true
+            direct_debit:
+              type: object
+              properties:
+                bank_account_number:
+                  type: string
+                  nullable: true
+                bank_account_hash:
+                  type: string
+                  nullable: true
+              required:
+                - bank_account_number
+                - bank_account_hash
+              nullable: true
+            ewallet:
+              type: object
+              properties:
+                account_name:
+                  type: string
+                  nullable: true
+                account_number:
+                  type: string
+                  nullable: true
+                payment_code:
+                  type: string
+                  nullable: true
+                qr_string:
+                  type: string
+                  nullable: true
+                expires_at:
+                  type: string
+                  nullable: true
+              required:
+                - account_name
+                - account_number
+                - payment_code
+                - qr_string
+                - expires_at
+              nullable: true
+            recurring_expiry:
+              nullable: true
+            recurring_frequency:
+              type: number
+              minimum: 1
+              exclusiveMinimum: false
+              nullable: true
+            is_default:
+              type: boolean
+            rank:
+              type: number
+              minimum: 1
+              exclusiveMinimum: false
+            metadata:
+              type: object
+              additionalProperties: {}
+              nullable: true
+          required:
+            - id
+            - created_at
+            - updated_at
+            - user_id
+            - external_id
+            - type
+            - reusability
+            - country
+            - currency
+            - status
+            - channel_code
+            - provider
+            - failure_code
+            - custom_name
+            - card
+            - direct_debit
+            - ewallet
+            - recurring_expiry
+            - recurring_frequency
+            - is_default
+            - rank
+            - metadata
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.833Z'
+      required:
+        - success
+        - path
+        - data
+    AllPaymentMethodsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                minLength: 1
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              user_id:
+                type: string
+                format: uuid
+                minLength: 1
+              external_id:
+                type: string
+              type:
+                type: string
+                enum:
+                  - CARD
+                  - EWALLET
+                  - DIRECT_DEBIT
+                  - VIRTUAL_ACCOUNT
+                  - QRCODE
+                  - OTC
+                  - OTHER
+                x-enumNames:
+                  - CARD
+                  - EWALLET
+                  - DIRECT_DEBIT
+                  - VA
+                  - QRCODE
+                  - OTC
+                  - OTHER
+              reusability:
+                type: string
+                nullable: true
+              country:
+                type: string
+                nullable: true
+              currency:
+                type: string
+                nullable: true
+              status:
+                type: string
+                nullable: true
+              channel_code:
+                type: string
+                nullable: true
+              provider:
+                type: string
+                nullable: true
+              failure_code:
+                type: string
+                nullable: true
+              custom_name:
+                type: string
+                nullable: true
+              card:
+                type: object
+                properties:
+                  network:
+                    type: string
+                    nullable: true
+                  issuer:
+                    type: string
+                    nullable: true
+                  card_type:
+                    type: string
+                    nullable: true
+                  masked_card_number:
+                    type: string
+                    nullable: true
+                  expiry_month:
+                    type: string
+                    nullable: true
+                  expiry_year:
+                    type: string
+                    nullable: true
+                  card_holder_name:
+                    type: string
+                    nullable: true
+                required:
+                  - network
+                  - issuer
+                  - card_type
+                  - masked_card_number
+                  - expiry_month
+                  - expiry_year
+                  - card_holder_name
+                nullable: true
+              direct_debit:
+                type: object
+                properties:
+                  bank_account_number:
+                    type: string
+                    nullable: true
+                  bank_account_hash:
+                    type: string
+                    nullable: true
+                required:
+                  - bank_account_number
+                  - bank_account_hash
+                nullable: true
+              ewallet:
+                type: object
+                properties:
+                  account_name:
+                    type: string
+                    nullable: true
+                  account_number:
+                    type: string
+                    nullable: true
+                  payment_code:
+                    type: string
+                    nullable: true
+                  qr_string:
+                    type: string
+                    nullable: true
+                  expires_at:
+                    type: string
+                    nullable: true
+                required:
+                  - account_name
+                  - account_number
+                  - payment_code
+                  - qr_string
+                  - expires_at
+                nullable: true
+              recurring_expiry:
+                nullable: true
+              recurring_frequency:
+                type: number
+                minimum: 1
+                exclusiveMinimum: false
+                nullable: true
+              is_default:
+                type: boolean
+              rank:
+                type: number
+                minimum: 1
+                exclusiveMinimum: false
+              metadata:
+                type: object
+                additionalProperties: {}
+                nullable: true
+            required:
+              - id
+              - created_at
+              - updated_at
+              - user_id
+              - external_id
+              - type
+              - reusability
+              - country
+              - currency
+              - status
+              - channel_code
+              - provider
+              - failure_code
+              - custom_name
+              - card
+              - direct_debit
+              - ewallet
+              - recurring_expiry
+              - recurring_frequency
+              - is_default
+              - rank
+              - metadata
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.833Z'
+      required:
+        - success
+        - path
+        - data
+    SortPaymentMethodsRequest:
+      type: array
+      items:
+        type: object
+        properties:
+          payment_method_id:
+            type: string
+            format: uuid
+            minLength: 1
+          rank:
+            type: number
+            minimum: 1
+            exclusiveMinimum: false
+        required:
+          - payment_method_id
+          - rank
+    ValidatePaymentMethodRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - CARD
+            - EWALLET
+            - DIRECT_DEBIT
+        card:
+          type: object
+          properties:
+            card_type:
+              type: string
+              nullable: true
+            masked_card_number:
+              type: string
+              nullable: true
+            expiry_month:
+              type: string
+              nullable: true
+            expiry_year:
+              type: string
+              nullable: true
+          required:
+            - card_type
+            - masked_card_number
+            - expiry_month
+            - expiry_year
+          nullable: true
+        ewallet:
+          type: object
+          properties:
+            channel_code:
+              type: string
+              enum:
+                - DANA
+                - SHOPEEPAY
+          required:
+            - channel_code
+          nullable: true
+        direct_debit:
+          type: object
+          properties:
+            channel_code:
+              type: string
+              enum:
+                - MANDIRI
+                - BPI
+          required:
+            - channel_code
+          nullable: true
+      required:
+        - type
+    CreatePaymentMethodRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - EWALLET
+            - DIRECT_DEBIT
+        ewallet:
+          type: object
+          properties:
+            channel_code:
+              type: string
+              enum:
+                - DANA
+                - SHOPEEPAY
+          required:
+            - channel_code
+          nullable: true
+        direct_debit:
+          type: object
+          properties:
+            channel_code:
+              type: string
+              enum:
+                - MANDIRI
+                - BPI
+          required:
+            - channel_code
+          nullable: true
+        default:
+          type: boolean
+          default: false
+        success_return_url:
+          type: string
+          format: uri
+        failure_return_url:
+          type: string
+          format: uri
+      required:
+        - type
+        - success_return_url
+        - failure_return_url
+    PaymentMethodActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: object
+          properties:
+            action:
+              type: string
+            url:
+              type: string
+              format: uri
+              minLength: 1
+            method:
+              type: string
+              enum:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+              default: GET
+          required:
+            - action
+            - url
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.830Z'
+      required:
+        - success
+        - path
+        - data
+    TransactionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: number
+          default: 200
+        path:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                minLength: 1
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              user_id:
+                type: string
+                format: uuid
+              cycle_id:
+                type: string
+                format: uuid
+              payment_method_id:
+                type: string
+                format: uuid
+              subscription_id:
+                type: string
+                format: uuid
+              reference_id:
+                type: string
+                minLength: 1
+              product_name:
+                type: string
+                minLength: 1
+              amount:
+                type: number
+                minimum: 0
+                exclusiveMinimum: false
+              currency:
+                type: string
+                nullable: true
+              status:
+                type: string
+                enum:
+                  - PENDING
+                  - PAID
+                  - FAILED
+                  - REFUSED
+                  - REFUNDED
+                x-enumNames:
+                  - PENDING
+                  - PAID
+                  - FAILED
+                  - REFUSED
+                  - REFUNDED
+              payment_method_type:
+                type: string
+                minLength: 1
+              payment_type:
+                type: string
+                enum:
+                  - PAYMENT_LINK
+                  - PAYMENT_REQUEST
+                x-enumNames:
+                  - PAYMENT_LINK
+                  - PAYMENT_REQUEST
+              metadata:
+                type: object
+                properties: {}
+                nullable: true
+              paid_at:
+                type: string
+                format: date-time
+                nullable: true
+              failed_at:
+                type: string
+                format: date-time
+                nullable: true
+              failure_code:
+                type: string
+                nullable: true
+              refunded_at:
+                type: string
+                format: date-time
+                nullable: true
+              invoice_id:
+                type: string
+                nullable: true
+              invoice_url:
+                type: string
+                nullable: true
+              invoice_number:
+                type: string
+                nullable: true
+              invoice_pdf_path:
+                type: string
+                nullable: true
+            required:
+              - id
+              - created_at
+              - updated_at
+              - user_id
+              - cycle_id
+              - payment_method_id
+              - subscription_id
+              - reference_id
+              - product_name
+              - amount
+              - currency
+              - status
+              - payment_method_type
+              - payment_type
+              - metadata
+              - paid_at
+              - failed_at
+              - failure_code
+              - refunded_at
+              - invoice_id
+              - invoice_url
+              - invoice_number
+              - invoice_pdf_path
+        timestamp:
+          type: string
+          format: date-time
+          default: '2025-11-14T02:18:58.847Z'
+      required:
+        - success
+        - path
+        - data
