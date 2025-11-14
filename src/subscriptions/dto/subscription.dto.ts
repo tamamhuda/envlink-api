@@ -14,8 +14,16 @@ export const subscriptionInfoSchema = baseSchema.extend({
   external_id: z.string().nullable(),
   user_id: z.string().uuid(),
   plan: planSchema,
-  started_at: z.date().nullable(),
-  expires_at: z.date().nullable(),
+  started_at: z
+    .string()
+    .datetime()
+    .transform((date) => new Date(date))
+    .nullable(),
+  expires_at: z
+    .string()
+    .datetime()
+    .transform((date) => new Date(date))
+    .nullable(),
   remaining: z.number().min(0),
   status: z.nativeEnum(SubscriptionStatus),
   is_trial: z.boolean().default(false),
@@ -35,7 +43,11 @@ export const subscriptionInfoSchema = baseSchema.extend({
     .catchall(z.any())
     .nullable(),
   transaction_status: z.string().nullable(),
-  next_billing_date: z.date().nullable(),
+  next_billing_date: z
+    .string()
+    .datetime()
+    .transform((date) => new Date(date))
+    .nullable(),
   actions: z
     .array(
       z.object({

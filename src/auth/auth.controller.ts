@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterBodyDto } from './dto/register.dto';
+import { RegisterBodyDto, RegisterRequest } from './dto/register.dto';
 import {
   ApiOkResponse,
   ApiBearerAuth,
@@ -43,7 +43,7 @@ import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decor
 import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
 import { JWT_REFRESH_SECURITY } from 'src/config/jwt.config';
 import { ClientUrl } from 'src/common/decorators/client-url.decorator';
-import { LoginBodyDto } from './dto/login.dto';
+import { LoginRequest } from './dto/login.dto';
 
 @Controller('auth')
 @ApiTags('Authentication')
@@ -56,7 +56,14 @@ export class AuthController {
 
   @Post('register')
   @ThrottleScope(PolicyScope.REGISTER)
-  @ApiOperation({ summary: 'Register a new account' })
+  @ApiOperation({
+    operationId: 'Register',
+    summary: 'Register a new account',
+  })
+  @ApiBody({
+    type: RegisterRequest,
+    description: 'Request body for registering a new account',
+  })
   @ApiOkResponse({
     type: AuthenticatedResponse,
     description: 'Registration successful',
@@ -81,14 +88,14 @@ export class AuthController {
   @Post('login')
   @SkipThrottle()
   @UseGuards(LocalAuthGuard)
-  @ApiOperation({ summary: 'Login an account' })
+  @ApiOperation({ operationId: 'Login', summary: 'Login an account' })
   @ApiOkResponse({
     type: AuthenticatedResponse,
     description: 'Login successful',
   })
   @ApiBody({
-    type: LoginBodyDto,
-    required: true,
+    type: LoginRequest,
+    description: 'Request body for logging in an account',
   })
   @HttpCode(HttpStatus.OK)
   @InvalidateCache<AuthenticatedDto>(
@@ -104,7 +111,7 @@ export class AuthController {
   @SkipThrottle()
   @UseGuards(JwtRefreshGuard)
   @ApiBearerAuth(JWT_REFRESH_SECURITY)
-  @ApiOperation({ summary: 'Refresh token' })
+  @ApiOperation({ operationId: 'Refresh', summary: 'Refresh token' })
   @ApiOkResponse({
     type: TokensResponse,
     description: 'Refresh token successful',
@@ -117,7 +124,7 @@ export class AuthController {
 
   @SkipThrottle()
   @Get('verify')
-  @ApiOperation({ summary: 'Verify email' })
+  @ApiOperation({ operationId: 'Verify', summary: 'Verify email' })
   @ApiOkResponse({
     type: UserInfoDto,
     description: 'Verify email successful',

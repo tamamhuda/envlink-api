@@ -15,7 +15,10 @@ export const subscriptionCycleSchema = baseSchema.extend({
   cycle_number: z.number().min(1),
   attempt_count: z.number().min(0),
   failure_code: z.string().nullable(),
-  scheduled_date: z.date(),
+  scheduled_date: z
+    .string()
+    .datetime()
+    .transform((date) => new Date(date)),
 });
 
 export const subscriptionCycleDtoSchema = zodToCamelCase(
@@ -30,7 +33,7 @@ export class SubscriptionCycleSerializerDto extends createZodDto(
   subscriptionCycleSchema,
 ) {}
 
-export class ListSubscriptionCyclesResponse extends createResponseDto(
+export class AllSubscriptionCyclesResponse extends createResponseDto(
   z.array(subscriptionCycleSchema),
 ) {}
 

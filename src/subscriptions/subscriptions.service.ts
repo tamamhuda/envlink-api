@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UpgradeSubscriptionBodyDto } from './dto/upgrade-subscription';
+import { UpgradeSubscriptionBodyDto } from './dto/upgrade-subscription.dto';
 import { SubscriptionRepository } from 'src/database/repositories/subscription.repository';
 import Subscription from 'src/database/entities/subscription.entity';
 import Plan from 'src/database/entities/plan.entity';

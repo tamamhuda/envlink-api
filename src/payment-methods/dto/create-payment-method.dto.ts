@@ -45,3 +45,5 @@ export const createPaymentMethodDtoSchema = zodToCamelCase(
 export class CreatePaymentMethodBodyDto extends createZodDto(
   createPaymentMethodDtoSchema,
 ) {}
+
+export class CreatePaymentMethodRequest extends CreatePaymentMethodBodyDto {}

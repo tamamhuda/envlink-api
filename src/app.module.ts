@@ -120,13 +120,13 @@ import { SnakeCaseTransformInterceptor } from './common/interceptors/snake-case-
     },
     {
       provide: APP_INTERCEPTOR,
+      useClass: InvalidateCacheInterceptor, // after controller, before serialization
+    },
+    {
+      provide: APP_INTERCEPTOR,
       useClass: SnakeCaseTransformInterceptor, // before serialization
     },
 
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: InvalidateCacheInterceptor, // after controller, before serialization
-    },
     {
       provide: APP_INTERCEPTOR,
       useClass: CacheInterceptor, // before controller

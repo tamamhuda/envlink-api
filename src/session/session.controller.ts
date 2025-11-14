@@ -15,13 +15,15 @@ import { SessionService } from './session.service';
 import { Request } from 'express';
 import {
   ApiBearerAuth,
+  ApiNoContentResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import {
   SessionInfoResponse,
-  SessionsInfoResponse,
+  AllSessionsInfoResponse,
   SessionInfoDto,
   SessionInfoSerializerDto,
 } from './dto/session.dto';
@@ -35,6 +37,7 @@ import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decor
 
 @SkipThrottle()
 @Controller('session')
+@ApiBearerAuth(JWT_SECURITY)
 @ApiTags('Sessions')
 export class SessionController {
   constructor(
@@ -43,10 +46,8 @@ export class SessionController {
   ) {}
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get session by id' })
-  @ApiBearerAuth(JWT_SECURITY)
-  @ApiResponse({
-    status: 200,
+  @ApiOperation({ operationId: 'GetById', summary: 'Get session by id' })
+  @ApiOkResponse({
     type: SessionInfoResponse,
     description: 'Get session by id successfully',
   })
@@ -60,11 +61,9 @@ export class SessionController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all user sessions' })
-  @ApiBearerAuth(JWT_SECURITY)
-  @ApiResponse({
-    status: 200,
-    type: SessionsInfoResponse,
+  @ApiOperation({ operationId: 'GetAll', summary: 'Get all user sessions' })
+  @ApiOkResponse({
+    type: AllSessionsInfoResponse,
     description: 'Get all user sessions successfully',
   })
   @HttpCode(HttpStatus.OK)
@@ -82,10 +81,11 @@ export class SessionController {
   }
 
   @Post('revoke/:id')
-  @ApiOperation({ summary: 'Revoke a user session' })
-  @ApiBearerAuth(JWT_SECURITY)
-  @ApiResponse({
-    status: 204,
+  @ApiOperation({
+    operationId: 'RevokeById',
+    summary: 'Revoke a user session',
+  })
+  @ApiNoContentResponse({
     description: 'No content',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -98,10 +98,11 @@ export class SessionController {
   }
 
   @Post('revoke')
-  @ApiOperation({ summary: 'Revoke all user sessions' })
-  @ApiBearerAuth(JWT_SECURITY)
-  @ApiResponse({
-    status: 204,
+  @ApiOperation({
+    operationId: 'RevokeAll',
+    summary: 'Revoke all user sessions',
+  })
+  @ApiNoContentResponse({
     description: 'No content',
   })
   @HttpCode(HttpStatus.NO_CONTENT)

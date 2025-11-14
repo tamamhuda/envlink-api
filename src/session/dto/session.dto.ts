@@ -22,6 +22,6 @@ export class SessionInfoSerializerDto extends createZodDto(sessionInfoSchema) {}
 
 export class SessionInfoResponse extends createResponseDto(sessionInfoSchema) {}
 
-export class SessionsInfoResponse extends createResponseDto(
+export class AllSessionsInfoResponse extends createResponseDto(
   sessionInfoSchema.array(),
 ) {}

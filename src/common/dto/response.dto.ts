@@ -16,7 +16,7 @@ function createResponseSchema<T extends z.ZodSchema>(
     status: z.number().default(httpStatus),
     path: z.string(),
     data: zodSchema,
-    timestamp: z.string().date().default(new Date().toISOString()),
+    timestamp: z.string().datetime().default(new Date().toISOString()),
   });
 }
 

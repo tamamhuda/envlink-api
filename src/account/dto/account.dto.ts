@@ -11,7 +11,11 @@ export const accountSchema = z.object({
   provider_email: z.string().email().optional(),
   provider_username: z.string().optional(),
   is_verified: z.boolean().default(false),
-  last_login_at: z.date().optional(),
+  last_login_at: z
+    .string()
+    .datetime()
+    .transform((value) => new Date(value))
+    .optional(),
 });
 
 export const accountDtoSchema = zodToCamelCase(accountSchema);

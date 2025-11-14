@@ -6,7 +6,7 @@ export interface ApiResponse<T> {
   timestamp: string;
 }
 
-export interface ErrorResponse {
+export interface ErrorApiResponse {
   success: boolean;
   status: number;
   path: string;

@@ -17,16 +17,22 @@ import { Env } from 'src/config/env.config';
 import { Response } from 'express';
 import { SignedUrlGuard, UrlGeneratorService } from 'nestjs-url-generator';
 import LoggerService from 'src/common/logger/logger.service';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OkDto, OkResponse } from 'src/common/dto/response.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 
-import { ValidatePaymentMethodBodyDto } from '../dto/validate-payment-method.dto';
+import {
+  ValidatePaymentMethodBodyDto,
+  ValidatePaymentMethodRequest,
+} from '../dto/validate-payment-method.dto';
 import {
   PaymentMethodActionDto,
   PaymentMethodActionResponse,
 } from '../dto/request-payment-method.dto';
-import { CreatePaymentMethodBodyDto } from '../dto/create-payment-method.dto';
+import {
+  CreatePaymentMethodBodyDto,
+  CreatePaymentMethodRequest,
+} from '../dto/create-payment-method.dto';
 
 @Controller('public/payment-methods')
 @SkipThrottle()
@@ -44,7 +50,7 @@ export class PublicPaymentMethodsController {
   }
 
   @Get('/add')
-  @ApiOperation({ summary: 'Add payment method' })
+  @ApiOperation({ operationId: 'Add', summary: 'Add payment method' })
   @UseGuards(SignedUrlGuard)
   async addPaymentMethod(
     @Res() res: Response,
@@ -77,7 +83,11 @@ export class PublicPaymentMethodsController {
   }
 
   @Post('/validate')
-  @ApiOperation({ summary: 'Validate payment method' })
+  @ApiOperation({ operationId: 'Validate', summary: 'Validate payment method' })
+  @ApiBody({
+    type: ValidatePaymentMethodRequest,
+    description: 'Request body for validating a payment method',
+  })
   @UseGuards(SignedUrlGuard)
   @ApiOkResponse({
     type: OkResponse,
@@ -96,8 +106,12 @@ export class PublicPaymentMethodsController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create payment method' })
+  @ApiOperation({ operationId: 'Create', summary: 'Create payment method' })
   @UseGuards(SignedUrlGuard)
+  @ApiBody({
+    type: CreatePaymentMethodRequest,
+    description: 'Request body for creating a payment method',
+  })
   @ApiOkResponse({
     type: PaymentMethodActionResponse,
     description: 'Create payment method successfully',

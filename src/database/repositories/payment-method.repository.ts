@@ -37,6 +37,19 @@ export class PaymentMethodRepository extends Repository<PaymentMethod> {
     });
   }
 
+  async findOneByUserAndIdOrExternalId(
+    userId: string,
+    idOrExternalId: string,
+  ): Promise<PaymentMethod | null> {
+    return await this.findOne({
+      where: [
+        { id: idOrExternalId, user: { id: userId } },
+        { externalId: idOrExternalId, user: { id: userId } },
+      ],
+      relations: ['user'],
+    });
+  }
+
   async findManyByUser(userId: string): Promise<PaymentMethod[]> {
     return await this.find({
       where: { user: { id: userId } },

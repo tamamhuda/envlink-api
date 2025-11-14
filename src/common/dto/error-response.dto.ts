@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import * as z from 'zod';
-import { ErrorResponse } from '../interfaces/api-response.intercace';
+import { ErrorApiResponse } from '../interfaces/api-response.intercace';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
 function createErrorResponseSchema<T extends StatusCodes>(statusCode: T) {
@@ -16,33 +16,20 @@ function createErrorResponseSchema<T extends StatusCodes>(statusCode: T) {
       .default(`${reason} Exception`)
       .optional(),
     path: z.string(),
-    timestamp: z.string().date().default(new Date().toISOString()),
+    timestamp: z
+      .string()
+      .datetime()
+      .transform((val) => new Date(val).toDateString()),
   });
 }
 
 export function createErrorResponseDto<T extends StatusCodes>(
   statusCode: T,
-): new () => ErrorResponse {
+): new () => ErrorApiResponse {
   const responseSchema = createErrorResponseSchema(statusCode);
   return class ResponseDto extends createZodDto(responseSchema) {};
 }
 
-export class ForbiddenResponse extends createErrorResponseDto(
-  StatusCodes.FORBIDDEN,
-) {}
-
-export class NotFoundResponse extends createErrorResponseDto(
+export class ErrorResponse extends createErrorResponseDto(
   StatusCodes.NOT_FOUND,
-) {}
-
-export class UnauthorizedResponse extends createErrorResponseDto(
-  StatusCodes.UNAUTHORIZED,
-) {}
-
-export class BadRequestResponse extends createErrorResponseDto(
-  StatusCodes.BAD_REQUEST,
-) {}
-
-export class ConflictResponse extends createErrorResponseDto(
-  StatusCodes.CONFLICT,
 ) {}

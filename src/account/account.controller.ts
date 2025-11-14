@@ -10,7 +10,6 @@ import { AccountService } from './account.service';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiConflictResponse,
   ApiHeaders,
   ApiNoContentResponse,
   ApiOkResponse,
@@ -21,11 +20,13 @@ import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorato
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 import { Request } from 'express';
-import { ZodString } from 'zod';
 import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
 import { PolicyScope } from 'src/common/throttle/throttle.constans';
 import { JWT_SECURITY } from 'src/config/jwt.config';
-import { ChangePasswordBodyDto } from 'src/auth/dto/change-password.dto';
+import {
+  ChangePasswordBodyDto,
+  ChangePasswordRequest,
+} from 'src/auth/dto/change-password.dto';
 import {
   UserInfoDto,
   UserInfoResponse,
@@ -38,7 +39,7 @@ import LoggerService from 'src/common/logger/logger.service';
 
 @Controller('account')
 @ApiBearerAuth(JWT_SECURITY)
-@ApiTags('Session')
+@ApiTags('Account')
 export class AccountController {
   constructor(
     private readonly accountService: AccountService,
@@ -53,6 +54,7 @@ export class AccountController {
     ({ sessionId, user }) => `${user?.id}:${sessionId}`,
   )
   @ApiOperation({
+    operationId: 'Logout',
     summary: 'Logout user',
   })
   @ApiNoContentResponse({
@@ -66,25 +68,16 @@ export class AccountController {
   @Post('/verify/resend')
   @ThrottleScope(PolicyScope.RESEND_EMAIL)
   @ApiOperation({
+    operationId: 'Verify-Resend',
     summary: 'Resend verification email',
   })
   @ApiOkResponse({
-    type: ZodString,
+    type: String,
     description: 'Resend verify email successful',
     examples: {
       OK: {
         summary: 'Ok',
         value: 'OK',
-      },
-    },
-  })
-  @ApiConflictResponse({
-    type: ZodString,
-    description: 'Resend verify email unsuccessful',
-    examples: {
-      CONFLICT: {
-        summary: 'Conflict',
-        value: 'Account already verified',
       },
     },
   })
@@ -106,6 +99,7 @@ export class AccountController {
   @Post('change-password')
   @ThrottleScope(PolicyScope.CHANGE_PASSWORD)
   @ApiOperation({
+    operationId: 'Change-Password',
     summary: 'Change password',
   })
   @ApiOkResponse({
@@ -113,8 +107,8 @@ export class AccountController {
     description: 'Change password successful',
   })
   @ApiBody({
-    type: ChangePasswordBodyDto,
-    required: true,
+    type: ChangePasswordRequest,
+    description: 'Request body for changing password',
   })
   @HttpCode(HttpStatus.OK)
   @InvalidateCache(

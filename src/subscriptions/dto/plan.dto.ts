@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
+import { createResponseDto } from 'src/common/dto/response.dto';
 import { PlanEnum } from 'src/common/enums/plans.enum';
 import { zodToCamelCase } from 'src/common/utils/case-transform.util';
 import * as z from 'zod';
@@ -20,6 +21,6 @@ export class PlanDto extends createZodDto(planDtoSchema) {}
 
 export class PlanSerializerDto extends createZodDto(planSchema) {}
 
-export class PlanResponse extends createZodDto(planSchema) {}
+export class PlanResponse extends createResponseDto(planSchema) {}
 
-export class ListAllPlansResponse extends createZodDto(planSchema.array()) {}
+export class AllPlansResponse extends createResponseDto(planSchema.array()) {}

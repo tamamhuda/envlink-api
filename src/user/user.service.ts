@@ -132,8 +132,8 @@ export class UserService {
     );
   }
 
-  async update(id: string, updateUserDto: UpdateUserBodyDto): Promise<User> {
-    const { username, email, ...updateUser } = updateUserDto;
+  async update(id: string, data: Partial<User>): Promise<User> {
+    const { username, email, ...updateUser } = data;
     const existingUser = await this.findUserById(id);
 
     if (username || email) {
@@ -146,11 +146,11 @@ export class UserService {
 
   async updateUser(
     req: Request,
-    updateUserDto: UpdateUserBodyDto,
+    body: UpdateUserBodyDto,
     id: string,
   ): Promise<UserInfoDto> {
     const { providers, lastLoginAt } = req.user;
-    const { externalId, ...user } = await this.update(id, updateUserDto);
+    const { externalId, ...user } = await this.update(id, body);
     return {
       ...user,
       customerId: externalId,

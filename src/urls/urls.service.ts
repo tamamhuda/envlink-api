@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { UrlRepository } from 'src/database/repositories/url.repository';
 import LoggerService from 'src/common/logger/logger.service';
-import { ShortenUrlBodyDto } from './dto/shorten.dto';
+import { PublicShortenUrlBodyDto, ShortenUrlBodyDto } from './dto/shorten.dto';
 import { UnlockUrlBodyDto, UpdateUrlBodyDto, UrlDto } from './dto/url.dto';
 import { UserService } from 'src/user/user.service';
 import { Url } from 'src/database/entities/url.entity';
@@ -65,7 +65,7 @@ export class UrlsService {
   }
 
   async createUrl(
-    body: ShortenUrlBodyDto,
+    body: Partial<ShortenUrlBodyDto>,
     userInfo?: UserInfo,
   ): Promise<UrlDto> {
     return this.urlRepository.manager.transaction(async (manager) => {

@@ -53,6 +53,7 @@ async function bootstrap() {
       'http://localhost:4000',
       'http://0.0.0.0:4000',
       'https://local-nest.utadev.app',
+      '*',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

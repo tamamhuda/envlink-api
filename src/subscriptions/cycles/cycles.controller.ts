@@ -21,7 +21,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import LoggerService from 'src/common/logger/logger.service';
 import {
   SubscriptionCycleDto,
-  ListSubscriptionCyclesResponse,
+  AllSubscriptionCyclesResponse,
   SubscriptionCycleResponse,
   SubscriptionCycleSerializerDto,
 } from '../dto/subscription-cycle.dto';
@@ -42,7 +42,7 @@ export class SubscriptionsCyclesController {
   @Get('/active/cycles')
   @ApiOperation({ summary: 'Get all active subscription cycles' })
   @ApiOkResponse({
-    type: ListSubscriptionCyclesResponse,
+    type: AllSubscriptionCyclesResponse,
     description: 'Get all active subscription cycles successfully',
   })
   @HttpCode(HttpStatus.OK)
@@ -57,7 +57,7 @@ export class SubscriptionsCyclesController {
   @Get(':id/cycles')
   @ApiOperation({ summary: 'Get all subscription cycles' })
   @ApiOkResponse({
-    type: ListSubscriptionCyclesResponse,
+    type: AllSubscriptionCyclesResponse,
     description: 'Get all subscription cycles successfully',
   })
   @HttpCode(HttpStatus.OK)

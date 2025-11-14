@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 import {
   TransactionDto,
-  ListTransactionsResponse,
+  TransactionsResponse,
   TransactionSerializerDto,
 } from './dto/transaction.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
@@ -38,9 +38,12 @@ export class TransactionsController {
 
   @SkipThrottle()
   @Get()
-  @ApiOperation({ summary: 'Get all transactions' })
+  @ApiOperation({
+    operationId: 'GetAll',
+    summary: 'Get all transactions',
+  })
   @ApiOkResponse({
-    type: ListTransactionsResponse,
+    type: TransactionsResponse,
     description: 'Get all transactions successfully',
   })
   @HttpCode(HttpStatus.OK)
@@ -88,9 +91,9 @@ export class TransactionsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get transaction by id' })
+  @ApiOperation({ operationId: 'GetById', summary: 'Get transaction by id' })
   @ApiOkResponse({
-    type: ListTransactionsResponse,
+    type: TransactionsResponse,
     description: 'get transaction by id successfully',
   })
   @HttpCode(HttpStatus.OK)

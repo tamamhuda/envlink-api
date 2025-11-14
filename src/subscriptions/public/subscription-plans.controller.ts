@@ -7,7 +7,7 @@ import {
   ParseEnumPipe,
 } from '@nestjs/common';
 import {
-  ListAllPlansResponse,
+  AllPlansResponse,
   PlanDto,
   PlanResponse,
   PlanSerializerDto,
@@ -27,9 +27,12 @@ export class PublicSubscriptionPlansController {
 
   @SkipThrottle()
   @Get()
-  @ApiOperation({ summary: 'Get all plan details' })
+  @ApiOperation({
+    operationId: 'GetAll',
+    summary: 'Get all plan details',
+  })
   @ApiOkResponse({
-    type: ListAllPlansResponse,
+    type: AllPlansResponse,
     description: 'Get all plan details suc ',
   })
   @HttpCode(HttpStatus.OK)
@@ -40,7 +43,10 @@ export class PublicSubscriptionPlansController {
 
   @SkipThrottle()
   @Get(':name')
-  @ApiOperation({ summary: 'Get plan details by name' })
+  @ApiOperation({
+    operationId: 'GetByName',
+    summary: 'Get plan details by name',
+  })
   @ApiOkResponse({
     type: PlanResponse,
     description: 'Get plan details successfully ',

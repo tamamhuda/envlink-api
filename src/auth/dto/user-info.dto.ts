@@ -12,7 +12,11 @@ export const providerSchema = z.object({
 
 export const userInfoSchema = userBaseSchema.extend({
   providers: providerSchema,
-  last_login_at: z.date().or(z.string()).optional().nullable(),
+  last_login_at: z
+    .string()
+    .datetime()
+    .transform((val) => new Date(val))
+    .optional(),
 });
 
 export const userInfoDtoSchema = zodToCamelCase(userInfoSchema);

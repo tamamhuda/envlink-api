@@ -9,9 +9,13 @@ import {
   Get,
 } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
-import { UpgradeSubscriptionBodyDto } from './dto/upgrade-subscription';
+import {
+  UpgradeSubscriptionBodyDto,
+  UpgradeSubscriptionRequest,
+} from './dto/upgrade-subscription.dto';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -45,7 +49,10 @@ export class SubscriptionsController {
 
   @SkipThrottle()
   @Get('/active')
-  @ApiOperation({ summary: 'Get user active subscription' })
+  @ApiOperation({
+    operationId: 'GetActive',
+    summary: 'Get current user active subscription',
+  })
   @ApiOkResponse({
     type: SubscriptionInfoResponse,
     description: 'Get user active subscription successfully',
@@ -60,7 +67,10 @@ export class SubscriptionsController {
 
   @SkipThrottle()
   @Get(':id')
-  @ApiOperation({ summary: 'Get subscription by id' })
+  @ApiOperation({
+    operationId: 'GetById',
+    summary: 'Get subscription by id',
+  })
   @ApiOkResponse({
     type: SubscriptionInfoResponse,
     description: 'Get subscription by id successfully',
@@ -76,7 +86,10 @@ export class SubscriptionsController {
 
   @SkipThrottle()
   @Post(':id/deactivate')
-  @ApiOperation({ summary: 'Deactivate subscription plan' })
+  @ApiOperation({
+    operationId: 'Deactivate',
+    summary: 'Deactivate subscription plan',
+  })
   @ApiOkResponse({
     type: SubscriptionInfoResponse,
     description: 'Deactivate Subscription plan successfully',
@@ -92,7 +105,14 @@ export class SubscriptionsController {
 
   @SkipThrottle()
   @Post(':id/upgrade')
-  @ApiOperation({ summary: 'Upgrade subscription plan' })
+  @ApiOperation({
+    operationId: 'Upgrade',
+    summary: 'Upgrade subscription plan',
+  })
+  @ApiBody({
+    type: UpgradeSubscriptionRequest,
+    description: 'Request body for upgrading subscription plan',
+  })
   @ApiCreatedResponse({
     type: SubscriptionInfoResponse,
     description: 'Upgrade subscription plan successfully',
@@ -113,7 +133,10 @@ export class SubscriptionsController {
 
   @SkipThrottle()
   @Get(':id/upgrade-options')
-  @ApiOperation({ summary: 'Get subscription upgrade options' })
+  @ApiOperation({
+    operationId: 'GetUpgradeOptions',
+    summary: 'Get subscription upgrade options',
+  })
   @ApiCreatedResponse({
     type: SubscriptionUpgradeOptionsResponse,
     description: 'Get subscription upgrade options successfully',

@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from './env.config';
 import { DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 import { JWT_REFRESH_SECURITY, JWT_SECURITY } from './jwt.config';
+import { ErrorResponse } from 'src/common/dto/error-response.dto';
 
 export const getSwaggerDocumentConfig = (
   config: ConfigService<Env>,
@@ -11,39 +12,33 @@ export const getSwaggerDocumentConfig = (
     config.get<Env['APP_DESCRIPTION']>('APP_DESCRIPTION') ??
     'nest-js application';
   const APP_VERSION = config.get<Env['APP_VERSION']>('APP_VERSION') ?? 'v1.0.0';
-  return new DocumentBuilder()
 
-    .setTitle(APP_NAME)
-    .addServer('http://localhost:3000', 'Local Development')
-    .addServer(
-      'https://local-nest.utadev.app',
-      'Local Development (Cloudflare Tunnel)',
-    )
-    .addServer('https://staging.enlink.app', 'Staging Environment')
-    .addServer('https://api.envlink.one', 'Production API')
-    .addBearerAuth(
-      {
+  return (
+    new DocumentBuilder()
+      .setTitle(APP_NAME)
+      .setDescription(APP_DESCRIPTION)
+      .setVersion(APP_VERSION)
+      .setOpenAPIVersion('3.1.0')
+      .addServer('https://local-nest.utadev.app', 'Development')
+      .addServer('https://api.envlink.one', 'Production')
+      // Correct JWT bearer configuration
+      .addSecurity(JWT_SECURITY, {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        name: 'Authorization',
-        description: 'Enter Access Token (Bearer <token>)',
-        in: 'header',
-      },
-      JWT_SECURITY,
-    )
-    .addBearerAuth(
-      {
+        description: 'Access Token authentication',
+      })
+      .addSecurity(JWT_REFRESH_SECURITY, {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        name: 'Authorization',
-        description: 'Enter Refresh Token (Bearer <token>)',
-        in: 'header',
-      },
-      JWT_REFRESH_SECURITY,
-    )
-    .setDescription(APP_DESCRIPTION)
-    .setVersion(APP_VERSION)
-    .build();
+        description: 'Refresh Token authentication',
+      })
+      .addGlobalResponse({
+        type: ErrorResponse,
+        description: 'API Error Response',
+        status: '4XX',
+      })
+      .build()
+  );
 };

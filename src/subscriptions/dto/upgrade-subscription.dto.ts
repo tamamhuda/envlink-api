@@ -21,9 +21,12 @@ export const upgradeSubscriptionDtoSchema = zodToCamelCase(
       total_recurrence: z.number().min(1).default(12),
     }),
     description: z.string().nonempty(),
+    metadata: z.record(z.string(), z.any()).optional(),
   }),
 );
 
 export class UpgradeSubscriptionBodyDto extends createZodDto(
   upgradeSubscriptionDtoSchema,
 ) {}
+
+export class UpgradeSubscriptionRequest extends UpgradeSubscriptionBodyDto {}

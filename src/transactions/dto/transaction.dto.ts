@@ -20,10 +20,22 @@ export const transactionSchema = baseSchema.extend({
   payment_method_type: z.string().nonempty(),
   payment_type: z.nativeEnum(PaymentType),
   metadata: z.object({}).catchall(z.any()).nullable(),
-  paid_at: z.date().nullable(),
-  failed_at: z.date().nullable(),
+  paid_at: z
+    .string()
+    .datetime()
+    .transform((value) => new Date(value))
+    .nullable(),
+  failed_at: z
+    .string()
+    .datetime()
+    .transform((value) => new Date(value))
+    .nullable(),
   failure_code: z.string().nullable(),
-  refunded_at: z.date().nullable(),
+  refunded_at: z
+    .string()
+    .datetime()
+    .transform((value) => new Date(value))
+    .nullable(),
   invoice_id: z.string().nullable(),
   invoice_url: z.string().nullable(),
   invoice_number: z.string().nullable(),
@@ -40,7 +52,7 @@ export class TransactionDto extends createZodDto(transactionDtoSchema) {}
 
 export class TransactionSerializerDto extends createZodDto(transactionSchema) {}
 
-export class ListTransactionsResponse extends createResponseDto(
+export class TransactionsResponse extends createResponseDto(
   z.array(transactionSchema),
 ) {}
 

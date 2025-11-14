@@ -29,7 +29,7 @@ import { JWT_SECURITY } from 'src/config/jwt.config';
 import { Cached } from 'src/common/decorators/cached.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
-import { UpdateUserBodyDto } from './dto/user.dto';
+import { UpdateUserBodyDto, UpdateUserRequest } from './dto/user.dto';
 import { ZodSerializerDto, ZodValidationPipe } from 'nestjs-zod';
 import { ImageUploadDto } from './dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -43,7 +43,7 @@ import multer from 'multer';
 
 @Controller('user')
 @ApiBearerAuth(JWT_SECURITY)
-@ApiTags('User Management')
+@ApiTags('User')
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -53,7 +53,7 @@ export class UserController {
   @SkipThrottle()
   @Get('me')
   @Cached(CachePrefix.USER, (req) => `${req.user?.id}`)
-  @ApiOperation({ summary: 'Get user information' })
+  @ApiOperation({ operationId: 'GetInfo', summary: 'Get user information' })
   @ApiOkResponse({
     type: UserInfoResponse,
     description: 'Get user information successfully',
@@ -67,6 +67,10 @@ export class UserController {
 
   @Patch(':id')
   @ThrottleScope(PolicyScope.UPDATE_USER)
+  @ApiBody({
+    description: 'Request body for updating user',
+    type: UpdateUserRequest,
+  })
   @InvalidateCache([
     {
       prefix: CachePrefix.SESSION,
@@ -77,7 +81,7 @@ export class UserController {
       key: (req) => `${req.user?.id}`,
     },
   ])
-  @ApiOperation({ summary: 'Update user information' })
+  @ApiOperation({ operationId: 'Update', summary: 'Update user information' })
   @ApiOkResponse({
     type: UserInfoResponse,
     description: 'Update user information successfully',
@@ -104,7 +108,7 @@ export class UserController {
       key: (req) => `${req.user?.id}`,
     },
   ])
-  @ApiOperation({ summary: 'Upload user image' })
+  @ApiOperation({ operationId: 'UploadAvatar', summary: 'Upload user image' })
   @ApiOkResponse({
     type: UserInfoResponse,
     description: 'Upload user image successfully',

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ZodSerializationException, ZodValidationException } from 'nestjs-zod';
-import { ErrorResponse } from '../interfaces/api-response.intercace';
+import { ErrorApiResponse } from '../interfaces/api-response.intercace';
 import { getReasonPhrase } from 'http-status-codes';
 import { ZodError } from 'zod';
 import LoggerService from '../logger/logger.service';
@@ -50,7 +50,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     this.logger.httpException(HttpExceptionFilter.name, request, exception);
 
-    const errorResponse: ErrorResponse = {
+    const errorResponse: ErrorApiResponse = {
       success: false,
       status,
       message,

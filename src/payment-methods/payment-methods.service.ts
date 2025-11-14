@@ -28,7 +28,6 @@ import { ValidatePaymentMethodBodyDto } from './dto/validate-payment-method.dto'
 import { TokenUtil } from 'src/common/utils/token.util';
 import { CreatePaymentMethodBodyDto } from './dto/create-payment-method.dto';
 import { ZodValidationException } from 'nestjs-zod';
-import { User } from 'src/database/entities/user.entity';
 
 @Injectable()
 export class PaymentMethodsService {
@@ -178,14 +177,14 @@ export class PaymentMethodsService {
     return this.paymentMethodMapper.mapToDto(paymentMethod);
   }
 
-  async getPaymentMethodByExternalId(
+  async getPaymentMethodByIdorExternalId(
     userId: string,
-    externalId: string,
+    idOrexternalId: string,
   ): Promise<PaymentMethodDto> {
     const paymentMethod =
-      await this.paymentMethodRepository.findOneByUserAndExternalId(
+      await this.paymentMethodRepository.findOneByUserAndIdOrExternalId(
         userId,
-        externalId,
+        idOrexternalId,
       );
     if (!paymentMethod) throw new NotFoundException('Payment method not found');
     return this.paymentMethodMapper.mapToDto(paymentMethod);

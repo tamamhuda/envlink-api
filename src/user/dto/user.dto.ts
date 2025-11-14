@@ -33,3 +33,5 @@ const updateSchema = zodToCamelCase(
 export class UserDto extends createZodDto(userBaseSchema) {}
 
 export class UpdateUserBodyDto extends createZodDto(updateSchema) {}
+
+export class UpdateUserRequest extends UpdateUserBodyDto {}

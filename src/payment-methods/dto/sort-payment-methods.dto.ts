@@ -30,3 +30,5 @@ export const sortPaymentMethodsDtoSchema = zodToCamelCase(
 export class SortPaymentMethodsBodyDto extends createZodDto(
   sortPaymentMethodsDtoSchema,
 ) {}
+
+export class SortPaymentMethodsRequest extends SortPaymentMethodsBodyDto {}

@@ -1,4 +1,4 @@
-import { createZodDto, ZodValidationPipe } from 'nestjs-zod';
+import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import * as z from 'zod';
 
@@ -21,6 +21,6 @@ export class PaymentMethodActionResponse extends createResponseDto(
   requestPaymentMethodSchema,
 ) {}
 
-export class ListPaymentMethodActionResponse extends createResponseDto(
+export class AllPaymentMethodActionResponse extends createResponseDto(
   z.array(requestPaymentMethodSchema),
 ) {}

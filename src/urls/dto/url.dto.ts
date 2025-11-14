@@ -64,6 +64,8 @@ const unlockUrlDtoSchema = zodToCamelCase(
 
 export class UnlockUrlBodyDto extends createZodDto(unlockUrlDtoSchema) {}
 
+export class UnlockUrlRequest extends UnlockUrlBodyDto {}
+
 export class PublicUrlDto extends createZodDto(publicUrlDtoSchema) {}
 
 export class PublicUrlSerializerDto extends createZodDto(publicUrlSchema) {}
@@ -71,6 +73,8 @@ export class PublicUrlSerializerDto extends createZodDto(publicUrlSchema) {}
 export class PublicUrlResponse extends createResponseDto(publicUrlSchema) {}
 
 export class UpdateUrlBodyDto extends createZodDto(updateUrlDtoSchema) {}
+
+export class UpdateUrlRequest extends UpdateUrlBodyDto {}
 
 export class UpdateMetadataDto extends createZodDto(updateMetadataDtoSchema) {}
 

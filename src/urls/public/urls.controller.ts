@@ -10,23 +10,26 @@ import {
 } from '@nestjs/common';
 import { UrlsService } from '../urls.service';
 import LoggerService from 'src/common/logger/logger.service';
-import { ShortenUrlBodyDto } from '../dto/shorten.dto';
+import {
+  PublicShortenUrlBodyDto,
+  PublicShortenUrlRequest,
+} from '../dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
   PublicUrlDto,
   PublicUrlResponse,
   PublicUrlSerializerDto,
   UnlockUrlBodyDto,
+  UnlockUrlRequest,
 } from '../dto/url.dto';
 import {
+  ApiBody,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { UrlAnalyticInterceptor } from 'src/common/interceptors/url-analytic.interceptor';
-import { ForbiddenResponse } from 'src/common/dto/error-response.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
 import { PolicyScope } from 'src/common/throttle/throttle.constans';
@@ -43,27 +46,32 @@ export class PublicUrlsController {
 
   @Post('shorten')
   @ThrottleScope(PolicyScope.SHORTEN_PUBLIC)
-  @ApiOperation({ summary: 'Shorten a URL for public access' })
+  @ApiBody({ type: PublicShortenUrlRequest })
+  @ApiOperation({
+    operationId: 'Shorten',
+    summary: 'Shorten a URL for public access',
+  })
   @ApiCreatedResponse({
     type: PublicUrlResponse,
     description: 'Created a new public short URL successfully',
   })
   @ZodSerializerDto(PublicUrlSerializerDto)
-  async shortenUrl(@Body() body: ShortenUrlBodyDto): Promise<PublicUrlDto> {
+  async shortenUrl(
+    @Body() body: PublicShortenUrlBodyDto,
+  ): Promise<PublicUrlDto> {
     return await this.urlsService.createUrl(body);
   }
 
   @SkipThrottle()
   @Get(':code')
   @UseInterceptors(UrlAnalyticInterceptor)
-  @ApiOperation({ summary: 'Get a short URL for public access' })
+  @ApiOperation({
+    operationId: 'GetByCode',
+    summary: 'Get a short URL for public access',
+  })
   @ApiOkResponse({
     type: PublicUrlResponse,
     description: 'Get a short URL for a public access',
-  })
-  @ApiForbiddenResponse({
-    type: ForbiddenResponse,
-    description: 'Forbidden access to the URL',
   })
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(PublicUrlSerializerDto)
@@ -73,7 +81,14 @@ export class PublicUrlsController {
 
   @SkipThrottle()
   @Post('unlock/:code')
-  @ApiOperation({ summary: 'Unlock a short URL for public access' })
+  @ApiOperation({
+    operationId: 'Unlock',
+    summary: 'Unlock a short URL for public access',
+  })
+  @ApiBody({
+    type: UnlockUrlRequest,
+    description: 'Request body for unlocking a short URL',
+  })
   @ApiOkResponse({
     type: PublicUrlResponse,
     description: 'Unlock a short URL for a public access',

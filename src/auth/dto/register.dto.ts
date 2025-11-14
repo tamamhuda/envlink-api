@@ -9,7 +9,14 @@ const registerRequestSchema = zodToCamelCase(
       username: z.string().min(3).nonempty(),
       email: z.string().email().nonempty(),
       password: z.string().min(8).max(100).nonempty().trim(),
-      confirm_password: z.string().min(8).max(100).nonempty().trim(),
+      confirm_password: z
+        .string({
+          description: '*confirm password must match with the password field',
+        })
+        .min(8)
+        .max(100)
+        .nonempty()
+        .trim(),
       phone_number: z.string().nullable().optional(),
     })
     .refine((data) => data.password === data.confirm_password, {
@@ -18,3 +25,5 @@ const registerRequestSchema = zodToCamelCase(
 );
 
 export class RegisterBodyDto extends createZodDto(registerRequestSchema) {}
+
+export class RegisterRequest extends RegisterBodyDto {}

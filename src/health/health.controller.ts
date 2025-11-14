@@ -23,7 +23,7 @@ export class HealthController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Check health status' })
+  @ApiOperation({ operationId: 'Health-Check', summary: 'Check health status' })
   @HealthCheck()
   check(@Ip() ipAddr: string) {
     return this.health.check([

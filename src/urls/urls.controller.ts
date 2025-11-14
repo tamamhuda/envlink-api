@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
 import LoggerService from 'src/common/logger/logger.service';
-import { ShortenUrlBodyDto } from './dto/shorten.dto';
+import { ShortenUrlBodyDto, ShortenUrlRequest } from './dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
   UpdateUrlBodyDto,
@@ -20,9 +20,11 @@ import {
   UrlResponse,
   AllUrlsResponse,
   UrlSerializerDto,
+  UpdateUrlRequest,
 } from './dto/url.dto';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiOkResponse,
@@ -36,7 +38,7 @@ import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decor
 
 @ApiBearerAuth(JWT_SECURITY)
 @Controller('urls')
-@ApiTags('Transactions')
+@ApiTags('Urls')
 export class UrlsController {
   constructor(
     private readonly urlsService: UrlsService,
@@ -48,7 +50,11 @@ export class UrlsController {
     scope: 'shorten',
     cost: 1,
   })
-  @ApiOperation({ summary: 'Create a new short URL' })
+  @ApiBody({
+    type: ShortenUrlRequest,
+    description: 'Request body to shorten a URL',
+  })
+  @ApiOperation({ operationId: 'Shorten', summary: 'Create a new short URL' })
   @ApiCreatedResponse({
     type: UrlResponse,
     description: 'Created a new short URL',
@@ -64,7 +70,7 @@ export class UrlsController {
 
   @SkipThrottle()
   @Get(':id')
-  @ApiOperation({ summary: 'Get a short URL by id' })
+  @ApiOperation({ operationId: 'GetById', summary: 'Get a short URL by id' })
   @ApiOkResponse({
     type: UrlResponse,
     description: 'Get a short URL by id successfully',
@@ -77,7 +83,10 @@ export class UrlsController {
 
   @SkipThrottle()
   @Get()
-  @ApiOperation({ summary: 'Get all short URLs for a user' })
+  @ApiOperation({
+    operationId: 'GetAll',
+    summary: 'Get all short URLs for a user',
+  })
   @ApiOkResponse({
     type: AllUrlsResponse,
     description: 'Get all short URLs for a user successfully',
@@ -90,7 +99,14 @@ export class UrlsController {
 
   @SkipThrottle()
   @Put(':id')
-  @ApiOperation({ summary: 'Update a short URL' })
+  @ApiBody({
+    type: UpdateUrlRequest,
+    description: 'Request body to update a URL',
+  })
+  @ApiOperation({
+    operationId: 'Update',
+    summary: 'Update a short URL',
+  })
   @ApiOkResponse({
     type: UrlResponse,
     description: 'Update a short URL',
@@ -105,7 +121,10 @@ export class UrlsController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a short URL' })
+  @ApiOperation({
+    operationId: 'Delete',
+    summary: 'Delete a short URL',
+  })
   @ApiNoContentResponse({
     description: 'Delete a short URL successfully',
   })

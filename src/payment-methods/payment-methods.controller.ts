@@ -21,6 +21,7 @@ import {
 import { Request } from 'express';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 import {
+  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
@@ -28,18 +29,27 @@ import {
 } from '@nestjs/swagger';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { SortPaymentMethodsBodyDto } from './dto/sort-payment-methods.dto';
+import {
+  SortPaymentMethodsBodyDto,
+  SortPaymentMethodsRequest,
+} from './dto/sort-payment-methods.dto';
 import {
   PaymentMethodActionDto,
-  ListPaymentMethodActionResponse,
+  AllPaymentMethodActionResponse,
   PaymentMethodActionResponse,
 } from './dto/request-payment-method.dto';
 import LoggerService from 'src/common/logger/logger.service';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
 import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
-import { CreatePaymentMethodBodyDto } from './dto/create-payment-method.dto';
+import {
+  CreatePaymentMethodBodyDto,
+  CreatePaymentMethodRequest,
+} from './dto/create-payment-method.dto';
 import { OkDto, OkResponse } from 'src/common/dto/response.dto';
-import { ValidatePaymentMethodBodyDto } from './dto/validate-payment-method.dto';
+import {
+  ValidatePaymentMethodBodyDto,
+  ValidatePaymentMethodRequest,
+} from './dto/validate-payment-method.dto';
 import { Cached } from 'src/common/decorators/cached.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
@@ -55,9 +65,12 @@ export class PaymentMethodsController {
   ) {}
 
   @Get('/requests')
-  @ApiOperation({ summary: 'Get requested payment methods' })
+  @ApiOperation({
+    operationId: 'Request',
+    summary: 'Get requested payment methods',
+  })
   @ApiOkResponse({
-    type: ListPaymentMethodActionResponse,
+    type: AllPaymentMethodActionResponse,
     description: 'Get requested payment method successfully',
   })
   @HttpCode(HttpStatus.OK)
@@ -74,26 +87,8 @@ export class PaymentMethodsController {
     );
   }
 
-  @Get(':external_id')
-  @ApiOperation({ summary: 'Get payment method by external id' })
-  @ApiOkResponse({
-    type: PaymentMethodResponse,
-    description: 'Get payment method by external id successfully',
-  })
-  @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto(PaymentMethodSerializerDto)
-  async getPaymentMethodByExternalId(
-    @Param('external_id') externalId: string,
-    @AuthenticatedUser() user: UserInfo,
-  ): Promise<PaymentMethodDto> {
-    return await this.paymentMethodsService.getPaymentMethodByExternalId(
-      user.id,
-      externalId,
-    );
-  }
-
   @Get(':id')
-  @ApiOperation({ summary: 'Get payment method by id' })
+  @ApiOperation({ operationId: 'GetById', summary: 'Get payment method by id' })
   @ApiOkResponse({
     type: PaymentMethodResponse,
     description: 'Get payment method by id successfully',
@@ -104,11 +99,14 @@ export class PaymentMethodsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @AuthenticatedUser() user: UserInfo,
   ): Promise<PaymentMethodDto> {
-    return await this.paymentMethodsService.getPaymentMethodById(user.id, id);
+    return await this.paymentMethodsService.getPaymentMethodByIdorExternalId(
+      user.id,
+      id,
+    );
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all payment methods' })
+  @ApiOperation({ operationId: 'GetAll', summary: 'Get all payment methods' })
   @ApiOkResponse({
     type: AllPaymentMethodsResponse,
     description: 'Get all payment methods successfully',
@@ -121,7 +119,11 @@ export class PaymentMethodsController {
   }
 
   @Patch('/sort')
-  @ApiOperation({ summary: 'Sort payment methods' })
+  @ApiOperation({ operationId: 'Sort', summary: 'Sort payment methods' })
+  @ApiBody({
+    type: SortPaymentMethodsRequest,
+    description: 'Request body sort payment methods',
+  })
   @ApiOkResponse({
     type: AllPaymentMethodsResponse,
     description: 'Get payment method by id successfully',
@@ -143,7 +145,11 @@ export class PaymentMethodsController {
   }
 
   @Post('/validate')
-  @ApiOperation({ summary: 'Validate payment method' })
+  @ApiOperation({ operationId: 'Validate', summary: 'Validate payment method' })
+  @ApiBody({
+    type: ValidatePaymentMethodRequest,
+    description: 'Request body validate payment method',
+  })
   @ApiOkResponse({
     type: OkResponse,
     description: 'Validate payment method successfully',
@@ -161,7 +167,11 @@ export class PaymentMethodsController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create payment method' })
+  @ApiOperation({ operationId: 'Create', summary: 'Create payment method' })
+  @ApiBody({
+    type: CreatePaymentMethodRequest,
+    description: 'Request body create payment method',
+  })
   @ApiOkResponse({
     type: PaymentMethodActionResponse,
     description: 'Create payment method successfully',
