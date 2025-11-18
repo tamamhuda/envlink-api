@@ -30,7 +30,7 @@ import {
 import {
   UserInfoDto,
   UserInfoResponse,
-  UserInfoSerializer,
+  UserInfoSerializerDto,
 } from 'src/auth/dto/user-info.dto';
 import { AccountVerifyService } from './account-verify.service';
 import { ClientUrl } from 'src/common/decorators/client-url.decorator';
@@ -115,7 +115,7 @@ export class AccountController {
     CachePrefix.SESSION,
     ({ sessionId, user }) => `${user?.id}:${sessionId}`,
   )
-  @ZodSerializerDto(UserInfoSerializer)
+  @ZodSerializerDto(UserInfoSerializerDto)
   async changePassword(
     @Req() req: Request,
     @Body() body: ChangePasswordBodyDto,
