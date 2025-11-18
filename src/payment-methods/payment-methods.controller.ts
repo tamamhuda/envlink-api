@@ -64,9 +64,9 @@ export class PaymentMethodsController {
     private readonly logger: LoggerService,
   ) {}
 
-  @Get('/requests')
+  @Get('/requests-actions')
   @ApiOperation({
-    operationId: 'Request',
+    operationId: 'RequestActions',
     summary: 'Get requested payment methods',
   })
   @ApiOkResponse({
