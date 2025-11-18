@@ -9,8 +9,16 @@ export const sessionInfoSchema = baseSchema.extend({
   user_agent: z.string().max(255).optional().nullable(),
   ip_location: z.string().max(255).optional().nullable(),
   is_revoked: z.boolean().default(false),
-  revoked_at: z.date().optional().nullable(),
-  expires_at: z.date().optional().nullable(),
+  revoked_at: z
+    .string()
+    .datetime()
+    .transform((val) => new Date(val))
+    .nullable(),
+  expires_at: z
+    .string()
+    .datetime()
+    .transform((val) => new Date(val))
+    .nullable(),
   user: userInfoSchema,
 });
 
