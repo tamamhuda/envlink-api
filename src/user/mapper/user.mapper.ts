@@ -3,7 +3,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import {
   UserInfo,
   UserInfoDto,
-  UserInfoSerializer,
+  UserInfoSerializerDto,
 } from 'src/auth/dto/user-info.dto';
 import { AwsS3Util } from 'src/common/utils/aws-s3.util';
 import { Account } from 'src/database/entities/account.entity';

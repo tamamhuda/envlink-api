@@ -149,10 +149,11 @@ export class UserService {
     body: UpdateUserBodyDto,
     id: string,
   ): Promise<UserInfoDto> {
-    const { providers, lastLoginAt } = req.user;
+    const { providers, lastLoginAt, avatar } = req.user;
     const { externalId, ...user } = await this.update(id, body);
     return {
       ...user,
+      avatar,
       customerId: externalId,
       providers,
       lastLoginAt,

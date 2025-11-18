@@ -15,7 +15,7 @@ import { UserService } from './user.service';
 import {
   UserInfoDto,
   UserInfoResponse,
-  UserInfoSerializer,
+  UserInfoSerializerDto,
 } from 'src/auth/dto/user-info.dto';
 import {
   ApiBearerAuth,
@@ -59,14 +59,14 @@ export class UserController {
     description: 'Get user information successfully',
   })
   @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto(UserInfoSerializer)
+  @ZodSerializerDto(UserInfoSerializerDto)
   userInfo(@Req() req: Request, @ClientUrl() clientUrl: string): UserInfoDto {
     console.log(clientUrl);
     return req.user;
   }
 
   @Patch(':id')
-  @ThrottleScope(PolicyScope.UPDATE_USER)
+  @ThrottleScope(PolicyScope.DEFAULT)
   @ApiBody({
     description: 'Request body for updating user',
     type: UpdateUserRequest,
@@ -87,7 +87,7 @@ export class UserController {
     description: 'Update user information successfully',
   })
   @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto(UserInfoSerializer)
+  @ZodSerializerDto(UserInfoSerializerDto)
   async updateUser(
     @Req() req: Request,
     @Body() body: UpdateUserBodyDto,
@@ -128,7 +128,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @InvalidateCache(CachePrefix.USER, (req) => `${req.user?.id}`)
   @UseInterceptors(FileInterceptor('file', { storage: multer.memoryStorage() }))
-  @ZodSerializerDto(UserInfoSerializer)
+  @ZodSerializerDto(UserInfoSerializerDto)
   async imageUpload(
     @Req() req: Request,
     @UploadedFile(new ZodValidationPipe(ImageUploadDto))

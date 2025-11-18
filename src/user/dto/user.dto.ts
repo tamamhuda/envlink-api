@@ -11,7 +11,7 @@ export const userBaseSchema = baseSchema.extend({
   full_name: z.string().nonempty(),
   phone_number: z.string().nullable().optional(),
   role: z.nativeEnum(RolesEnum).default(RolesEnum.USER),
-  avatar: z.string().url().nullable().optional(),
+  avatar: z.string().nullable().optional(),
 });
 
 const updateSchema = zodToCamelCase(
