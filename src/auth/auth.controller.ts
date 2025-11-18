@@ -35,7 +35,11 @@ import {
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { UserInfoDto } from './dto/user-info.dto';
+import {
+  UserInfoDto,
+  UserInfoResponse,
+  UserInfoSerializerDto,
+} from './dto/user-info.dto';
 import LoggerService from 'src/common/logger/logger.service';
 import { PolicyScope } from 'src/common/throttle/throttle.constans';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -126,9 +130,10 @@ export class AuthController {
   @Get('verify')
   @ApiOperation({ operationId: 'Verify', summary: 'Verify email' })
   @ApiOkResponse({
-    type: UserInfoDto,
+    type: UserInfoResponse,
     description: 'Verify email successful',
   })
+  @ZodSerializerDto(UserInfoSerializerDto)
   async verify(@Query('token') token: string): Promise<UserInfoDto> {
     return await this.authService.verify(token);
   }

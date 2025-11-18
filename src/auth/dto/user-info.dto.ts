@@ -25,6 +25,6 @@ export type UserInfo = z.infer<typeof userInfoDtoSchema>;
 
 export class UserInfoDto extends createZodDto(userInfoDtoSchema) {}
 
-export class UserInfoSerializer extends createZodDto(userInfoSchema) {}
+export class UserInfoSerializerDto extends createZodDto(userInfoSchema) {}
 
 export class UserInfoResponse extends createResponseDto(userInfoSchema) {}

@@ -42,7 +42,7 @@ export class JwtAuthGuard extends AuthGuard(JWT_ACCESS_STRATEGY) {
       throw new UnauthorizedException('Invalid token');
     }
     if (err || !user) {
-      throw new UnauthorizedException(err.message || 'Invalid Authorization');
+      throw new UnauthorizedException('Invalid Authorization');
     }
     return user;
   }
