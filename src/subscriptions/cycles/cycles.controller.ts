@@ -40,7 +40,10 @@ export class SubscriptionsCyclesController {
 
   @SkipThrottle()
   @Get('/active/cycles')
-  @ApiOperation({ summary: 'Get all active subscription cycles' })
+  @ApiOperation({
+    operationId: 'getAllActiveSubscriptionCycles',
+    summary: 'Get all active subscription cycles',
+  })
   @ApiOkResponse({
     type: AllSubscriptionCyclesResponse,
     description: 'Get all active subscription cycles successfully',
@@ -55,7 +58,10 @@ export class SubscriptionsCyclesController {
 
   @SkipThrottle()
   @Get(':id/cycles')
-  @ApiOperation({ summary: 'Get all subscription cycles' })
+  @ApiOperation({
+    operationId: 'getAllBySubscriptionId',
+    summary: 'Get all subscription cycles',
+  })
   @ApiOkResponse({
     type: AllSubscriptionCyclesResponse,
     description: 'Get all subscription cycles successfully',
@@ -71,7 +77,10 @@ export class SubscriptionsCyclesController {
 
   @SkipThrottle()
   @Get(':id/cycles/:cycleId')
-  @ApiOperation({ summary: 'Get subscription cycle by id' })
+  @ApiOperation({
+    operationId: 'GetCycleById',
+    summary: 'Get subscription cycle by id',
+  })
   @ApiOkResponse({
     type: SubscriptionCycleResponse,
     description: 'Get subscription cycle by id successfully',
