@@ -28,7 +28,7 @@ export default class Session extends BaseEntity {
     type: 'timestamp',
     nullable: true,
   })
-  expiresAt?: Date;
+  expiresAt!: Date | null;
 
   @Index()
   @Column({
