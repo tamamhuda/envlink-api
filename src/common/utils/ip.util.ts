@@ -38,7 +38,7 @@ export class IpUtil {
       if (cached) return cached;
 
       const result = await this.ip2Client
-        .lookup(ipAddr, 'en')
+        .lookup(ipAddr)
         .catch((error) => {
           this.logger.error(error);
           return undefined;
@@ -66,7 +66,7 @@ export class IpUtil {
 
     return {
       city: location?.city_name || 'Unknown',
-      country: location?.country_name || 'Unknown',
+      country: location?.country_code || 'Unknown',
       region: location?.region_name || 'Unknown',
       language: location?.country?.language.code || 'Unknown',
     };

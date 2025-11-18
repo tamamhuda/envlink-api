@@ -10,6 +10,20 @@ import snakecaseKeys from 'snakecase-keys';
 
 @Injectable()
 export class SnakeCaseTransformInterceptor implements NestInterceptor {
+  private normalizeDates(obj: unknown): unknown {
+    if (obj === null || obj === undefined) return obj;
+    if (obj instanceof Date) return obj.toISOString();
+    if (Array.isArray(obj)) return obj.map((v) => this.normalizeDates(v));
+    if (typeof obj === 'object' && obj !== null) {
+      const result: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        result[key] = this.normalizeDates(value);
+      }
+      return result;
+    }
+    return obj;
+  }
+
   intercept(context: ExecutionContext, next: CallHandler) {
     return next.handle().pipe(
       map((data) => {
@@ -24,22 +38,10 @@ export class SnakeCaseTransformInterceptor implements NestInterceptor {
         const normalizedData = this.normalizeDates(plainData);
 
         // apply snake_case transformation
-        return snakecaseKeys(normalizedData, { deep: true });
+        return snakecaseKeys(normalizedData as Record<string, unknown>, {
+          deep: true,
+        });
       }),
     );
-  }
-
-  normalizeDates(obj: any): any {
-    if (obj === null || obj === undefined) return obj;
-    if (obj instanceof Date) return obj.toISOString(); // convert Date to string
-    if (Array.isArray(obj)) return obj.map(this.normalizeDates);
-    if (typeof obj === 'object') {
-      const result: Record<string, any> = {};
-      for (const [key, value] of Object.entries(obj)) {
-        result[key] = this.normalizeDates(value);
-      }
-      return result;
-    }
-    return obj;
   }
 }

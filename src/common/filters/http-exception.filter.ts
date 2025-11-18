@@ -1,5 +1,6 @@
 import {
   ArgumentsHost,
+  BadRequestException,
   Catch,
   ExceptionFilter,
   HttpException,
@@ -10,6 +11,7 @@ import { ErrorApiResponse } from '../interfaces/api-response.intercace';
 import { getReasonPhrase } from 'http-status-codes';
 import { ZodError } from 'zod';
 import LoggerService from '../logger/logger.service';
+import { ValidationError } from 'class-validator';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -46,6 +48,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message: issue.message,
       }));
       message = exception.message;
+    }
+
+    if (exception instanceof BadRequestException) {
+      const exceptionResponse = errorException as any;
+      if (exceptionResponse.message instanceof Object) {
+        error = exceptionResponse.message;
+        message = 'Validation Error';
+      }
     }
 
     this.logger.httpException(HttpExceptionFilter.name, request, exception);
