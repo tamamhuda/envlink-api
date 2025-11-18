@@ -34,6 +34,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { getSignedUrlConfig } from './config/signed-url.config';
 import { ClientUrlMiddleware } from './common/middlewares/client-url.middleware';
 import { SnakeCaseTransformInterceptor } from './common/interceptors/snake-case-transform.interceptor';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -91,6 +92,7 @@ import { SnakeCaseTransformInterceptor } from './common/interceptors/snake-case-
     WebhooksModule,
     PaymentMethodsModule,
     TransactionsModule,
+    AnalyticsModule,
   ],
 
   providers: [
@@ -120,11 +122,11 @@ import { SnakeCaseTransformInterceptor } from './common/interceptors/snake-case-
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: InvalidateCacheInterceptor, // after controller, before serialization
+      useClass: SnakeCaseTransformInterceptor, // before serialization
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: SnakeCaseTransformInterceptor, // before serialization
+      useClass: InvalidateCacheInterceptor, // after controller, before serialization
     },
 
     {
