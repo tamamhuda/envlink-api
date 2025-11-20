@@ -11,6 +11,7 @@ import { Transaction } from './transaction.entity';
 import { PaymentMethod } from './payment-method.entity';
 import { SubscriptionHistory } from './subscription-history.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { BillingAddress } from './billing-address.entity';
 
 @Entity({ name: 'users' })
 @Index(['username', 'email', 'externalId'], { unique: true })
@@ -75,6 +76,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Url, (url) => url.user)
   urls!: Url[];
+
+  @OneToMany(() => BillingAddress, (address) => address.user)
+  billingAddresses!: BillingAddress[];
 
   @Column({ type: 'boolean', default: false })
   isTrial!: boolean;
