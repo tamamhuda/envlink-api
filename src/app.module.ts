@@ -35,6 +35,7 @@ import { getSignedUrlConfig } from './config/signed-url.config';
 import { ClientUrlMiddleware } from './common/middlewares/client-url.middleware';
 import { SnakeCaseTransformInterceptor } from './common/interceptors/snake-case-transform.interceptor';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { BillingAddressModule } from './billing-address/billing-address.module';
 
 @Module({
   imports: [
@@ -93,6 +94,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     PaymentMethodsModule,
     TransactionsModule,
     AnalyticsModule,
+    BillingAddressModule,
   ],
 
   providers: [
