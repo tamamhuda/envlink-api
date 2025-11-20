@@ -5,13 +5,15 @@ import * as z from 'zod';
 import { channelSchema } from './channel.dto';
 import { zodToCamelCase } from 'src/common/utils/case-transform.util';
 
-const metadataSchema = z.object({
-  title: z.string().max(255).optional(),
-  description: z.string().optional(),
-  image: z.string().url().optional(),
-  favicon: z.string().url().optional(),
-  site_name: z.string().max(255).optional(),
-});
+const metadataSchema = z
+  .object({
+    title: z.string().max(255).optional(),
+    description: z.string().optional(),
+    image: z.string().url().optional(),
+    favicon: z.string().url().optional(),
+    site_name: z.string().max(255).optional(),
+  })
+  .catchall(z.any());
 
 const updateMetadataDtoSchema = zodToCamelCase(
   metadataSchema.partial().refine((data) => Object.keys(data).length > 0, {
