@@ -47,7 +47,7 @@ export class SubscriptionsService {
     return existingSubscription;
   }
 
-  private mapSubscriptionToDto(
+  private mapToDto(
     subscription: Subscription,
     actions?: SubscriptionInfoDto['actions'],
   ): SubscriptionInfoDto {
@@ -61,10 +61,17 @@ export class SubscriptionsService {
     };
   }
 
+  async getAll(userId: string): Promise<SubscriptionInfoDto[]> {
+    const subscriptions =
+      await this.subscriptionRepository.findAllByUserId(userId);
+    return subscriptions.map((subscription) => this.mapToDto(subscription));
+  }
+
   getUpgradePlanOption(
     currentSubs: Subscription,
     targetPlan: Plan,
     discount = 0,
+    newPrice?: number,
   ): UpgradePlanOptionDto {
     const { expiresAt, startedAt, plan, amountPaid } = currentSubs;
     const now = new Date();
@@ -88,7 +95,7 @@ export class SubscriptionsService {
     }
 
     const A_current = amountPaid;
-    const A_new = targetPlan.price;
+    const A_new = newPrice ?? targetPlan.price;
     const remainingCredit = A_current * (remainingDays / totalDays);
 
     const netAmountImmediate = Math.max(A_new - remainingCredit - discount, 0);
@@ -179,7 +186,8 @@ export class SubscriptionsService {
   ): Promise<SubscriptionInfoDto> {
     return await this.subscriptionRepository.manager.transaction(
       async (manager) => {
-        const { description, plan, schedule, strategy, discount } = body;
+        const { description, plan, schedule, strategy, discount, amount } =
+          body;
 
         // Validate is current subcription is upgradable
         const existingPendingSubscription =
@@ -197,6 +205,7 @@ export class SubscriptionsService {
           currentSubs,
           newPlan,
           discount || 0,
+          body.amount,
         ).options.find((option) => option.strategy === strategy);
 
         if (
@@ -206,6 +215,7 @@ export class SubscriptionsService {
         )
           throw new BadRequestException(`Subscription is not upgradable`);
 
+        console.log(upgradePlanOption);
         // Get customer id by Get or create customer
         let user = currentSubs.user;
         let customer_id = user.externalId;
@@ -227,24 +237,13 @@ export class SubscriptionsService {
         });
 
         // Create new subscription with pending status
-        const {
-          netAmount,
-          currentPlan: previousPlan,
-          amount,
-          remainingCredit: previousRemainingCredit,
-          remainingDays: previousRemainingDays,
-        } = upgradePlanOption;
+        const { netAmount, currentPlan: previousPlan } = upgradePlanOption;
 
         const metadata: Subscription['metadata'] = {
           strategy,
           previousPlan,
           newPlan: newPlan.name,
-          previousExternalId: currentSubs.externalId,
-          previousRemainingCredit,
-          previousRemainingDays,
-          amount,
-          discount,
-          netAmount,
+          ...body.metadata,
         };
 
         const subscription = manager.create(Subscription, {
@@ -294,7 +293,7 @@ export class SubscriptionsService {
         });
         await manager.save(mergedSubscription);
 
-        return this.mapSubscriptionToDto(mergedSubscription, actions);
+        return this.mapToDto(mergedSubscription, actions);
       },
     );
   }
@@ -362,7 +361,7 @@ export class SubscriptionsService {
   ): Promise<SubscriptionInfoDto> {
     const activeSubscription =
       await this.findActiveSubscriptionByUserId(userId);
-    return this.mapSubscriptionToDto(activeSubscription);
+    return this.mapToDto(activeSubscription);
   }
 
   async getUserSubscriptionById(
@@ -392,7 +391,7 @@ export class SubscriptionsService {
       });
     }
 
-    return this.mapSubscriptionToDto(subscription, actions);
+    return this.mapToDto(subscription, actions);
   }
 
   async createFallbackFreeSubscription(user: User): Promise<Subscription> {
@@ -457,6 +456,6 @@ export class SubscriptionsService {
         return await manager.save(updatedSubscription);
       });
 
-    return this.mapSubscriptionToDto(deactivatedSubscription);
+    return this.mapToDto(deactivatedSubscription);
   }
 }

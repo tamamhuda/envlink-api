@@ -71,7 +71,6 @@ export default class Subscription extends BaseEntity {
     strategy: UpgradeStrategy;
     previousPlan: PlanEnum;
     newPlan: PlanEnum;
-    previousExternalId: string | null;
     [key: string]: any;
   } | null;
 

@@ -18,6 +18,13 @@ export class SubscriptionRepository extends Repository<Subscription> {
     return this.findOne({ where: { id }, relations: ['user', 'plan'] });
   }
 
+  async findAllByUserId(userId: string): Promise<Subscription[]> {
+    return this.find({
+      where: { user: { id: userId } },
+      relations: ['user', 'plan'],
+    });
+  }
+
   async findOneByReferenceId(
     referenceId: string,
   ): Promise<Subscription | null> {

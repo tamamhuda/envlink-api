@@ -1,9 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { SubscriptionInterval } from 'src/common/enums/Period.enum';
-import { PlanEnum } from 'src/common/enums/plans.enum';
 import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
-import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
 import { baseSchema } from 'src/common/schemas/base.schema';
 import * as z from 'zod';
 import { zodToCamelCase } from 'src/common/utils/case-transform.util';
@@ -34,20 +32,14 @@ export const subscriptionInfoSchema = baseSchema.extend({
       total_recurrence: z.number().min(1),
     })
     .nullable(),
-  metadata: z
-    .object({
-      strategy: z.nativeEnum(UpgradeStrategy),
-      previous_plan: z.nativeEnum(PlanEnum),
-      new_plan: z.nativeEnum(PlanEnum),
-    })
-    .catchall(z.any())
-    .nullable(),
+  metadata: z.record(z.string(), z.any()).nullable(),
   transaction_status: z.string().nullable(),
   next_billing_date: z
     .string()
     .datetime()
     .transform((date) => new Date(date))
-    .nullable(),
+    .nullable()
+    .optional(),
   actions: z
     .array(
       z.object({
@@ -72,4 +64,8 @@ export class SubscriptionInfoSerializerDto extends createZodDto(
 
 export class SubscriptionInfoResponse extends createResponseDto(
   subscriptionInfoSchema,
+) {}
+
+export class AllSubscriptionInfoResponse extends createResponseDto(
+  subscriptionInfoSchema.array(),
 ) {}

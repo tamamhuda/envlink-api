@@ -24,6 +24,7 @@ import {
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 import {
+  AllSubscriptionInfoResponse,
   SubscriptionInfoDto,
   SubscriptionInfoResponse,
   SubscriptionInfoSerializerDto,
@@ -63,6 +64,24 @@ export class SubscriptionsController {
     @AuthenticatedUser() user: UserInfo,
   ): Promise<SubscriptionInfoDto> {
     return await this.subscriptionsService.getUserActiveSubscription(user.id);
+  }
+
+  @SkipThrottle()
+  @Get()
+  @ApiOperation({
+    operationId: 'GetAll',
+    summary: 'Get all subscriptions',
+  })
+  @ApiOkResponse({
+    type: AllSubscriptionInfoResponse,
+    description: 'Get all subscriptions successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  @ZodSerializerDto([SubscriptionInfoSerializerDto])
+  async getAllSubscriptions(
+    @AuthenticatedUser() user: UserInfo,
+  ): Promise<SubscriptionInfoDto[]> {
+    return await this.subscriptionsService.getAll(user.id);
   }
 
   @SkipThrottle()

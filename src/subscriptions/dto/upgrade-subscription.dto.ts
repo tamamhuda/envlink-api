@@ -11,7 +11,7 @@ export const upgradeSubscriptionDtoSchema = zodToCamelCase(
     strategy: z
       .nativeEnum(UpgradeStrategy)
       .default(UpgradeStrategy.UPGRADE_IMMEDIATELY),
-    amount: z.number().nonnegative().min(0).optional(),
+    amount: z.number().min(10000),
     discount: z.number().nonnegative().min(0).optional(),
     schedule: z.object({
       interval: z
