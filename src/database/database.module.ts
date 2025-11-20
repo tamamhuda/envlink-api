@@ -13,6 +13,7 @@ import { PaymentMethodRepository } from './repositories/payment-method.repositor
 import { SubscriptionCycleRepository } from './repositories/subscription-cycle.repository';
 import { TransactionRepository } from './repositories/transaction.repository';
 import { SubscriptionHistoryRepository } from './repositories/subscription-history.repository';
+import { BillingAddressRepository } from './repositories/billing-address.repository';
 
 @Global()
 @Module({
@@ -31,6 +32,7 @@ import { SubscriptionHistoryRepository } from './repositories/subscription-histo
     SubscriptionCycleRepository,
     TransactionRepository,
     SubscriptionHistoryRepository,
+    BillingAddressRepository,
   ],
   exports: [
     UserRepository,
@@ -47,6 +49,7 @@ import { SubscriptionHistoryRepository } from './repositories/subscription-histo
     SubscriptionCycleRepository,
     TransactionRepository,
     SubscriptionHistoryRepository,
+    BillingAddressRepository,
   ],
 })
 export class DatabaseModule {}
