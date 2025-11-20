@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm';
 
 @Injectable()
 export class ChannelRepository extends Repository<Channel> {
-  constructor(private readonly dataSource: DataSource) {
+  constructor(dataSource: DataSource) {
     super(Channel, dataSource.createEntityManager());
   }
 }
