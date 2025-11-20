@@ -113,7 +113,7 @@ export class AnalyticsController {
     summary: 'Get all timeline of urls',
   })
   @ApiOkResponse({
-    type: UrlAnalyticTimelineDto,
+    type: UrlAnalyticTimelineResponse,
     description: 'Get all timeline of urls successfully',
   })
   @HttpCode(HttpStatus.OK)
