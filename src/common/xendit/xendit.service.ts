@@ -68,10 +68,10 @@ export class XenditService {
 
     if (!success_return_url || !failure_return_url) {
       success_return_url = this.urlGenService.signUrl({
-        relativePath: '/public/subscription/success',
+        relativePath: 'public/subscription/success',
       });
       failure_return_url = this.urlGenService.signUrl({
-        relativePath: '/public/subscription/failure',
+        relativePath: 'public/subscription/failure',
       });
     }
     return {

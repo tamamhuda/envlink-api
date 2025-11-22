@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import { Env } from 'src/config/env.config';
 import { getJwtOptions } from 'src/config/jwt.config';
 import { RolesEnum } from 'src/common/enums/roles.enum';
@@ -38,7 +38,10 @@ export class JwtUtil {
   async verifyRefreshToken(
     token: string,
   ): Promise<JwtPayload & { expiresAt: Date; ttl: number }> {
-    return this.jwt.verifyAsync(token, this.jwtOptions('refresh'));
+    return this.jwt.verifyAsync(
+      token,
+      this.jwtOptions('refresh') as JwtVerifyOptions,
+    );
   }
 
   async extractRefreshExpiresAt(token: string): Promise<Date> {
@@ -62,7 +65,7 @@ export class JwtUtil {
   ): Promise<JwtPayload & { expiresAt: Date; ttl: number }> {
     const payload = await this.jwt.verifyAsync(
       token,
-      this.jwtOptions('access'),
+      this.jwtOptions('access') as JwtVerifyOptions,
     );
     const expiresAt = new Date(payload.exp * 1000);
     const now = new Date();
