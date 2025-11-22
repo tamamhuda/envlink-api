@@ -9,7 +9,10 @@ export class UserRepository extends Repository<User> {
   }
 
   async findOneById(id: string): Promise<User | null> {
-    return this.findOne({ where: { id } });
+    return this.findOne({
+      where: { id },
+      relations: ['activeSubscription', 'activeSubscription.plan'],
+    });
   }
 
   async findOneByExternalId(externalId: string): Promise<User | null> {
