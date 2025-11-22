@@ -12,7 +12,6 @@ import { PlanSeeder } from './database/seeders/plan.seeder';
 import LoggerService from './common/logger/logger.service';
 import { join } from 'path';
 import * as hbs from 'hbs';
-import { Response } from 'express';
 import * as yaml from 'yaml';
 
 async function bootstrap() {
@@ -53,11 +52,8 @@ async function bootstrap() {
       'http://localhost:4000',
       'http://0.0.0.0:4000',
       'https://local-nest.utadev.app',
-      '*',
     ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Client-Url'],
   });
 
   // Swagger / OpenAPI

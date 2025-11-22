@@ -4,22 +4,17 @@ import ms from 'ms';
 import { StringValue } from 'ms';
 import { CachePrefix } from '../common/enums/cache-prefix.enum';
 import { Env } from './env.config';
-import { RedisOptions } from 'ioredis';
-import { RedisSingleOptions } from '@nestjs-modules/ioredis';
-import { createKeyv, Keyv } from '@keyv/redis';
+import { createKeyv } from '@keyv/redis';
+import { RedisClientConfig } from '@quazex/nestjs-ioredis';
 
 export const getRedisConfig = (
   config: ConfigService<Env>,
   db: number = 0,
-): RedisSingleOptions => {
-  const options: RedisOptions = {
+): RedisClientConfig => {
+  return {
     port: config.getOrThrow('REDIS_PORT'),
     host: config.getOrThrow('REDIS_HOST'),
     db: db,
-  };
-  return {
-    type: 'single',
-    options,
   };
 };
 
@@ -30,7 +25,7 @@ export const getCacheConfig = (
   const ttl = ms(config.get<Env['CACHE_TTL']>('CACHE_TTL') as StringValue);
 
   const stores = Object.values(CachePrefix).map((namespace) =>
-    createKeyv(redis, {
+    createKeyv(redis.uri, {
       namespace,
       keyPrefixSeparator: `:`,
     }),

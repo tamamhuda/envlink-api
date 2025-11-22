@@ -1,4 +1,3 @@
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import {
   HttpException,
   HttpStatus,
@@ -18,6 +17,7 @@ import LoggerService from '../logger/logger.service';
 import { Request, Response } from 'express';
 import { ClientIdentityUtil } from '../utils/client-identity.util';
 import { IpUtil } from '../utils/ip.util';
+import { InjectRedisClient } from '@quazex/nestjs-ioredis';
 
 @Injectable()
 export class ThrottleService {
@@ -27,7 +27,7 @@ export class ThrottleService {
   constructor(
     private readonly ipUtil: IpUtil,
     private readonly clientIdentityUtil: ClientIdentityUtil,
-    @InjectRedis() private readonly redis: Redis,
+    @InjectRedisClient() private readonly redis: Redis,
     private readonly planUsageRepository: PlanUsageRepository,
     private readonly logger: LoggerService,
   ) {}

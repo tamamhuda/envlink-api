@@ -10,14 +10,14 @@ import { Keyv } from '@keyv/redis';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { StoredDataNoRaw } from 'keyv';
 import Redis from 'ioredis';
-import { InjectRedis } from '@nestjs-modules/ioredis';
+import { InjectRedisClient } from '@quazex/nestjs-ioredis';
 
 @Injectable()
 export class CacheService {
   constructor(
     private readonly logger: Logger,
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
-    @InjectRedis() private readonly redis: Redis,
+    @InjectRedisClient() private readonly redis: Redis,
   ) {}
 
   async getStore(cachePrefix: CachePrefix, next?: CallHandler): Promise<Keyv> {
