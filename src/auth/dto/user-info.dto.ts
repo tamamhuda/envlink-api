@@ -16,6 +16,7 @@ export const userInfoSchema = userBaseSchema.extend({
     .string()
     .datetime()
     .transform((val) => new Date(val))
+    .nullable()
     .optional(),
 });
 

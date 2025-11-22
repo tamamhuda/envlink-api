@@ -96,7 +96,7 @@ export class SessionService {
     account: Account,
     req: Request,
   ): Promise<{ session: Session; tokens: TokensDto }> {
-    return this.sessionRepository.manager.transaction(async (manager) => {
+    return await this.sessionRepository.manager.transaction(async (manager) => {
       // Step 1: Update account last login
       account.lastLoginAt = new Date();
       await manager.save(account);
@@ -135,7 +135,7 @@ export class SessionService {
     const { sessionId, jti, ttl } =
       await this.jwtUtil.extractJwtPayloadFromHeader(req, 'access');
     await this.cache.set<boolean>(
-      CachePrefix.TOKEN,
+      CachePrefix.TOKENS,
       `BLACKLIST:${jti}`,
       true,
       ttl,

@@ -33,13 +33,14 @@ import { UpdateUserBodyDto, UpdateUserRequest } from './dto/user.dto';
 import { ZodSerializerDto, ZodValidationPipe } from 'nestjs-zod';
 import { ImageUploadDto } from './dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Request } from 'express';
+
 import { AwsS3Util } from 'src/common/utils/aws-s3.util';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
 import { PolicyScope } from 'src/common/throttle/throttle.constans';
 import { ClientUrl } from 'src/common/decorators/client-url.decorator';
 import multer from 'multer';
+import { Request } from 'express';
 
 @Controller('user')
 @ApiBearerAuth(JWT_SECURITY)
@@ -61,7 +62,6 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(UserInfoSerializerDto)
   userInfo(@Req() req: Request, @ClientUrl() clientUrl: string): UserInfoDto {
-    console.log(clientUrl);
     return req.user;
   }
 

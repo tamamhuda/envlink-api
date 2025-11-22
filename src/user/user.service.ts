@@ -11,7 +11,7 @@ import { Account } from 'src/database/entities/account.entity';
 import { UserRepository } from 'src/database/repositories/user.repository';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
 import { UserInfoDto } from 'src/auth/dto/user-info.dto';
-import { Request } from 'express';
+
 import LoggerService from 'src/common/logger/logger.service';
 import { AwsS3Util } from 'src/common/utils/aws-s3.util';
 import { randomUUID } from 'node:crypto';
@@ -20,6 +20,7 @@ import Subscription from 'src/database/entities/subscription.entity';
 import Plan from 'src/database/entities/plan.entity';
 import { PlanEnum } from 'src/common/enums/plans.enum';
 import { XenditService } from 'src/common/xendit/xendit.service';
+import { Request } from 'express';
 
 @Injectable()
 export class UserService {
@@ -44,6 +45,56 @@ export class UserService {
       const fieldExist = existingUser.email == email ? 'email' : 'username';
       throw new ConflictException(`${fieldExist} already exists`);
     }
+  }
+
+  async createUserAndAccountByGoogle(
+    data: Partial<User>,
+    providerId: string,
+  ): Promise<any> {
+    const { email: providerEmail, username: providerUsername } = data;
+
+    return await this.userRepository.manager.transaction(async (manager) => {
+      const user = manager.create(User, data);
+      const { id: externalId } = await this.xenditService.createCustomer(user);
+      user.externalId = externalId;
+      await manager.save(user);
+
+      const account = manager.create(Account, {
+        user,
+        providerAccountId: providerId,
+        provider: ProviderEnum.GOOGLE,
+        providerUsername,
+        providerEmail,
+        isVerified: true,
+      });
+
+      await manager.save(account);
+
+      // Create session
+      const session = manager.create(Session, {
+        user,
+        account,
+      });
+      await manager.save(session);
+
+      // Create Subscription (Free Plan)
+      const plan = await manager.findOneByOrFail(Plan, {
+        name: PlanEnum.FREE,
+      });
+
+      const subscription = manager.create(Subscription, {
+        user,
+        plan,
+      });
+      subscription.initializeSubscriptionPeriod();
+      await manager.save(subscription);
+
+      await manager.update(User, user.id, {
+        activeSubscription: subscription,
+      });
+
+      return { user, account, session };
+    });
   }
 
   async createUserWithAccountAndSession(
@@ -90,13 +141,10 @@ export class UserService {
       await manager.save(session);
 
       // Create Subscription (Free Plan)
-      const plan = await manager.findOne(Plan, {
-        where: {
-          name: PlanEnum.FREE,
-        },
+      const plan = await manager.findOneByOrFail(Plan, {
+        name: PlanEnum.FREE,
       });
 
-      if (!plan) throw new NotFoundException('Free plan not found');
       const subscription = manager.create(Subscription, {
         user,
         plan,

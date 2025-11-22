@@ -42,7 +42,7 @@ export class JwtStrategy extends PassportStrategy(
     const jti = payload.jti;
 
     const isBlacklist = await this.cache.getCache<boolean>(
-      CachePrefix.TOKEN,
+      CachePrefix.TOKENS,
       `BLACKLIST:${jti}`,
     );
 
