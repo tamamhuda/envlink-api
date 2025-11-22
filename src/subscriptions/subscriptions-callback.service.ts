@@ -27,11 +27,12 @@ import { SubscriptionsService } from './subscriptions.service';
 import LoggerService from 'src/common/logger/logger.service';
 import { SubscriptionHistory } from 'src/database/entities/subscription-history.entity';
 import { UserService } from 'src/user/user.service';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+
 import { SEND_MAIL_SUBSCRIPTION_QUEUE } from 'src/queue/queue.constans';
 import { SendMailSubscriptionJob } from 'src/queue/interfaces/mail-subscription.interface';
 import { SubscriptionsCyclesService } from './cycles/cycles.service';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 
 @Injectable()
 export class SubscriptionsCallbackService {
@@ -55,6 +56,9 @@ export class SubscriptionsCallbackService {
     const existingSubscription =
       await this.subscriptionService.getSubscriptionByExternalId(externalId);
     const previousSubscription = existingSubscription.user.activeSubscription;
+    const existingUser = await this.userService.findUserById(
+      existingSubscription.user.id,
+    );
 
     const upgradedSubscription =
       await this.subscriptionRepository.manager.transaction(async (manager) => {
@@ -69,12 +73,12 @@ export class SubscriptionsCallbackService {
             transactionStatus: TransactionStatus.PAID,
           },
         );
-        const { user } = await manager.save(upgradedSubscription);
+
+        await manager.save(upgradedSubscription);
 
         // Deactivated previous user subscription
-        const previousSubscription = user.activeSubscription;
+        const previousSubscription = existingUser.activeSubscription;
         const {
-          id: previouseSubscriptionId,
           externalId: previouseSubscriptionExternalId,
           plan: previousPlan,
         } = previousSubscription;
@@ -88,16 +92,22 @@ export class SubscriptionsCallbackService {
             previouseSubscriptionExternalId,
           );
         } else {
-          await manager.update(Subscription, previouseSubscriptionId, {
-            status: SubscriptionStatus.INACTIVE,
-            endReason: SubscriptionEndReason.UPGRADED,
-          });
+          const deactivatedSubscription = manager.merge(
+            Subscription,
+            previousSubscription,
+            {
+              status: SubscriptionStatus.INACTIVE,
+              endReason: SubscriptionEndReason.UPGRADED,
+            },
+          );
+          await manager.save(deactivatedSubscription);
         }
 
         // Set user active subscription with upgraded subscription
-        await manager.update(User, user.id, {
+        const updatedUser = manager.merge(User, existingUser, {
           activeSubscription: upgradedSubscription,
         });
+        await manager.save(updatedUser);
 
         return upgradedSubscription;
       });
@@ -123,13 +133,13 @@ export class SubscriptionsCallbackService {
       },
     };
     if (previousPlan.name === PlanEnum.FREE) {
-      await this.sendMailSubscription.add(
-        `mail_sub_created_${upgradedSubscriptionId}}`,
-        {
-          event: 'subscription.created',
-          ...base,
-        },
-      );
+      // await this.sendMailSubscription.add(
+      //   `mail_sub_created_${upgradedSubscriptionId}}`,
+      //   {
+      //     event: 'subscription.created',
+      //     ...base,
+      //   },
+      // );
     } else {
       await this.sendMailSubscription.add(
         `mail_sub_upgraded_${upgradedSubscriptionId}}`,

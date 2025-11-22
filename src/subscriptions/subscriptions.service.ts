@@ -64,7 +64,30 @@ export class SubscriptionsService {
   async getAll(userId: string): Promise<SubscriptionInfoDto[]> {
     const subscriptions =
       await this.subscriptionRepository.findAllByUserId(userId);
-    return subscriptions.map((subscription) => this.mapToDto(subscription));
+
+    return await Promise.all(
+      subscriptions.map(async (subscription) => {
+        if (
+          subscription.status === SubscriptionStatus.PENDING &&
+          subscription.plan.name !== PlanEnum.FREE &&
+          subscription.externalId
+        ) {
+          const recurring = await this.xenditService.getRecurringPlanById(
+            subscription.externalId,
+          );
+
+          const actions = recurring.actions?.map((i) => {
+            return {
+              ...i,
+              urlType: i.url_type,
+            };
+          });
+
+          return this.mapToDto(subscription, actions);
+        }
+        return this.mapToDto(subscription);
+      }),
+    );
   }
 
   getUpgradePlanOption(
@@ -186,8 +209,16 @@ export class SubscriptionsService {
   ): Promise<SubscriptionInfoDto> {
     return await this.subscriptionRepository.manager.transaction(
       async (manager) => {
-        const { description, plan, schedule, strategy, discount, amount } =
-          body;
+        const {
+          description,
+          plan,
+          schedule,
+          strategy,
+          discount,
+          amount,
+          successReturnUrl,
+          failureReturnUrl,
+        } = body;
 
         // Validate is current subcription is upgradable
         const existingPendingSubscription =
@@ -215,7 +246,6 @@ export class SubscriptionsService {
         )
           throw new BadRequestException(`Subscription is not upgradable`);
 
-        console.log(upgradePlanOption);
         // Get customer id by Get or create customer
         let user = currentSubs.user;
         let customer_id = user.externalId;
@@ -274,6 +304,8 @@ export class SubscriptionsService {
           customer_id,
           paymentMethods,
           user,
+          successReturnUrl,
+          failureReturnUrl,
         );
 
         // Create new xendit recurring plan payment
@@ -353,6 +385,7 @@ export class SubscriptionsService {
     if (!existingSubscription || !activeSubscription) {
       throw new NotFoundException('Active subscription not found');
     }
+
     return existingSubscription;
   }
 

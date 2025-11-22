@@ -21,6 +21,8 @@ export const upgradeSubscriptionDtoSchema = zodToCamelCase(
       total_recurrence: z.number().min(1).default(12),
     }),
     description: z.string().nonempty(),
+    successReturnUrl: z.string().url().optional(),
+    failureReturnUrl: z.string().url().optional(),
     metadata: z.record(z.string(), z.any()).optional(),
   }),
 );
