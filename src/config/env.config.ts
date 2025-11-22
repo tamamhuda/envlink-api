@@ -58,6 +58,10 @@ const envSchema = z
     SENDER_ADDRESS: z.string().nonempty(),
     SENDER_NOTIFICATION: z.string().nonempty(),
     ZEPTO_API_URL: z.string().nonempty('api.zeptomail.com'),
+
+    GOOGLE_CLIENT_ID: z.string().nonempty(),
+    GOOGLE_CLIENT_SECRET: z.string().nonempty(),
+    GOOGLE_CALLBACK_URL: z.string().nonempty(),
   })
   .required();
 

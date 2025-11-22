@@ -23,7 +23,6 @@ import { QueueModule } from './queue/queue.module';
 import { CommonModule } from './common/common.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { getCacheConfig, getRedisConfig } from './config/cache.config';
-import { RedisModule } from '@nestjs-modules/ioredis';
 import { ThrottleInterceptor } from './common/interceptors/throttle.interceptor';
 import { ThrottleGuard } from './common/throttle/guards/throttle.guard';
 import { JwtAuthGuard } from './auth/guards/jwt.guard';
@@ -36,6 +35,8 @@ import { ClientUrlMiddleware } from './common/middlewares/client-url.middleware'
 import { SnakeCaseTransformInterceptor } from './common/interceptors/snake-case-transform.interceptor';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { BillingAddressModule } from './billing-address/billing-address.module';
+import { OauthModule } from './oauth/oauth.module';
+import { RedisClientModule } from '@quazex/nestjs-ioredis';
 
 @Module({
   imports: [
@@ -74,7 +75,7 @@ import { BillingAddressModule } from './billing-address/billing-address.module';
     }),
 
     // Redis Module
-    RedisModule.forRootAsync({
+    RedisClientModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: getRedisConfig,
@@ -95,6 +96,7 @@ import { BillingAddressModule } from './billing-address/billing-address.module';
     TransactionsModule,
     AnalyticsModule,
     BillingAddressModule,
+    OauthModule,
   ],
 
   providers: [
