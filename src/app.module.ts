@@ -2,7 +2,7 @@ import { ZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
 import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AccountModule } from './account/account.module';
-import { SessionModule } from './session/session.module';
+import { SessionModule } from './sessions/session.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';

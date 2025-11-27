@@ -49,8 +49,9 @@ async function bootstrap() {
   // Cors configuration
   app.enableCors({
     origin: [
-      'http://localhost:4000',
-      'http://0.0.0.0:4000',
+      'http://localhost:8000',
+      'http://localhost:3000',
+      'https://local.envlink.one',
       'https://local-nest.utadev.app',
     ],
     credentials: true,
