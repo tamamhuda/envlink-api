@@ -20,6 +20,27 @@ export default class Session extends BaseEntity {
 
   @Column({
     type: 'varchar',
+    length: 32,
+    default: 'unknown',
+  })
+  deviceType!: string;
+
+  @Column({
+    type: 'varchar',
+    length: 64,
+    default: 'unknown',
+  })
+  os!: string;
+
+  @Column({
+    type: 'varchar',
+    length: 64,
+    default: 'unknown',
+  })
+  browser!: string;
+
+  @Column({
+    type: 'varchar',
     nullable: true,
   })
   ipLocation?: string;

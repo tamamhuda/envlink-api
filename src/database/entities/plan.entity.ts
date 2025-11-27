@@ -42,4 +42,10 @@ export default class Plan extends BaseEntity {
 
   @Column({ type: 'float', default: 0 })
   price!: number;
+
+  @Column({ type: 'varchar', default: 'Get Started' })
+  cta!: string;
+
+  @Column({ type: 'boolean', default: false })
+  popular!: boolean;
 }

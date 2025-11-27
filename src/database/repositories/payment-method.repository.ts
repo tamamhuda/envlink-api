@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { PaymentMethod } from '../entities/payment-method.entity';
 import { PaymentMethodStatus } from 'src/common/enums/payment-method-status.enum';
+import { validate as isValidUUID } from 'uuid';
 
 @Injectable()
 export class PaymentMethodRepository extends Repository<PaymentMethod> {
@@ -41,11 +42,12 @@ export class PaymentMethodRepository extends Repository<PaymentMethod> {
     userId: string,
     idOrExternalId: string,
   ): Promise<PaymentMethod | null> {
+    const isUUID = isValidUUID(idOrExternalId);
+    let where = isUUID
+      ? { id: idOrExternalId, user: { id: userId } }
+      : { externalId: idOrExternalId, user: { id: userId } };
     return await this.findOne({
-      where: [
-        { id: idOrExternalId, user: { id: userId } },
-        { externalId: idOrExternalId, user: { id: userId } },
-      ],
+      where,
       relations: ['user'],
     });
   }

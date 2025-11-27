@@ -17,18 +17,25 @@ export class SessionRepository extends Repository<Session> {
     return await this.save(session);
   }
 
-  async updateManyByUserId(
+  async revokeAll(
     userId: string,
-    data: Partial<Session>,
-    isRevoked?: boolean,
+    options?: {
+      keepCurrent?: boolean;
+      currentSessionId?: string;
+    },
   ) {
+    const { keepCurrent = false, currentSessionId } = options ?? {};
+
     const qb = this.createQueryBuilder()
       .update(Session)
-      .set(data)
+      .set({
+        isRevoked: true,
+        revokedAt: new Date(),
+      })
       .where('userId = :userId', { userId });
 
-    if (typeof isRevoked !== 'undefined') {
-      qb.andWhere('isRevoked = :isRevoked', { isRevoked });
+    if (keepCurrent && currentSessionId) {
+      qb.andWhere('id != :currentSessionId', { currentSessionId });
     }
 
     return qb.execute();

@@ -20,6 +20,8 @@ export class PlanSeeder {
         price: 0,
         description: 'Essential link shortening tools.',
         features: ['Short Links', 'Custom Aliases', 'Basic Analytics'],
+        cta: 'Get Started',
+        popular: false,
       },
       {
         name: PlanEnum.STARTER,
@@ -27,7 +29,7 @@ export class PlanSeeder {
         resetInterval: '24h',
         cost: 5,
         chargeOnSuccess: true,
-        price: 75000, // ~ $5/month
+        price: 75000,
         description: 'Grow your personal or small project.',
         features: [
           'All Free features',
@@ -35,6 +37,8 @@ export class PlanSeeder {
           'QR Codes',
           'Simple Geo Targeting',
         ],
+        cta: 'Upgrade',
+        popular: true,
       },
       {
         name: PlanEnum.PRO,
@@ -42,7 +46,7 @@ export class PlanSeeder {
         resetInterval: '24h',
         cost: 15,
         chargeOnSuccess: true,
-        price: 225000, // ~ $15/month
+        price: 225000,
         description: 'For teams and marketing professionals.',
         features: [
           'All Starter features',
@@ -50,6 +54,8 @@ export class PlanSeeder {
           'Device Targeting',
           'Metadata Fetching',
         ],
+        cta: 'Upgrade',
+        popular: false,
       },
       {
         name: PlanEnum.ENTERPRISE,
@@ -65,6 +71,8 @@ export class PlanSeeder {
           'Dedicated API Key',
           'Priority Support',
         ],
+        cta: 'Contact Sales',
+        popular: false,
       },
     ];
 
