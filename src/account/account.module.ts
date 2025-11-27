@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { AccountController } from './account.controller';
-import { SessionModule } from 'src/session/session.module';
+import { SessionModule } from 'src/sessions/session.module';
 import { AccountVerifyService } from './account-verify.service';
 
 @Module({

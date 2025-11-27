@@ -8,7 +8,7 @@ import { Account } from 'src/database/entities/account.entity';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
 import { AccountRepository } from 'src/database/repositories/account.repository';
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
-import { SessionService } from 'src/session/session.service';
+import { SessionService } from 'src/sessions/session.service';
 import { Request } from 'express';
 import { ChangePasswordBodyDto } from 'src/auth/dto/change-password.dto';
 import { UserInfoDto } from 'src/auth/dto/user-info.dto';
@@ -21,6 +21,7 @@ import Plan from 'src/database/entities/plan.entity';
 import { PlanEnum } from 'src/common/enums/plans.enum';
 import Subscription from 'src/database/entities/subscription.entity';
 import { XenditService } from 'src/common/xendit/xendit.service';
+import { GoogleProfile } from 'src/common/interfaces/google-profile.interface';
 
 @Injectable()
 export class AccountService {
@@ -129,14 +130,8 @@ export class AccountService {
     return req.user;
   }
 
-  private validateGoogleProfile(profile: Profile) {
-    const { id: providerAccountId, displayName: fullName } = profile;
-
-    const providerEmail = profile.emails?.[0].value;
-
-    if (!providerEmail) {
-      throw new BadRequestException('Email and Username are required');
-    }
+  private validateGoogleProfile(profile: GoogleProfile) {
+    const { id: providerAccountId, fullName, email: providerEmail } = profile;
 
     // ensure only alphanumeric characters and underscores
     const providerUsername = providerEmail
@@ -189,7 +184,7 @@ export class AccountService {
   }
 
   async createAccountByGoogleWithTokens(
-    profile: Profile,
+    profile: GoogleProfile,
     req: Request,
   ): Promise<{ tokens: TokensDto; account: Account }> {
     const { fullName, providerAccountId, providerEmail, providerUsername } =
