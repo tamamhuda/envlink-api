@@ -88,7 +88,10 @@ export class PaymentMethodsController {
   }
 
   @Get(':id')
-  @ApiOperation({ operationId: 'GetById', summary: 'Get payment method by id' })
+  @ApiOperation({
+    operationId: 'GetById',
+    summary: 'Get payment method by id or external id',
+  })
   @ApiOkResponse({
     type: PaymentMethodResponse,
     description: 'Get payment method by id successfully',
@@ -96,7 +99,7 @@ export class PaymentMethodsController {
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(PaymentMethodSerializerDto)
   async getPaymentMethodById(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id') id: string,
     @AuthenticatedUser() user: UserInfo,
   ): Promise<PaymentMethodDto> {
     return await this.paymentMethodsService.getPaymentMethodByIdorExternalId(
