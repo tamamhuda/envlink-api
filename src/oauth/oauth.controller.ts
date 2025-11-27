@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { OauthService } from './oauth.service';
@@ -32,6 +33,10 @@ import {
   AuthenticatedSerializerDto,
 } from 'src/auth/dto/authenticated.dto';
 import { GoogleUrlResponse } from './dto/url.dto';
+import {
+  GoogleCredential,
+  GoogleCredentialRequest,
+} from './dto/google-credential.dto';
 
 @Controller('oauth')
 @Public()
@@ -91,22 +96,55 @@ export class OauthController {
   })
   @UseGuards(GoogleAuthGuard)
   async googleCallback(@Req() req: Request, @Res() res: Response) {
-    // Google may recall without state; avoid double send errors
-    if (!req.state) {
-      res.status(204).send();
+    if (res.headersSent) {
       return;
     }
 
+    // Google may recall without state; avoid double send errors
+    if (!req.state) {
+      const stateEncoded = req.query.state as string;
+
+      if (stateEncoded) {
+        const { redirect } = JSON.parse(
+          Buffer.from(stateEncoded, 'base64').toString(),
+        );
+        const url = `${redirect}?status=error`;
+        res.redirect(redirect);
+        return;
+      }
+      throw new UnauthorizedException('Invalid state');
+    }
     const { tokens, redirect, user } = req.state;
 
     if (redirect) {
       const code = await this.oauthService.generateCode({ tokens, user });
       const url = `${redirect}?code=${code}`;
-      return res.redirect(url);
+      res.redirect(url);
+      return;
     }
 
     res.status(200).json({ user, tokens });
     return;
+  }
+
+  @Post('google/credential')
+  @ApiOperation({
+    operationId: 'googleCredential',
+    summary: 'Verifies a Google credential',
+  })
+  @ApiBody({
+    type: GoogleCredentialRequest,
+    description: 'The request body for verifying a Google credential',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Authenticated with google credential successfully',
+    type: AuthenticatedResponse,
+  })
+  @ZodSerializerDto(AuthenticatedSerializerDto)
+  async googleCredentials(@Req() req: Request, @Body() body: GoogleCredential) {
+    const { credential } = body;
+    return await this.oauthService.verifyGoogleCredential(req, credential);
   }
 
   @Post('exchange-code')

@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Request } from 'express';
 import ms from 'ms';
 import { randomUUID } from 'node:crypto';
@@ -8,6 +12,8 @@ import { AuthenticatedDto } from 'src/auth/dto/authenticated.dto';
 import { TokensDto } from 'src/auth/dto/token.dto';
 import { CacheService } from 'src/common/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
+import { GoogleProfile } from 'src/common/interfaces/google-profile.interface';
+import { GoogleClientUtil } from 'src/common/utils/google-client.util';
 import { Account } from 'src/database/entities/account.entity';
 import { UserMapper } from 'src/user/mapper/user.mapper';
 
@@ -17,6 +23,7 @@ export class OauthService {
     private readonly accountService: AccountService,
     private readonly cache: CacheService,
     private readonly userMapper: UserMapper,
+    private readonly googleClient: GoogleClientUtil,
   ) {}
 
   private async mapToAuthenticatedDto(
@@ -43,9 +50,21 @@ export class OauthService {
     if (account && tokens) {
       return await this.mapToAuthenticatedDto(account, tokens);
     }
+    const { value: email, verified: emailVerified } = profile.emails![0];
+    const { id, displayName: fullName, profileUrl: picture } = profile;
+
+    if (!emailVerified) throw new BadRequestException('Email is not verified');
+
+    const googleProfile: GoogleProfile = {
+      id,
+      email,
+      emailVerified,
+      fullName,
+      picture,
+    };
 
     const result = await this.accountService.createAccountByGoogleWithTokens(
-      profile,
+      googleProfile,
       req,
     );
 
@@ -63,9 +82,32 @@ export class OauthService {
       CachePrefix.TOKENS,
       code,
     );
-    console.log('oauth', code);
+
     if (!auth) throw new UnauthorizedException('Invalid or expired code');
 
     return auth;
+  }
+
+  async verifyGoogleCredential(
+    req: Request,
+    credential: string,
+  ): Promise<AuthenticatedDto> {
+    const profile = await this.googleClient.verifyCredential(credential);
+    const { account, tokens } =
+      await this.accountService.findAccountByGoogleProviderWithTokens(
+        profile.id,
+        req,
+      );
+
+    if (account && tokens) {
+      return await this.mapToAuthenticatedDto(account, tokens);
+    }
+
+    const result = await this.accountService.createAccountByGoogleWithTokens(
+      profile,
+      req,
+    );
+
+    return await this.mapToAuthenticatedDto(result.account, result.tokens);
   }
 }
