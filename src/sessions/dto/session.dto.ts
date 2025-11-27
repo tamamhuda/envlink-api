@@ -9,6 +9,10 @@ export const sessionInfoSchema = baseSchema.extend({
   user_agent: z.string().max(255).optional().nullable(),
   ip_location: z.string().max(255).optional().nullable(),
   is_revoked: z.boolean().default(false),
+  is_current: z.boolean().default(false),
+  device_type: z.string().max(32).optional().nullable(),
+  os: z.string().max(64).optional().nullable(),
+  browser: z.string().max(64).optional().nullable(),
   revoked_at: z
     .string()
     .datetime()

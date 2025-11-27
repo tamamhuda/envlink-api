@@ -17,6 +17,7 @@ import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { UserMapper } from 'src/user/mapper/user.mapper';
 import { CacheService } from 'src/common/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
+import { ClientIdentityUtil } from 'src/common/utils/client-identity.util';
 
 @Injectable()
 export class SessionService {
@@ -24,6 +25,7 @@ export class SessionService {
 
   constructor(
     private readonly ipUtil: IpUtil,
+    private readonly clientIdentityUtil: ClientIdentityUtil,
     private readonly sessionRepository: SessionRepository,
     private readonly jwtUtil: JwtUtil,
     private readonly userMapper: UserMapper,
@@ -31,12 +33,16 @@ export class SessionService {
     private readonly cache: CacheService,
   ) {}
 
-  async mapSessionToDto(session: Session): Promise<SessionInfoDto> {
+  async mapSessionToDto(
+    session: Session,
+    isCurrent: boolean = false,
+  ): Promise<SessionInfoDto> {
     const { user, account } = session;
 
     const userInfo = await this.userMapper.mapToUserInfoDto(account, user);
     return {
       ...session,
+      isCurrent,
       user: userInfo,
     };
   }
@@ -103,11 +109,16 @@ export class SessionService {
 
       // Step 2: Create session (tokens null for now)
       const ipLocation = await this.ipUtil.getFormattedLocation(req);
+      const { browser, os, deviceType } =
+        this.clientIdentityUtil.parseUserAgent(req.headers['user-agent'] || '');
       let session = manager.create(Session, {
         user: account.user,
         account,
         ipLocation,
-        parsedUa: req.headers['user-agent'],
+        userAgent: req.headers['user-agent'],
+        browser,
+        os,
+        deviceType,
       });
       session = await manager.save(session);
 
@@ -152,21 +163,19 @@ export class SessionService {
     this.logger.log(`Revoking session ${id}`);
   }
 
-  async revokeAllSessions(req: Request) {
-    await this.sessionRepository.updateManyByUserId(
-      req.user.id,
-      {
-        isRevoked: true,
-        revokedAt: new Date(),
-      },
-      false,
-    );
+  async revokeAllSessions(req: Request, keepCurrent: boolean = false) {
+    const sessionId = await this.jwtUtil.extractSessionIdFromHeader(req);
+    await this.sessionRepository.revokeAll(req.user.id, {
+      keepCurrent,
+      currentSessionId: sessionId,
+    });
   }
 
   async getAllUserSessions(
     req: Request,
     isActive: boolean = true,
   ): Promise<SessionInfoDto[]> {
+    const sessionId = await this.jwtUtil.extractSessionIdFromHeader(req);
     let sessionsDto: SessionInfoDto[] = [];
     const sessions = await this.sessionRepository.findManyByUserId(
       req.user.id,
@@ -177,7 +186,9 @@ export class SessionService {
 
     if (sessions.length > 0) {
       sessionsDto = await Promise.all(
-        sessions.map(async (data) => await this.mapSessionToDto(data)),
+        sessions.map(async (data) =>
+          this.mapSessionToDto(data, data.id === sessionId),
+        ),
       );
     }
 

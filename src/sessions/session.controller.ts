@@ -18,6 +18,7 @@ import {
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -36,7 +37,7 @@ import { Cached } from 'src/common/decorators/cached.decorator';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
 
 @SkipThrottle()
-@Controller('session')
+@Controller('sessions')
 @ApiBearerAuth(JWT_SECURITY)
 @ApiTags('Sessions')
 export class SessionController {
@@ -105,9 +106,20 @@ export class SessionController {
   @ApiNoContentResponse({
     description: 'No content',
   })
+  @ApiQuery({
+    name: 'keepCurrent',
+    required: false,
+    description: 'Keep current session',
+    type: Boolean,
+    default: false,
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @InvalidateCache(CachePrefix.SESSION, (ctx) => `${ctx.user?.id}:*`)
-  async revokeAllSessions(@Req() req: Request) {
-    return this.sessionService.revokeAllSessions(req);
+  async revokeAllSessions(
+    @Req() req: Request,
+    @Query('keepCurrent', new DefaultValuePipe(false), ParseBoolPipe)
+    keepCurrent = false,
+  ) {
+    return this.sessionService.revokeAllSessions(req, keepCurrent);
   }
 }
