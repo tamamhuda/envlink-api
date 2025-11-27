@@ -27,7 +27,7 @@ export class SnakeCaseTransformInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler) {
     return next.handle().pipe(
       map((data) => {
-        if (data == null) return data;
+        if (data == null || typeof data === 'string') return data;
 
         // convert entity or DTO instance to plain object
         const plainData = Array.isArray(data)

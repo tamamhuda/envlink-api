@@ -28,6 +28,7 @@ import { XenditUtil } from './utils/xendit.util';
 import { TokenUtil } from './utils/token.util';
 import { ClientUrlMiddleware } from './middlewares/client-url.middleware';
 import { SnakeCaseTransformInterceptor } from './interceptors/snake-case-transform.interceptor';
+import { GoogleClientUtil } from './utils/google-client.util';
 
 @Global()
 @Module({
@@ -63,6 +64,7 @@ import { SnakeCaseTransformInterceptor } from './interceptors/snake-case-transfo
     ClientIdentityUtil,
     XenditUtil,
     TokenUtil,
+    GoogleClientUtil,
 
     XenditService,
 
@@ -99,6 +101,7 @@ import { SnakeCaseTransformInterceptor } from './interceptors/snake-case-transfo
     ClientIdentityUtil,
     XenditUtil,
     TokenUtil,
+    GoogleClientUtil,
 
     XenditService,
     ClientUrlMiddleware,

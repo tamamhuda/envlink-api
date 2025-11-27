@@ -10,17 +10,29 @@ import { Injectable } from '@nestjs/common';
 export class ClientIdentityUtil {
   // Parse User-Agent string into browser, OS, and device type.
   parseUserAgent(userAgent: string): ClientInfo {
-    const { browser, os, device } = new UAParser(userAgent).getResult();
+    const parse = new UAParser(userAgent);
 
-    const deviceType =
-      device.type ||
-      (/Windows|Mac\s?OS|Linux/i.test(os.name ?? '') ? 'desktop' : 'unknown');
+    const { browser, os, device, ...rest } = parse.getResult();
+
+    const deviceType = this.detectDeviceType(os.name, device.type);
 
     return {
       browser: browser.name ?? 'unknown',
       os: os.name ?? 'unknown',
       deviceType,
     };
+  }
+
+  detectDeviceType(osName?: string, deviceType?: string) {
+    if (deviceType) return deviceType;
+
+    const name = (osName ?? '').toLowerCase();
+
+    if (name.includes('windows')) return 'desktop';
+    if (name.includes('mac')) return 'desktop';
+    if (name.includes('linux')) return 'desktop';
+
+    return 'unknown';
   }
 
   // Generate a stable identity hash and a dynamic visit hash.
@@ -41,4 +53,6 @@ export class ClientIdentityUtil {
 
     return { identityHash, visitHash };
   }
+
+  // Detect device type based on OS name and device type.
 }

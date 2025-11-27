@@ -1,6 +1,6 @@
 import { UserInfoDto } from 'src/auth/dto/user-info.dto';
 import { ParsedQs } from 'qs';
-import { SessionInfoDto } from 'src/session/dto/session.dto';
+import { SessionInfoDto } from 'src/sessions/dto/session.dto';
 
 export interface CacheKeyContext<TResponse = any> {
   params: Record<string, any>;
