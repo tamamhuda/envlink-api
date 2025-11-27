@@ -1,0 +1,40 @@
+import { createZodDto } from 'nestjs-zod';
+import { createResponseDto } from 'src/common/dto/response.dto';
+import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import z from 'zod';
+
+export const visitSchema = z.object({
+  total: z.number().min(0).default(0),
+  unique: z.number().min(0).default(0),
+});
+
+export const segmentsSchema = z.object({
+  device_visits: z.record(z.string(), visitSchema).nullable(),
+  os_visits: z.record(z.string(), visitSchema).nullable(),
+  browser_visits: z.record(z.string(), visitSchema).nullable().default({}),
+  country_visits: z
+    .array(
+      visitSchema.extend({
+        country: z.string(),
+      }),
+    )
+    .nullable()
+    .default([]),
+  referrer_visits: z.record(z.string(), visitSchema).default({}),
+  region_visits: z
+    .array(visitSchema.extend({ region: z.string() }))
+    .default([]),
+  city_visits: z.array(visitSchema.extend({ city: z.string() })).default([]),
+});
+
+const segmentsDtoSchema = zodToCamelCase(segmentsSchema);
+
+export class UrlAnalyticsSegmentsDto extends createZodDto(segmentsDtoSchema) {}
+
+export class UrlAnalyticsSegmentsSerializedDto extends createZodDto(
+  segmentsSchema,
+) {}
+
+export class UrlAnalyticsSegmentsResponse extends createResponseDto(
+  segmentsDtoSchema,
+) {}

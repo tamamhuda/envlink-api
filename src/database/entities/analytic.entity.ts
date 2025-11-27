@@ -53,19 +53,6 @@ export class Analytic extends BaseEntity {
 
   @Column({
     type: 'varchar',
-    length: 32,
-  })
-  deviceType!: string;
-
-  @Column({
-    type: 'varchar',
-    length: 64,
-    nullable: false,
-  })
-  os!: string;
-
-  @Column({
-    type: 'varchar',
     length: 64,
     nullable: false,
   })
@@ -76,6 +63,19 @@ export class Analytic extends BaseEntity {
     default: false,
   })
   isUnique!: boolean;
+
+  @Column({
+    type: 'varchar',
+    length: 32,
+  })
+  deviceType!: string;
+
+  @Column({
+    type: 'varchar',
+    length: 64,
+    nullable: false,
+  })
+  os!: string;
 
   @Column({
     type: 'varchar',

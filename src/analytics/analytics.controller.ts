@@ -45,6 +45,11 @@ import {
   UrlAnalyticTimelineSerializerDto,
 } from './dto/timeline.dto';
 import { PaginatedQueryDto } from 'src/common/dto/paginated.dto';
+import {
+  UrlAnalyticsSegmentsDto,
+  UrlAnalyticsSegmentsResponse,
+  UrlAnalyticsSegmentsSerializedDto,
+} from './dto/segments.dto';
 
 @Controller('analytics/urls')
 @SkipThrottle()
@@ -68,6 +73,23 @@ export class AnalyticsController {
     @AuthenticatedUser() user: UserInfo,
   ): Promise<UrlAnalyticsOverviewDto> {
     return this.service.getOverview(user.id);
+  }
+
+  @Get('segments')
+  @ApiOperation({
+    operationId: 'getUrlsSegments',
+    summary: 'Get Segments of url analytics',
+  })
+  @ApiOkResponse({
+    type: UrlAnalyticsSegmentsResponse,
+    description: 'Get url analytics segments successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  @ZodSerializerDto(UrlAnalyticsSegmentsSerializedDto)
+  getSegments(
+    @AuthenticatedUser() user: UserInfo,
+  ): Promise<UrlAnalyticsSegmentsDto> {
+    return this.service.getUrlsSegments(user.id);
   }
 
   @Get('stats')

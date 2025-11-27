@@ -12,6 +12,7 @@ import { UrlGeneratorService } from 'nestjs-url-generator';
 import { UrlAnalyticTimelineDto } from './dto/timeline.dto';
 import { PaginatedQueryDto } from 'src/common/dto/paginated.dto';
 import { PaginatedResult } from 'src/common/interfaces/paginated.interface';
+import { UrlAnalyticsSegmentsDto } from './dto/segments.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -149,5 +150,9 @@ export class AnalyticsService {
       ...urlLogsPaginated,
       data: urlLogsDto,
     };
+  }
+
+  async getUrlsSegments(userId: string): Promise<UrlAnalyticsSegmentsDto> {
+    return await this.analyticsRepository.getGlobalSegments(userId);
   }
 }

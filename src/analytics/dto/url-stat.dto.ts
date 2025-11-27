@@ -5,24 +5,7 @@ import { zodToCamelCase } from 'src/common/utils/case-transform.util';
 
 import { urlSchema } from 'src/urls/dto/url.dto';
 import z from 'zod';
-export const visitSchema = z.object({
-  total: z.number().min(0).default(0),
-  unique: z.number().min(0).default(0),
-});
-
-export const statBreakdownSchema = z.object({
-  device_visits: z.record(z.string(), visitSchema).nullable(),
-  os_visits: z.record(z.string(), visitSchema).nullable(),
-  browser_visits: z.record(z.string(), visitSchema).nullable().default({}),
-  country_visits: z
-    .array(
-      visitSchema.extend({
-        country: z.string(),
-      }),
-    )
-    .nullable()
-    .default([]),
-});
+import { segmentsSchema } from './segments.dto';
 
 export const urlAnalyticStatSchema = z
   .object({
@@ -46,7 +29,7 @@ export const urlAnalyticStatSchema = z
       .transform((val) => new Date(val))
       .nullable(),
   })
-  .merge(statBreakdownSchema);
+  .merge(segmentsSchema);
 
 export const urlAnalyticStatDtoSchema = zodToCamelCase(urlAnalyticStatSchema);
 
