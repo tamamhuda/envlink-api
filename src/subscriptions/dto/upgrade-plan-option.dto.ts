@@ -10,8 +10,6 @@ import { planSchema } from './plan.dto';
 export const upgradeOptionsSchema = z.object({
   strategy: z.nativeEnum(UpgradeStrategy),
   upgradable: z.boolean(),
-  current_plan: z.nativeEnum(PlanEnum),
-  new_plan: z.nativeEnum(PlanEnum),
   amount: z.number().min(0),
   discount: z.number().min(0),
   remaining_days: z.number().min(0),
@@ -21,6 +19,7 @@ export const upgradeOptionsSchema = z.object({
 
 export const upgradePlanOptionSchema = baseSchema.merge(planSchema).extend({
   upgradable: z.boolean(),
+  current_plan: z.nativeEnum(PlanEnum),
   options: z.array(upgradeOptionsSchema),
 });
 

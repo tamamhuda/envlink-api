@@ -13,6 +13,8 @@ export const planSchema = z.object({
   description: z.string().nullable(),
   price: z.number().min(0),
   features: z.array(z.string()).min(1),
+  cta: z.string().nullable(),
+  popular: z.boolean().default(false),
 });
 
 export const planDtoSchema = zodToCamelCase(planSchema);

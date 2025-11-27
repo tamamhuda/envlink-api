@@ -111,18 +111,35 @@ export class SubscriptionsService {
     const remainingDays = Math.max(totalDays - usedDays, 0);
 
     const newPlan = targetPlan.name;
+    const currentPlan = plan.name;
 
     // Base default if not upgradable
-    if (newPlan === plan.name || newPlan === PlanEnum.FREE) {
-      return { ...targetPlan, upgradable: false, options: [] };
+    if (newPlan === currentPlan || newPlan === PlanEnum.FREE) {
+      return {
+        ...targetPlan,
+        currentPlan,
+        upgradable: false,
+        options: [],
+      };
     }
 
     const A_current = amountPaid;
     const A_new = newPrice ?? targetPlan.price;
-    const remainingCredit = A_current * (remainingDays / totalDays);
+    const remainingCreditRaw = A_current * (remainingDays / totalDays);
+
+    // Max 25% credit allowed
+    const maxCredit = A_new * 0.25;
+
+    // Enforce cap
+    const remainingCredit = Math.min(remainingCreditRaw, maxCredit);
+
+    // If raw prorated credit exceeds cap → not upgradable
+    const creditExceedsCap = remainingCreditRaw > maxCredit;
 
     const netAmountImmediate = Math.max(A_new - remainingCredit - discount, 0);
     const netAmountFinishCycle = Math.max(A_new - discount, 0);
+
+    const globalUpgradable = !creditExceedsCap;
 
     const makeOption = (
       strategy: UpgradeStrategy,
@@ -131,9 +148,7 @@ export class SubscriptionsService {
       netAmount: number,
     ): UpgradeOptionsDto => ({
       strategy,
-      upgradable,
-      currentPlan: plan.name,
-      newPlan,
+      upgradable: upgradable && globalUpgradable,
       amount: A_new,
       discount,
       remainingDays,
@@ -170,7 +185,12 @@ export class SubscriptionsService {
       );
     }
 
-    return { ...targetPlan, upgradable: true, options };
+    return {
+      ...targetPlan,
+      currentPlan,
+      upgradable: globalUpgradable,
+      options,
+    };
   }
 
   async getAllUpgradePlanOptions(
@@ -232,15 +252,20 @@ export class SubscriptionsService {
 
         // Calculate price new subscription plan
         const newPlan = await manager.findOneByOrFail(Plan, { name: plan });
-        const upgradePlanOption = this.getUpgradePlanOption(
+
+        const upgradePlanOptions = this.getUpgradePlanOption(
           currentSubs,
           newPlan,
           discount || 0,
           body.amount,
-        ).options.find((option) => option.strategy === strategy);
+        );
+
+        const upgradeOption = upgradePlanOptions.options.find(
+          (option) => option.strategy === strategy,
+        );
 
         if (
-          !upgradePlanOption ||
+          !upgradeOption ||
           existingPendingSubscription ||
           currentSubs.status !== SubscriptionStatus.ACTIVE
         )
@@ -267,23 +292,25 @@ export class SubscriptionsService {
         });
 
         // Create new subscription with pending status
-        const { netAmount, currentPlan: previousPlan } = upgradePlanOption;
+        const { netAmount } = upgradeOption;
+        const { currentPlan: previousPlanName, name: newPlanName } =
+          upgradePlanOptions;
 
         const metadata: Subscription['metadata'] = {
           strategy,
-          previousPlan,
-          newPlan: newPlan.name,
+          previousPlan: previousPlanName,
+          newPlan: newPlanName,
           ...body.metadata,
         };
 
         const subscription = manager.create(Subscription, {
-          user,
-          plan: newPlan,
           ...schedule,
-          metadata,
-          amount,
+          plan: newPlan,
           status: SubscriptionStatus.PENDING,
           transactionStatus: 'PENDING',
+          user,
+          metadata,
+          amount,
           description,
         });
         await manager.save(subscription);
