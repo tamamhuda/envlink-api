@@ -1,15 +1,23 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
+import { GoogleClientUtil } from 'src/common/utils/google-client.util';
 import { getGoogleOauthConfig } from 'src/config/google-oauth.config';
 import { URLSearchParams } from 'url';
 
 @Injectable()
 export class GoogleAuthGuard extends AuthGuard('google') {
   private readonly googleConfig: ReturnType<typeof getGoogleOauthConfig>;
-  constructor(config: ConfigService) {
+  constructor(
+    config: ConfigService,
+    private readonly client: GoogleClientUtil,
+  ) {
     super();
     this.googleConfig = getGoogleOauthConfig(config);
   }
@@ -21,7 +29,6 @@ export class GoogleAuthGuard extends AuthGuard('google') {
     const direct = Boolean(
       !request.query.direct || request.query.direct === 'true',
     );
-    console.log('direct', direct);
 
     if (!direct) {
       request['oauthUrl'] = this.getGoogleAuthUrl(request);
@@ -30,18 +37,18 @@ export class GoogleAuthGuard extends AuthGuard('google') {
     return super.canActivate(context);
   }
 
+  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+    const res = context.switchToHttp().getResponse<Response>();
+
+    // If headers already sent: do nothing
+    if (res.headersSent) return res;
+
+    return user; // Normal case
+  }
+
   private getGoogleAuthUrl(req: Request): string {
     const direct = req.query.direct;
     const redirect = req.query.redirect;
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: this.googleConfig.clientID,
-      redirect_uri: this.googleConfig.callbackURL,
-      access_type: 'offline',
-      include_granted_scopes: 'true',
-      prompt: 'select_account',
-      scope: this.googleConfig.scope.join(' '),
-    });
 
     let state: string | undefined;
     if (redirect || direct) {
@@ -50,11 +57,6 @@ export class GoogleAuthGuard extends AuthGuard('google') {
       );
     }
 
-    // Optional: use ?state=xxx from client
-    if (state) {
-      params.set('state', state);
-    }
-
-    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    return this.client.generateAuthUrl(state);
   }
 }

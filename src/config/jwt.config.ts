@@ -1,17 +1,16 @@
 import { JwtSignOptions } from '@nestjs/jwt';
 import { Env } from './env.config';
 import { ConfigService } from '@nestjs/config';
-import ms from 'ms';
 
 function JwtConfigOptions(config: ConfigService<Env>) {
   return {
     access: {
       secret: config.getOrThrow('JWT_ACCESS_SECRET'),
-      expiresIn: Number(ms(config.getOrThrow('JWT_ACCESS_EXPIRES_IN'))),
+      expiresIn: config.getOrThrow('JWT_ACCESS_EXPIRES_IN'),
     },
     refresh: {
       secret: config.getOrThrow('JWT_REFRESH_SECRET'),
-      expiresIn: Number(ms(config.getOrThrow('JWT_REFRESH_EXPIRES_IN'))),
+      expiresIn: config.getOrThrow('JWT_REFRESH_EXPIRES_IN'),
     },
   };
 }

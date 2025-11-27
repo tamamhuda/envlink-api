@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
@@ -6,6 +6,7 @@ import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { Env } from 'src/config/env.config';
 import { getGoogleOauthConfig } from 'src/config/google-oauth.config';
 import { OauthService } from '../oauth.service';
+import { StrategyFailure } from 'passport';
 
 @Injectable()
 export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
@@ -13,10 +14,11 @@ export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
     config: ConfigService<Env>,
     private readonly oauthService: OauthService,
   ) {
-    const options = getGoogleOauthConfig(config);
+    const clientConfig = getGoogleOauthConfig(config);
     super({
-      ...options,
-
+      clientID: clientConfig.clientId,
+      clientSecret: clientConfig.clientSecret,
+      callbackURL: clientConfig.callbackUri,
       passReqToCallback: true,
     });
   }
@@ -38,14 +40,15 @@ export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
 
   async validate(
     request: Request,
-    accessToken: string,
-    refreshToken: string,
+    _accessToken: string,
+    _refreshToken: string,
     profile: Profile,
     done: VerifyCallback,
   ) {
     // Retrieve the 'state' parameter from the request object
     try {
       const stateEncoded = request.query.state as string;
+
       let state = {};
       if (stateEncoded) {
         const { redirect } = JSON.parse(
@@ -66,10 +69,9 @@ export class GoogleOauthStrategy extends PassportStrategy(Strategy, 'google') {
         ...authenticated,
       };
 
-      console.log(request.state);
-
       done(null, authenticated.user);
     } catch (error) {
+      console.log('Error:');
       done(error);
     }
   }

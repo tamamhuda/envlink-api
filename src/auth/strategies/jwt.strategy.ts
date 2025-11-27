@@ -9,9 +9,9 @@ import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { Request } from 'express';
 import LoggerService from 'src/common/logger/logger.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
-import { SessionInfoDto } from 'src/session/dto/session.dto';
+import { SessionInfoDto } from 'src/sessions/dto/session.dto';
 import { CacheService } from 'src/common/cache/cache.service';
-import { SessionService } from 'src/session/session.service';
+import { SessionService } from 'src/sessions/session.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(

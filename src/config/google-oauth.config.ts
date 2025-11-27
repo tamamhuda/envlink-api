@@ -1,11 +1,18 @@
 import { ConfigService } from '@nestjs/config';
 import { Env } from './env.config';
 
-export const getGoogleOauthConfig = (config: ConfigService<Env>) => {
+export const getGoogleOauthConfig = (
+  config: ConfigService<Env>,
+): {
+  clientId: string;
+  clientSecret: string;
+  callbackUri: string;
+  scope: string[];
+} => {
   return {
-    clientID: config.getOrThrow('GOOGLE_CLIENT_ID'),
-    clientSecret: config.getOrThrow('GOOGLE_CLIENT_SECRET'),
-    callbackURL: config.getOrThrow('GOOGLE_CALLBACK_URL'),
+    clientId: config.getOrThrow<string>('GOOGLE_CLIENT_ID'),
+    clientSecret: config.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
+    callbackUri: config.getOrThrow<string>('GOOGLE_CALLBACK_URL'),
     scope: ['profile', 'email'],
   };
 };

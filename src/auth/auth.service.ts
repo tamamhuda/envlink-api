@@ -4,7 +4,7 @@ import { AccountService } from 'src/account/account.service';
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { JwtUtil } from 'src/common/utils/jwt.util';
 import LoggerService from 'src/common/logger/logger.service';
-import { SessionService } from 'src/session/session.service';
+import { SessionService } from 'src/sessions/session.service';
 import { UserService } from 'src/user/user.service';
 import { AuthenticatedDto } from './dto/authenticated.dto';
 import { RegisterBodyDto } from './dto/register.dto';
