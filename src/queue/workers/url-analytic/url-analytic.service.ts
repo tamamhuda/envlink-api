@@ -29,7 +29,11 @@ export class UrlAnalyticService {
         clickCount: url.clickCount + 1,
       });
 
-      return await manager.save(analytic);
+      const { country: countryCode, ...rest } = await manager.save(analytic);
+      return {
+        ...rest,
+        countryCode,
+      };
     });
   }
 

@@ -59,7 +59,7 @@ export class UrlAnalyticProcessor extends WorkerHost {
     isUnique: boolean,
     channels: Channel[] = [],
   ): Promise<AnalyticDto> {
-    const { city, region, country, language } =
+    const { city, region, countryCode, language } =
       await this.ipUtil.getIpLocation(ipAddress);
 
     const dto: CreateAnalyticDto = {
@@ -72,7 +72,7 @@ export class UrlAnalyticProcessor extends WorkerHost {
       browser,
       city,
       region,
-      country,
+      countryCode,
       language,
       isUnique,
     };
@@ -144,7 +144,10 @@ export class UrlAnalyticProcessor extends WorkerHost {
           });
         }
         await this.analyticsService.incrementVisitorCount(existing);
-        return existing;
+        return {
+          ...existing,
+          countryCode: existing.country,
+        };
       }
 
       // Within TTL and same hash → no new record
