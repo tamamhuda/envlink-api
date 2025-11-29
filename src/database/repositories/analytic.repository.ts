@@ -7,14 +7,14 @@ import {
   UrlAnalyticStat,
   UrlAnalyticStatDto,
 } from 'src/analytics/dto/url-stat.dto';
-import { PaginatedOptions } from 'src/common/interfaces/paginated.interface';
+import {
+  PaginatedOptions,
+  PaginatedResult,
+} from 'src/common/interfaces/paginated.interface';
 import { Url } from '../entities/url.entity';
 import { paginatedResult } from 'src/common/utils/paginate.util';
 import { UrlLogsQueryDto, TimelineQueryDto } from 'src/analytics/dto/query.dto';
-
-type CountryVisit = { country: string; total: number; unique: number };
-type RegionVisit = { region: string; total: number; unique: number };
-type CityVisit = { city: string; total: number; unique: number };
+import { AnalyticUtil } from '../utils/analytic.util';
 
 @Injectable()
 export class AnalyticRepository extends Repository<Analytic> {
@@ -57,7 +57,10 @@ export class AnalyticRepository extends Repository<Analytic> {
       .where('url.userId = :userId', { userId })
       .andWhere('a.country IS NOT NULL')
       .andWhere('a.country != :unknown', { unknown: 'Unknown' })
-      .select('a.country', 'country')
+      .select(
+        "COALESCE(NULLIF(a.country, 'Unknown'), 'Unknown')",
+        'countryCode',
+      )
       .addSelect('SUM(a.visitorCount)::int', 'total')
       .groupBy('a.country')
       .having('SUM(a.visitorCount) > 0')
@@ -65,12 +68,14 @@ export class AnalyticRepository extends Repository<Analytic> {
       .limit(limit)
       .getRawMany();
 
+    console.log(JSON.stringify(raw, null, 2));
+
     return raw.map((r) => ({
-      country: r.country,
+      countryCode: r.countryCode,
       totalVisits: Number(r.total),
     }));
   }
-  private async getListUrlsSegments(urlIds: string[]) {
+  async getListUrlsSegments(urlIds: string[]) {
     if (!urlIds.length) return {};
 
     const rows = await this.createQueryBuilder('a')
@@ -78,13 +83,20 @@ export class AnalyticRepository extends Repository<Analytic> {
       .addSelect("COALESCE(NULLIF(a.deviceType,'Unknown'),'Unknown')", 'device')
       .addSelect("COALESCE(NULLIF(a.os,'Unknown'),'Unknown')", 'os')
       .addSelect("COALESCE(NULLIF(a.browser,'Unknown'),'Unknown')", 'browser')
-      .addSelect("COALESCE(NULLIF(a.country,'Unknown'),'Unknown')", 'country')
+      .addSelect(
+        "COALESCE(NULLIF(a.country,'Unknown'),'Unknown')",
+        'countryCode',
+      )
       .addSelect("COALESCE(NULLIF(a.region,'Unknown'),'Unknown')", 'region')
       .addSelect("COALESCE(NULLIF(a.city,'Unknown'),'Unknown')", 'city')
       .addSelect("COALESCE(NULLIF(a.referrer,''),'Direct')", 'referrer')
       .addSelect('SUM(a.visitorCount)::int', 'total')
       .addSelect(
-        `SUM(CASE WHEN a.isUnique = TRUE THEN a.visitorCount ELSE 0 END)::int`,
+        `
+        SUM(
+          CASE WHEN a.isUnique = TRUE THEN a.visitorCount ELSE 0 END
+        )::int
+      `,
         'unique',
       )
       .where('a.urlId IN (:...urlIds)', { urlIds })
@@ -96,105 +108,9 @@ export class AnalyticRepository extends Repository<Analytic> {
       .addGroupBy('region')
       .addGroupBy('city')
       .addGroupBy('referrer')
-      .getRawMany<{
-        urlId: string;
-        device: string;
-        os: string;
-        browser: string;
-        country: string;
-        region: string;
-        city: string;
-        referrer: string;
-        total: number;
-        unique: number;
-      }>();
+      .getRawMany();
 
-    const result: Record<string, any> = {};
-
-    for (const r of rows) {
-      if (!result[r.urlId]) {
-        result[r.urlId] = {
-          deviceVisits: {},
-          osVisits: {},
-          browserVisits: {},
-          countryVisits: [],
-          regionVisits: [],
-          cityVisits: [],
-          referrerVisits: {},
-        };
-      }
-
-      const bucket = result[r.urlId];
-
-      // Device
-      if (!bucket.deviceVisits[r.device]) {
-        bucket.deviceVisits[r.device] = { total: 0, unique: 0 };
-      }
-      bucket.deviceVisits[r.device].total += r.total;
-      bucket.deviceVisits[r.device].unique += r.unique;
-
-      // OS
-      if (!bucket.osVisits[r.os]) {
-        bucket.osVisits[r.os] = { total: 0, unique: 0 };
-      }
-      bucket.osVisits[r.os].total += r.total;
-      bucket.osVisits[r.os].unique += r.unique;
-
-      // Browser
-      if (!bucket.browserVisits[r.browser]) {
-        bucket.browserVisits[r.browser] = { total: 0, unique: 0 };
-      }
-      bucket.browserVisits[r.browser].total += r.total;
-      bucket.browserVisits[r.browser].unique += r.unique;
-
-      // Country
-      const c = bucket.countryVisits.find((x: any) => x.country === r.country);
-      if (c) {
-        c.total += r.total;
-        c.unique += r.unique;
-      } else {
-        bucket.countryVisits.push({
-          country: r.country,
-          total: r.total,
-          unique: r.unique,
-        });
-      }
-
-      // Region
-      const reg = bucket.regionVisits.find((x: any) => x.region === r.region);
-      if (reg) {
-        reg.total += r.total;
-        reg.unique += r.unique;
-      } else {
-        bucket.regionVisits.push({
-          region: r.region,
-          total: r.total,
-          unique: r.unique,
-        });
-      }
-
-      // City
-      const ct = bucket.cityVisits.find((x: any) => x.city === r.city);
-      if (ct) {
-        ct.total += r.total;
-        ct.unique += r.unique;
-      } else {
-        bucket.cityVisits.push({
-          city: r.city,
-          total: r.total,
-          unique: r.unique,
-        });
-      }
-
-      // Referrer
-      if (!bucket.referrerVisits[r.referrer]) {
-        bucket.referrerVisits[r.referrer] = { total: 0, unique: 0 };
-      }
-      bucket.referrerVisits[r.referrer].total += r.total;
-      bucket.referrerVisits[r.referrer].unique += r.unique;
-    }
-
-    return result;
+    return AnalyticUtil.reduceByUrl(rows);
   }
 
   async getGlobalSegments(userId: string) {
@@ -202,13 +118,20 @@ export class AnalyticRepository extends Repository<Analytic> {
       .select("COALESCE(NULLIF(a.deviceType,'Unknown'),'Unknown')", 'device')
       .addSelect("COALESCE(NULLIF(a.os,'Unknown'),'Unknown')", 'os')
       .addSelect("COALESCE(NULLIF(a.browser,'Unknown'),'Unknown')", 'browser')
-      .addSelect("COALESCE(NULLIF(a.country,'Unknown'),'Unknown')", 'country')
+      .addSelect(
+        "COALESCE(NULLIF(a.country,'Unknown'),'Unknown')",
+        'countryCode',
+      )
       .addSelect("COALESCE(NULLIF(a.region,'Unknown'),'Unknown')", 'region')
       .addSelect("COALESCE(NULLIF(a.city,'Unknown'),'Unknown')", 'city')
       .addSelect("COALESCE(NULLIF(a.referrer,''),'Direct')", 'referrer')
       .addSelect('SUM(a.visitorCount)::int', 'total')
       .addSelect(
-        `SUM(CASE WHEN a.isUnique = TRUE THEN a.visitorCount ELSE 0 END)::int`,
+        `
+        SUM(
+          CASE WHEN a.isUnique = TRUE THEN a.visitorCount ELSE 0 END
+        )::int
+      `,
         'unique',
       )
       .leftJoin('a.url', 'url')
@@ -221,98 +144,9 @@ export class AnalyticRepository extends Repository<Analytic> {
       .addGroupBy('region')
       .addGroupBy('city')
       .addGroupBy('referrer')
-      .getRawMany<{
-        device: string;
-        os: string;
-        browser: string;
-        country: string;
-        region: string;
-        city: string;
-        referrer: string;
-        total: number;
-        unique: number;
-      }>();
+      .getRawMany();
 
-    const result = {
-      deviceVisits: {} as Record<string, { total: number; unique: number }>,
-      osVisits: {} as Record<string, { total: number; unique: number }>,
-      browserVisits: {} as Record<string, { total: number; unique: number }>,
-      countryVisits: [] as CountryVisit[],
-      regionVisits: [] as RegionVisit[],
-      cityVisits: [] as CityVisit[],
-      referrerVisits: {} as Record<string, { total: number; unique: number }>,
-    };
-
-    for (const r of rows) {
-      // device
-      if (!result.deviceVisits[r.device]) {
-        result.deviceVisits[r.device] = { total: 0, unique: 0 };
-      }
-      result.deviceVisits[r.device].total += r.total;
-      result.deviceVisits[r.device].unique += r.unique;
-
-      // os
-      if (!result.osVisits[r.os]) {
-        result.osVisits[r.os] = { total: 0, unique: 0 };
-      }
-      result.osVisits[r.os].total += r.total;
-      result.osVisits[r.os].unique += r.unique;
-
-      // browser
-      if (!result.browserVisits[r.browser]) {
-        result.browserVisits[r.browser] = { total: 0, unique: 0 };
-      }
-      result.browserVisits[r.browser].total += r.total;
-      result.browserVisits[r.browser].unique += r.unique;
-
-      // country
-      const c = result.countryVisits.find((x) => x.country === r.country);
-      if (c) {
-        c.total += r.total;
-        c.unique += r.unique;
-      } else {
-        result.countryVisits.push({
-          country: r.country,
-          total: r.total,
-          unique: r.unique,
-        });
-      }
-
-      // region
-      const reg = result.regionVisits.find((x) => x.region === r.region);
-      if (reg) {
-        reg.total += r.total;
-        reg.unique += r.unique;
-      } else {
-        result.regionVisits.push({
-          region: r.region,
-          total: r.total,
-          unique: r.unique,
-        });
-      }
-
-      // city
-      const ct = result.cityVisits.find((x) => x.city === r.city);
-      if (ct) {
-        ct.total += r.total;
-        ct.unique += r.unique;
-      } else {
-        result.cityVisits.push({
-          city: r.city,
-          total: r.total,
-          unique: r.unique,
-        });
-      }
-
-      // referrer
-      if (!result.referrerVisits[r.referrer]) {
-        result.referrerVisits[r.referrer] = { total: 0, unique: 0 };
-      }
-      result.referrerVisits[r.referrer].total += r.total;
-      result.referrerVisits[r.referrer].unique += r.unique;
-    }
-
-    return result;
+    return AnalyticUtil.reduceRows(rows);
   }
 
   async getTopUrls(userId: string, limit = 3) {
@@ -324,23 +158,17 @@ export class AnalyticRepository extends Repository<Analytic> {
 
     const urlIds = rows.map((r) => r.urlId);
     const urls = await this.findManyUrls(urlIds);
-    const breakdown = await this.getListUrlsSegments(urlIds);
+    const urlsSegments = await this.getListUrlsSegments(urlIds);
 
     return rows.map((r) => {
-      const urlBreakdown = breakdown[r.urlId];
+      const segments = urlsSegments[r.urlId];
       return {
         url: urls.find((u) => u.id === r.urlId)!,
         totalVisit: r.total,
         uniqueVisitors: r.unique,
         firstVisit: r.firstVisit ?? null,
         lastVisit: r.lastVisit ?? null,
-        deviceVisits: urlBreakdown.deviceVisits,
-        osVisits: urlBreakdown.osVisits,
-        browserVisits: urlBreakdown.browserVisits,
-        countryVisits: urlBreakdown.countryVisits,
-        cityVisits: urlBreakdown.cityVisits,
-        regionVisits: urlBreakdown.regionVisits,
-        referrerVisits: urlBreakdown.referrerVisits,
+        ...segments,
       };
     });
   }
@@ -354,7 +182,7 @@ export class AnalyticRepository extends Repository<Analytic> {
       url: '',
     },
   ) {
-    const { limit, page } = options;
+    const { limit = 10, page = 1 } = options;
     const offset = (page - 1) * limit;
 
     // Fetch paginated URL stats
@@ -371,17 +199,12 @@ export class AnalyticRepository extends Repository<Analytic> {
     const urlIds = rows.map((r) => r.urlId);
     const urls = await this.findManyUrls(urlIds);
 
-    // Fetch breakdown per URL
-    const breakdowns = await this.getListUrlsSegments(urlIds);
+    // Fetch segments per URL
+    const urlsSegments = await this.getListUrlsSegments(urlIds);
 
     // Map data to DTO
     const data = rows.map((r) => {
-      const urlBreakdown = breakdowns[r.urlId] ?? {
-        deviceVisits: null,
-        osVisits: null,
-        browserVisits: null,
-        countryVisits: null,
-      };
+      const segments = urlsSegments[r.urlId];
 
       return {
         url: urls.find((u) => u.id === r.urlId)!,
@@ -389,48 +212,11 @@ export class AnalyticRepository extends Repository<Analytic> {
         uniqueVisitors: Number(r.unique),
         firstVisit: r.firstVisit ?? null,
         lastVisit: r.lastVisit ?? null,
-        deviceVisits: urlBreakdown.deviceVisits,
-        osVisits: urlBreakdown.osVisits,
-        browserVisits: urlBreakdown.browserVisits,
-        countryVisits: urlBreakdown.countryVisits,
-        cityVisits: urlBreakdown.cityVisits,
-        referrerVisits: urlBreakdown.referrerVisits,
-        regionVisits: urlBreakdown.regionVisits,
+        ...segments,
       };
     });
 
     return paginatedResult<UrlAnalyticStat>(data, totalItems, options);
-  }
-
-  // Helper for base aggregation
-  private async getUrlStats(
-    userId: string,
-    options?: { limit?: number; offset?: number; orderByTotal?: boolean },
-  ) {
-    const qb = this.createQueryBuilder('a')
-      .leftJoin('a.url', 'url')
-      .where('url.userId = :userId', { userId })
-      .select('url.id', 'urlId')
-      .addSelect('SUM(a.visitorCount)::int', 'total')
-      .addSelect(
-        `SUM(CASE WHEN a.isUnique = TRUE THEN a.visitorCount ELSE 0 END)::int`,
-        'unique',
-      )
-      .addSelect('MIN(a.createdAt)', 'firstVisit') // add firstVisit
-      .addSelect('MAX(a.createdAt)', 'lastVisit') // add lastVisit
-      .groupBy('url.id');
-
-    if (options?.orderByTotal) qb.orderBy('total', 'DESC');
-    if (options?.limit !== undefined) qb.limit(options.limit);
-    if (options?.offset !== undefined) qb.offset(options.offset);
-
-    return await qb.getRawMany<{
-      urlId: string;
-      total: number;
-      unique: number;
-      firstVisit: Date;
-      lastVisit: Date;
-    }>();
   }
 
   // Example for getUrlStatsById or getTopUrls
@@ -442,8 +228,8 @@ export class AnalyticRepository extends Repository<Analytic> {
     if (!raw) return null;
 
     const url = await this.findOneOrUrl(raw.urlId);
-    const breakdown = await this.getListUrlsSegments([raw.urlId]);
-    const urlBreakdown = breakdown[raw.urlId];
+    const urlsSegments = await this.getListUrlsSegments([raw.urlId]);
+    const segments = urlsSegments[raw.urlId];
 
     return {
       url,
@@ -451,69 +237,8 @@ export class AnalyticRepository extends Repository<Analytic> {
       uniqueVisitors: raw.unique,
       firstVisit: raw.firstVisit ?? null,
       lastVisit: raw.lastVisit ?? null,
-      deviceVisits: urlBreakdown.deviceVisits,
-      osVisits: urlBreakdown.osVisits,
-      browserVisits: urlBreakdown.browserVisits,
-      countryVisits: urlBreakdown.countryVisits,
-      cityVisits: urlBreakdown.cityVisits,
-      referrerVisits: urlBreakdown.referrerVisits,
-      regionVisits: urlBreakdown.regionVisits,
+      ...segments,
     };
-  }
-
-  private async getUrlAggregates(
-    userId: string,
-    options?: {
-      urlId?: string;
-      limit?: number;
-      offset?: number;
-      orderByTotal?: boolean;
-    },
-  ) {
-    const qb = this.createQueryBuilder('a')
-      .leftJoin('a.url', 'url')
-      .where('url.userId = :userId', { userId })
-      .select('url.id', 'urlId')
-      .addSelect('SUM(a.visitorCount)::int', 'total')
-      .addSelect(
-        `SUM(CASE WHEN a.isUnique = TRUE THEN a.visitorCount ELSE 0 END)::int`,
-        'unique',
-      )
-      .addSelect('MIN(a.createdAt)', 'firstVisit')
-      .addSelect('MAX(a.createdAt)', 'lastVisit')
-      .groupBy('url.id');
-
-    if (options?.urlId)
-      qb.andWhere('url.id = :urlId', { urlId: options.urlId });
-    if (options?.orderByTotal) qb.orderBy('total', 'DESC');
-    if (options?.limit !== undefined) qb.limit(options.limit);
-    if (options?.offset !== undefined) qb.offset(options.offset);
-
-    return qb.getRawMany<{
-      urlId: string;
-      total: number;
-      unique: number;
-      firstVisit: Date;
-      lastVisit: Date;
-    }>();
-  }
-
-  private async findManyUrls(urlIds: string[]): Promise<Url[]> {
-    const urlRepo = this.dataSource.getRepository(Url);
-
-    return await urlRepo.find({
-      where: { id: In(urlIds) },
-      relations: ['channels'],
-    });
-  }
-
-  private async findOneOrUrl(id: string) {
-    const urlRepo = this.dataSource.getRepository(Url);
-
-    return await urlRepo.findOneOrFail({
-      where: { id },
-      relations: ['channels'],
-    });
   }
 
   async getAllUrlTimeline(userId: string, options: TimelineQueryDto = {}) {
@@ -620,7 +345,7 @@ export class AnalyticRepository extends Repository<Analytic> {
     urlId: string,
     options: UrlLogsQueryDto,
     paginate: PaginatedOptions,
-  ) {
+  ): Promise<PaginatedResult<Analytic>> {
     const to = options.to ?? new Date();
     const from =
       options.from ?? new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000); // last 30 days
@@ -640,5 +365,91 @@ export class AnalyticRepository extends Repository<Analytic> {
     const [rows, totalItems] = await qb.getManyAndCount();
 
     return paginatedResult<Analytic>(rows, totalItems, paginate);
+  }
+
+  private async getUrlAggregates(
+    userId: string,
+    options?: {
+      urlId?: string;
+      limit?: number;
+      offset?: number;
+      orderByTotal?: boolean;
+    },
+  ) {
+    const qb = this.createQueryBuilder('a')
+      .leftJoin('a.url', 'url')
+      .where('url.userId = :userId', { userId })
+      .select('url.id', 'urlId')
+      .addSelect('SUM(a.visitorCount)::int', 'total')
+      .addSelect(
+        `SUM(CASE WHEN a.isUnique = TRUE THEN a.visitorCount ELSE 0 END)::int`,
+        'unique',
+      )
+      .addSelect('MIN(a.createdAt)', 'firstVisit')
+      .addSelect('MAX(a.createdAt)', 'lastVisit')
+      .groupBy('url.id');
+
+    if (options?.urlId)
+      qb.andWhere('url.id = :urlId', { urlId: options.urlId });
+    if (options?.orderByTotal) qb.orderBy('total', 'DESC');
+    if (options?.limit !== undefined) qb.limit(options.limit);
+    if (options?.offset !== undefined) qb.offset(options.offset);
+
+    return qb.getRawMany<{
+      urlId: string;
+      total: number;
+      unique: number;
+      firstVisit: Date;
+      lastVisit: Date;
+    }>();
+  }
+
+  private async findManyUrls(urlIds: string[]): Promise<Url[]> {
+    const urlRepo = this.dataSource.getRepository(Url);
+
+    return await urlRepo.find({
+      where: { id: In(urlIds) },
+      relations: ['channels'],
+    });
+  }
+
+  private async findOneOrUrl(id: string) {
+    const urlRepo = this.dataSource.getRepository(Url);
+
+    return await urlRepo.findOneOrFail({
+      where: { id },
+      relations: ['channels'],
+    });
+  }
+
+  // Helper for base aggregation
+  private async getUrlStats(
+    userId: string,
+    options?: { limit?: number; offset?: number; orderByTotal?: boolean },
+  ) {
+    const qb = this.createQueryBuilder('a')
+      .leftJoin('a.url', 'url')
+      .where('url.userId = :userId', { userId })
+      .select('url.id', 'urlId')
+      .addSelect('SUM(a.visitorCount)::int', 'total')
+      .addSelect(
+        `SUM(CASE WHEN a.isUnique = TRUE THEN a.visitorCount ELSE 0 END)::int`,
+        'unique',
+      )
+      .addSelect('MIN(a.createdAt)', 'firstVisit') // add firstVisit
+      .addSelect('MAX(a.createdAt)', 'lastVisit') // add lastVisit
+      .groupBy('url.id');
+
+    if (options?.orderByTotal) qb.orderBy('total', 'DESC');
+    if (options?.limit !== undefined) qb.limit(options.limit);
+    if (options?.offset !== undefined) qb.offset(options.offset);
+
+    return await qb.getRawMany<{
+      urlId: string;
+      total: number;
+      unique: number;
+      firstVisit: Date;
+      lastVisit: Date;
+    }>();
   }
 }

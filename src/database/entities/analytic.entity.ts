@@ -12,6 +12,18 @@ import { Channel } from './channel.entity';
 
 @Entity({ name: 'analytics' })
 @Index(['url', 'identityHash'], { unique: true })
+@Index(['identityHash'])
+@Index(['url'])
+@Index(['createdAt'])
+@Index('IDX_ANALYTIC_SEGMENTS', [
+  'deviceType',
+  'os',
+  'browser',
+  'country',
+  'region',
+  'city',
+  'referrer',
+])
 export class Analytic extends BaseEntity {
   @Column({ type: 'varchar', length: 128, nullable: false })
   identityHash!: string;
@@ -30,6 +42,7 @@ export class Analytic extends BaseEntity {
 
   @Column({
     type: 'varchar',
+    default: 'direct',
   })
   referrer!: string;
 
@@ -48,6 +61,7 @@ export class Analytic extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 64,
+    default: 'Unknown',
   })
   country!: string;
 

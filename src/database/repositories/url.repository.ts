@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Url } from '../entities/url.entity';
 import { DataSource, FindOptionsWhere } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
+import { PaginatedOptions } from 'src/common/interfaces/paginated.interface';
+import { paginatedResult } from 'src/common/utils/paginate.util';
 
 @Injectable()
 export class UrlRepository extends Repository<Url> {
@@ -41,6 +43,21 @@ export class UrlRepository extends Repository<Url> {
     return this.find({
       where: { user: { id: userId }, ...condition },
     });
+  }
+
+  async findUrlsPaginated(userId: string, options: PaginatedOptions) {
+    const { page = 1, limit = 10 } = options;
+
+    const qb = this.createQueryBuilder('url')
+      .leftJoinAndSelect('url.channels', 'channels')
+      .where('url.userId  = :userId', { userId })
+      .orderBy('url.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [rows, totalItems] = await qb.getManyAndCount();
+
+    return paginatedResult<Url>(rows, totalItems, options);
   }
 
   async updateOne(url: Url, data: Partial<Url>): Promise<Url> {
