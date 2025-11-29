@@ -4,6 +4,7 @@ import { baseSchema } from 'src/common/schemas/base.schema';
 import * as z from 'zod';
 import { channelSchema } from './channel.dto';
 import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { createPaginatedSchema } from 'src/common/dto/paginated.dto';
 
 const metadataSchema = z
   .object({
@@ -87,3 +88,17 @@ export class UrlSerializerDto extends createZodDto(urlSchema) {}
 export class UrlResponse extends createResponseDto(urlSchema) {}
 
 export class AllUrlsResponse extends createResponseDto(urlSchema.array()) {}
+
+export const urlPaginatedSchema = createPaginatedSchema(urlSchema);
+
+export const urlPaginatedDtoSchema = zodToCamelCase(urlPaginatedSchema);
+
+export class UrlPaginatedDto extends createZodDto(urlPaginatedDtoSchema) {}
+
+export class UrlPaginatedSerializerDto extends createZodDto(
+  urlPaginatedSchema,
+) {}
+
+export class UrlPaginatedResponse extends createResponseDto(
+  urlPaginatedSchema,
+) {}

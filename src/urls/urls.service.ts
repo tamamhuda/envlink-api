@@ -7,7 +7,12 @@ import {
 import { UrlRepository } from 'src/database/repositories/url.repository';
 import LoggerService from 'src/common/logger/logger.service';
 import { PublicShortenUrlBodyDto, ShortenUrlBodyDto } from './dto/shorten.dto';
-import { UnlockUrlBodyDto, UpdateUrlBodyDto, UrlDto } from './dto/url.dto';
+import {
+  UnlockUrlBodyDto,
+  UpdateUrlBodyDto,
+  UrlDto,
+  UrlPaginatedDto,
+} from './dto/url.dto';
 import { UserService } from 'src/user/user.service';
 import { Url } from 'src/database/entities/url.entity';
 import { Request } from 'express';
@@ -20,6 +25,8 @@ import { UrlMetadataJob } from 'src/queue/interfaces/url-metadata.interface';
 import { Channel } from 'src/database/entities/channel.entity';
 import { In } from 'typeorm';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
+import { PaginatedQueryDto } from 'src/common/dto/paginated.dto';
+import { UrlGeneratorService } from 'nestjs-url-generator';
 
 @Injectable()
 export class UrlsService {
@@ -27,6 +34,7 @@ export class UrlsService {
   private readonly shortCodeUtil: ShortCodeUtil = new ShortCodeUtil();
   constructor(
     private readonly urlRepository: UrlRepository,
+    private readonly urlGenService: UrlGeneratorService,
     private readonly logger: LoggerService,
     @InjectQueue(URL_METADATA_QUEUE)
     private readonly urlMetadataQueue: Queue<UrlMetadataJob>,
@@ -46,6 +54,20 @@ export class UrlsService {
   async getUserUrls(req: Request): Promise<UrlDto[]> {
     const { id } = req.user;
     return await this.urlRepository.findManyByUserId(id);
+  }
+
+  async getUrlsPaginated(
+    userId: string,
+    pagination: PaginatedQueryDto,
+  ): Promise<UrlPaginatedDto> {
+    const url = this.urlGenService.generateUrlFromPath({
+      relativePath: 'urls',
+    });
+
+    return await this.urlRepository.findUrlsPaginated(userId, {
+      ...pagination,
+      url,
+    });
   }
 
   async getUrlByCode(code: string): Promise<UrlDto> {

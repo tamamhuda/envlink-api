@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
@@ -21,6 +22,9 @@ import {
   AllUrlsResponse,
   UrlSerializerDto,
   UpdateUrlRequest,
+  UrlPaginatedResponse,
+  UrlPaginatedSerializerDto,
+  UrlPaginatedDto,
 } from './dto/url.dto';
 import {
   ApiBearerAuth,
@@ -29,12 +33,20 @@ import {
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ThrottlePlan } from 'src/common/throttle/decorators/throttle-plan.decorator';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import {
+  PaginatedQuery,
+  PaginatedQueryDto,
+} from 'src/common/dto/paginated.dto';
+import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
+import { UserInfo } from 'src/auth/dto/user-info.dto';
+import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
 
 @ApiBearerAuth(JWT_SECURITY)
 @Controller('urls')
@@ -54,26 +66,26 @@ export class UrlsController {
     type: ShortenUrlRequest,
     description: 'Request body to shorten a URL',
   })
-  @ApiOperation({ operationId: 'Shorten', summary: 'Create a new short URL' })
+  @ApiOperation({ operationId: 'Shorten', summary: 'Create a new URL' })
   @ApiCreatedResponse({
     type: UrlResponse,
-    description: 'Created a new short URL',
+    description: 'Created a new URL',
   })
   @HttpCode(HttpStatus.CREATED)
   @ZodSerializerDto(UrlSerializerDto)
   async createUrls(
-    @Req() req: Request,
+    @AuthenticatedUser() user: UserInfo,
     @Body() body: ShortenUrlBodyDto,
   ): Promise<UrlDto> {
-    return await this.urlsService.createUrl(body, req.user);
+    return await this.urlsService.createUrl(body, user);
   }
 
   @SkipThrottle()
   @Get(':id')
-  @ApiOperation({ operationId: 'GetById', summary: 'Get a short URL by id' })
+  @ApiOperation({ operationId: 'GetById', summary: 'Get a URL by id' })
   @ApiOkResponse({
     type: UrlResponse,
-    description: 'Get a short URL by id successfully',
+    description: 'Get a URL by id successfully',
   })
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(UrlSerializerDto)
@@ -85,16 +97,20 @@ export class UrlsController {
   @Get()
   @ApiOperation({
     operationId: 'GetAll',
-    summary: 'Get all short URLs for a user',
+    summary: 'Get all URLs paginated',
   })
   @ApiOkResponse({
-    type: AllUrlsResponse,
-    description: 'Get all short URLs for a user successfully',
+    type: UrlPaginatedResponse,
+    description: 'Get all URLs paginated for a user successfully',
   })
+  @ApiPaginationQuery()
   @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto([UrlSerializerDto])
-  async getUrls(@Req() req: Request): Promise<UrlDto[]> {
-    return await this.urlsService.getUserUrls(req);
+  @ZodSerializerDto(UrlPaginatedSerializerDto)
+  async getUrls(
+    @AuthenticatedUser() user: UserInfo,
+    @Query() pagination: PaginatedQueryDto,
+  ): Promise<UrlPaginatedDto> {
+    return await this.urlsService.getUrlsPaginated(user.id, pagination);
   }
 
   @SkipThrottle()
@@ -105,11 +121,11 @@ export class UrlsController {
   })
   @ApiOperation({
     operationId: 'Update',
-    summary: 'Update a short URL',
+    summary: 'Update a URL',
   })
   @ApiOkResponse({
     type: UrlResponse,
-    description: 'Update a short URL',
+    description: 'Update a URL',
   })
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(UrlSerializerDto)
@@ -123,10 +139,10 @@ export class UrlsController {
   @Delete(':id')
   @ApiOperation({
     operationId: 'Delete',
-    summary: 'Delete a short URL',
+    summary: 'Delete a URL',
   })
   @ApiNoContentResponse({
-    description: 'Delete a short URL successfully',
+    description: 'Delete a URL successfully',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUrl(@Param('id') id: string): Promise<void> {

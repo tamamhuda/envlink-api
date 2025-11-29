@@ -10,7 +10,7 @@ export const baseAnalythicSchema = z.object({
   ip_address: z.string(),
   user_agent: z.string(),
   referrer: z.string(),
-  country: z.string(),
+  country_code: z.string(),
   region: z.string(),
   city: z.string(),
   device_type: z.string(),
