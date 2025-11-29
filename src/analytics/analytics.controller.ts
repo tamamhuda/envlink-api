@@ -50,6 +50,7 @@ import {
   UrlAnalyticsSegmentsResponse,
   UrlAnalyticsSegmentsSerializedDto,
 } from './dto/segments.dto';
+import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
 
 @Controller('analytics/urls')
 @SkipThrottle()
@@ -61,7 +62,7 @@ export class AnalyticsController {
   @Get('overview')
   @ApiOperation({
     operationId: 'getUrlsOverview',
-    summary: 'Overview of url analytics',
+    summary: 'Get Overview of url analytics',
   })
   @ApiOkResponse({
     type: UrlAnalyticsOverviewResponse,
@@ -97,20 +98,7 @@ export class AnalyticsController {
     operationId: 'getAllUrlStats',
     summary: 'Get all analytics stats of urls',
   })
-  @ApiQuery({
-    name: 'page',
-    type: Number,
-    required: false,
-    description: 'Page number',
-    default: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    type: Number,
-    required: false,
-    description: 'Page size',
-    default: 10,
-  })
+  @ApiPaginationQuery()
   @ApiOkResponse({
     type: UrlAnalyticStatPaginatedResponse,
     description: 'Get all analytics stats of urls successfully',
@@ -124,9 +112,9 @@ export class AnalyticsController {
         transform: true,
       }),
     )
-    query: PaginatedQueryDto,
+    pagination: PaginatedQueryDto,
   ): Promise<UrlAnalyticStatPaginatedDto> {
-    return this.service.getAllUrlStats(user.id, query);
+    return this.service.getAllUrlStats(user.id, pagination);
   }
 
   @Get('timeline')
@@ -152,20 +140,7 @@ export class AnalyticsController {
     operationId: 'getAllUrlLogs',
     summary: 'Get all analytics logs of urls',
   })
-  @ApiQuery({
-    name: 'page',
-    type: Number,
-    required: false,
-    description: 'Page number',
-    default: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    type: Number,
-    required: false,
-    description: 'Page size',
-    default: 10,
-  })
+  @ApiPaginationQuery()
   @ApiOkResponse({
     type: UrlAnalyticLogPaginatedResponse,
     description: 'Get all analytics logs of urls successfully',
@@ -229,20 +204,7 @@ export class AnalyticsController {
     operationId: 'getUrlLogsById',
     summary: 'Get all analytics logs of url by id',
   })
-  @ApiQuery({
-    name: 'page',
-    type: Number,
-    required: false,
-    description: 'Page number',
-    default: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    type: Number,
-    required: false,
-    description: 'Page size',
-    default: 10,
-  })
+  @ApiPaginationQuery()
   @ApiOkResponse({
     type: UrlAnalyticLogPaginatedResponse,
     description: 'Get all analytics logs of url by id successfully',

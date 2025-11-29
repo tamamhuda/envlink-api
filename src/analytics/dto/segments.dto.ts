@@ -15,7 +15,7 @@ export const segmentsSchema = z.object({
   country_visits: z
     .array(
       visitSchema.extend({
-        country: z.string(),
+        country_code: z.string(),
       }),
     )
     .nullable()
@@ -24,7 +24,9 @@ export const segmentsSchema = z.object({
   region_visits: z
     .array(visitSchema.extend({ region: z.string() }))
     .default([]),
-  city_visits: z.array(visitSchema.extend({ city: z.string() })).default([]),
+  city_visits: z
+    .array(visitSchema.extend({ city: z.string(), country_code: z.string() }))
+    .default([]),
 });
 
 const segmentsDtoSchema = zodToCamelCase(segmentsSchema);

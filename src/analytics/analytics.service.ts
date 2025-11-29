@@ -44,15 +44,15 @@ export class AnalyticsService {
 
   async getAllUrlStats(
     userId: string,
-    query: PaginatedQueryDto,
+    pagination: PaginatedQueryDto,
   ): Promise<UrlAnalyticStatPaginatedDto> {
     const url = this.urlGenService.generateUrlFromPath({
       relativePath: 'analytics/urls/stats',
     });
 
     return await this.analyticsRepository.getAllUrlStatsPaginated(userId, {
-      limit: query.limit ?? 10,
-      page: query.page ?? 1,
+      limit: pagination.limit ?? 10,
+      page: pagination.page ?? 1,
       url,
     });
   }
@@ -85,6 +85,7 @@ export class AnalyticsService {
 
     const urlLogsDto: UrlAnalyticLogDto[] = urlLogsPaginated.data.map((i) => ({
       ...i,
+      countryCode: i.country,
       urlId: i.url.id,
       channels: i.channels.map((channel) => channel.name),
     }));
@@ -141,6 +142,7 @@ export class AnalyticsService {
     const urlLogsDto: UrlAnalyticLogDto[] = urlLogsPaginated.data.map((i) => {
       return {
         ...i,
+        countryCode: i.country,
         urlId: i.url.id,
         channels: i.channels.map((channel) => channel.name),
       };

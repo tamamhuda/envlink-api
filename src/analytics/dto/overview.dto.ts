@@ -9,7 +9,7 @@ export const urlOverviewSchema = z.object({
   unique_visitors: z.number().min(0).default(0),
   top_countries: z
     .object({
-      country: z.string().nonempty(),
+      country_code: z.string().nonempty(),
       total_visits: z.number(),
     })
     .array()

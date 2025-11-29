@@ -11,7 +11,7 @@ export const urlAnalyticLogSchema = baseSchema.extend({
   referrer: z.string().nullable(),
   region: z.string().nullable(),
   city: z.string().nullable(),
-  country: z.string().nullable(),
+  country_code: z.string().nullable(),
   device_type: z.string().nullable(),
   os: z.string().nullable(),
   language: z.string().nullable(),
