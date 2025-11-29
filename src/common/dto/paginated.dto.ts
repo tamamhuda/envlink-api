@@ -35,6 +35,8 @@ export class PaginatedQueryDto {
   @Min(0)
   page?: number = 1;
 }
+
+export class PaginatedQuery extends PaginatedQueryDto {}
 // export class PaginatedQueryDto extends createZodDto(paginatedQuerySchema) {}
 
 // export type PaginatedQuery = z.infer<typeof paginatedQuerySchema>;

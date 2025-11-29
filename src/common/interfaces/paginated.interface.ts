@@ -20,7 +20,7 @@ export interface PaginatedResult<T> {
 }
 
 export interface PaginatedOptions {
-  page: number;
-  limit: number;
+  page?: number;
+  limit?: number;
   url: string;
 }

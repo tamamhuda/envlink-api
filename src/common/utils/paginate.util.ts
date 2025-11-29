@@ -8,8 +8,7 @@ export function paginatedResult<T>(
   totalItems: number,
   options: PaginatedOptions,
 ): PaginatedResult<T> {
-  const limit = options.limit > 0 ? options.limit : 10;
-  const page = options.page > 0 ? options.page : 1;
+  const { page = 1, limit = 10 } = options;
 
   const totalPages = Math.max(1, Math.ceil(totalItems / limit));
 

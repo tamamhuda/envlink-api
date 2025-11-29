@@ -59,6 +59,7 @@ export class IpUtil {
   async getIpLocation(ip: string): Promise<{
     city: string;
     country: string;
+    countryCode: string;
     region: string;
     language: string;
   }> {
@@ -66,7 +67,8 @@ export class IpUtil {
 
     return {
       city: location?.city_name || 'Unknown',
-      country: location?.country_code || 'Unknown',
+      country: location?.country_name || 'Unknown',
+      countryCode: location?.country_code || 'Unknown',
       region: location?.region_name || 'Unknown',
       language: location?.country?.language.code || 'Unknown',
     };
@@ -81,10 +83,11 @@ export class IpUtil {
         return 'Localhost';
       }
 
-      const { city, region, country } = await this.getIpLocation(ipAddr);
+      const { city, region, countryCode, country } =
+        await this.getIpLocation(ipAddr);
 
       // If all values are 'Unknown', return a fallback
-      const isAllUnknown = [city, region, country].every(
+      const isAllUnknown = [city, region, countryCode].every(
         (val) => !val || val === 'Unknown',
       );
       if (isAllUnknown) return 'Unknown location';
