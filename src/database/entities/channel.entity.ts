@@ -12,6 +12,15 @@ export class Channel extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   description!: string | null;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  badgeColor!: string | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  badgeIcon!: string | null;
+
+  @Column({ type: 'boolean', default: false })
+  isStarred!: boolean;
+
   @ManyToOne(() => User, (user) => user.channels, { onDelete: 'CASCADE' })
   user!: User;
 

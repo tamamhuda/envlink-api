@@ -50,8 +50,8 @@ import { ClientUrl } from 'src/common/decorators/client-url.decorator';
 import { LoginRequest } from './dto/login.dto';
 
 @Controller('auth')
-@ApiTags('Authentication')
 @Public()
+@ApiTags('Authentication')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,

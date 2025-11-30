@@ -31,6 +31,6 @@ services:
         - action: rebuild
           path: ./package.json
         - action: rebuild
-          path: ./package-lock.json
+          path: ./pnpm-lock.json
         - action: rebuild
           path: ./prisma

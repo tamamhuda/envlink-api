@@ -39,12 +39,17 @@ export class UrlAnalyticService {
 
   async incrementVisitorCount(analytic: Analytic): Promise<void> {
     await this.analyticRepository.manager.transaction(async (manager) => {
+      const { visitorCount, url } = analytic;
+
       await manager.update(Analytic, analytic.id, {
-        visitorCount: analytic.visitorCount + 1,
+        visitorCount: visitorCount + 1,
       });
 
       await manager.update(Url, analytic.url.id, {
-        clickCount: analytic.url.clickCount + 1,
+        clickCount: url.clickCount + 1,
+        uniqueClicks: analytic.isUnique
+          ? url.uniqueClicks + 1
+          : url.uniqueClicks,
       });
     });
   }

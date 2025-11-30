@@ -2,7 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { baseSchema } from 'src/common/schemas/base.schema';
 import * as z from 'zod';
-import { channelSchema } from './channel.dto';
+import { channelSchema } from '../../channels/dto/channel.dto';
 import { zodToCamelCase } from 'src/common/utils/case-transform.util';
 import { createPaginatedSchema } from 'src/common/dto/paginated.dto';
 
@@ -30,6 +30,7 @@ export const urlSchema = baseSchema.extend({
   access_code: z.string().nullable(),
   expires_at: z.date().nullable(),
   click_count: z.number().min(0).default(0),
+  unique_clicks: z.number().min(0).default(0),
   metadata: metadataSchema.nullable(),
   channels: z.array(
     channelSchema.pick({ id: true, name: true, description: true }),
@@ -45,19 +46,23 @@ const publicUrlSchema = urlSchema.omit({
 });
 const publicUrlDtoSchema = zodToCamelCase(publicUrlSchema);
 
-const updateUrlDtoSchema = zodToCamelCase(
-  urlSchema
-    .omit({
-      id: true,
-      created_at: true,
-      updated_at: true,
-      click_count: true,
-    })
-    .partial()
-    .refine((data) => Object.keys(data).length > 0, {
-      message: 'At least one field is required',
-    }),
-);
+const updateUrlSchema = urlSchema
+  .omit({
+    id: true,
+    created_at: true,
+    updated_at: true,
+    click_count: true,
+    channels: true,
+  })
+  .extend({
+    channelsIds: z.array(z.string().uuid()).optional(),
+  })
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'At least one field is required',
+  });
+
+const updateUrlDtoSchema = zodToCamelCase(updateUrlSchema);
 
 const unlockUrlDtoSchema = zodToCamelCase(
   z.object({
@@ -77,7 +82,7 @@ export class PublicUrlResponse extends createResponseDto(publicUrlSchema) {}
 
 export class UpdateUrlBodyDto extends createZodDto(updateUrlDtoSchema) {}
 
-export class UpdateUrlRequest extends UpdateUrlBodyDto {}
+export class UpdateUrlRequest extends createZodDto(updateUrlSchema) {}
 
 export class UpdateMetadataDto extends createZodDto(updateMetadataDtoSchema) {}
 

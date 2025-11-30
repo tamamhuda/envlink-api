@@ -14,24 +14,4 @@ export const userBaseSchema = baseSchema.extend({
   avatar: z.string().nullable().optional(),
 });
 
-const updateSchema = zodToCamelCase(
-  userBaseSchema
-    .pick({
-      username: true,
-      full_name: true,
-      email: true,
-      phone_number: true,
-      avatar: true,
-    })
-    .partial()
-    .refine((data) => Object.keys(data).length > 0, {
-      path: ['body'],
-      message: 'Provide at least one field to update',
-    }),
-);
-
 export class UserDto extends createZodDto(userBaseSchema) {}
-
-export class UpdateUserBodyDto extends createZodDto(updateSchema) {}
-
-export class UpdateUserRequest extends UpdateUserBodyDto {}

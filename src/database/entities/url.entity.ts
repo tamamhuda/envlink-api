@@ -48,6 +48,12 @@ export class Url extends BaseEntity {
   })
   clickCount!: number;
 
+  @Column({
+    type: 'int',
+    default: 0,
+  })
+  uniqueClicks!: number;
+
   @Column({ type: 'jsonb', nullable: true })
   metadata!: {
     title?: string;

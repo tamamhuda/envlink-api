@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from 'src/database/entities/user.entity';
-import { UpdateUserBodyDto } from './dto/user.dto';
+import { UpdateUserBodyDto } from './dto/update.dto';
 import Session from 'src/database/entities/session.entity';
 import { Account } from 'src/database/entities/account.entity';
 import { UserRepository } from 'src/database/repositories/user.repository';

@@ -140,9 +140,12 @@ export class UrlsService {
 
   async updateUrl(id: string, body: UpdateUrlBodyDto): Promise<UrlDto> {
     const existingUrl = await this.findUrlByIdOrCode(id);
-    const { code } = body;
+    const { code, channelsIds, ...rest } = body;
     if (code) await this.validateCode(code);
-    return await this.urlRepository.updateOne(existingUrl, body);
+    return await this.urlRepository.updateOne(existingUrl, {
+      code,
+      ...rest,
+    });
   }
 
   async deleteUrl(id: string): Promise<void> {

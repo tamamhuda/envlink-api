@@ -13,4 +13,4 @@ done
 echo "✅ PostgreSQL is ready."
 
 echo "🚀 Starting NestJS in watch mode..."
-exec npm run start:dev
+exec pnpm run start:dev

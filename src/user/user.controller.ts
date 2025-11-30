@@ -29,7 +29,7 @@ import { JWT_SECURITY } from 'src/config/jwt.config';
 import { Cached } from 'src/common/decorators/cached.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
-import { UpdateUserBodyDto, UpdateUserRequest } from './dto/user.dto';
+import { UpdateUserBodyDto, UpdateUserRequest } from './dto/update.dto';
 import { ZodSerializerDto, ZodValidationPipe } from 'nestjs-zod';
 import { ImageUploadDto } from './dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';

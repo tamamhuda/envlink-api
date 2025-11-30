@@ -21,11 +21,11 @@ export const getRedisConfig = (
 export const getCacheConfig = (
   config: ConfigService<Env>,
 ): CacheManagerOptions => {
-  const redis = getRedisConfig(config);
+  const { host, port, db } = getRedisConfig(config);
   const ttl = ms(config.get<Env['CACHE_TTL']>('CACHE_TTL') as StringValue);
 
   const stores = Object.values(CachePrefix).map((namespace) =>
-    createKeyv(redis.uri, {
+    createKeyv(`redis://${host}:${port}/${db}`, {
       namespace,
       keyPrefixSeparator: `:`,
     }),

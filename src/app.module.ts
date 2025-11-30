@@ -37,6 +37,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { BillingAddressModule } from './billing-address/billing-address.module';
 import { OauthModule } from './oauth/oauth.module';
 import { RedisClientModule } from '@quazex/nestjs-ioredis';
+import { ChannelsModule } from './channels/channels.module';
 
 @Module({
   imports: [
@@ -97,6 +98,7 @@ import { RedisClientModule } from '@quazex/nestjs-ioredis';
     AnalyticsModule,
     BillingAddressModule,
     OauthModule,
+    ChannelsModule,
   ],
 
   providers: [
