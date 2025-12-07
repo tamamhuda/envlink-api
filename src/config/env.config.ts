@@ -4,7 +4,9 @@ import * as dotenv from 'dotenv';
 
 const envSchema = z
   .object({
-    NODE_ENV: z.enum(['development', 'production', 'local']).default('local'),
+    NODE_ENV: z
+      .enum(['development', 'production', 'local', 'staging'])
+      .default('local'),
 
     PORT: z.coerce.number().default(3000), // `coerce` if value comes from process.env
 
@@ -15,6 +17,7 @@ const envSchema = z
     APP_SECRET: z.string().default('secret'),
     API_VERSION: z.string().default('v1'),
     API_PREFIX: z.string().default('api/v1'),
+    APP_TAG: z.string().default('Local Deployment'),
 
     DB_HOST: z.string().default('localhost'),
     DB_PORT: z.coerce.number().default(5432),

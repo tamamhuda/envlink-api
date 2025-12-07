@@ -32,7 +32,10 @@ export class UrlAnalyticInterceptor<T extends UrlDto>
       tap(({ code: urlCode }: T) => {
         const userAgent = request.headers['user-agent'];
         if (userAgent) {
-          const referrer = request.headers['referer'] || 'unknown';
+          let referrer = request.headers['referer'];
+          if (referrer && ['http', 'https'].includes(referrer.split(':')[0])) {
+            referrer = new URL(referrer).hostname;
+          }
 
           const urlAnalyticJob: UrlAnalyticJob = {
             ipAddress,

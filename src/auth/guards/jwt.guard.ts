@@ -36,13 +36,13 @@ export class JwtAuthGuard extends AuthGuard(JWT_ACCESS_STRATEGY) {
     info: any,
   ): UserInfoDto {
     if (info instanceof TokenExpiredError) {
-      throw new UnauthorizedException('Token expired');
+      throw new UnauthorizedException('TOKEN_EXPIRED');
     }
     if (info instanceof JsonWebTokenError) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('TOKEN_INVALID');
     }
     if (err || !user) {
-      throw new UnauthorizedException('Invalid Authorization');
+      throw new UnauthorizedException('AUTHORIZATION_FAILED');
     }
     return user;
   }

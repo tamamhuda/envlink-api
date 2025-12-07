@@ -34,8 +34,6 @@ export class ThrottleInterceptor<T> implements NestInterceptor<T> {
       return next.handle();
     }
 
-    console.log(`Throttle Policy: ${JSON.stringify(policy)}`);
-
     const key = throttle.key;
     const cost = throttle.cost ?? policy.cost ?? 1;
 

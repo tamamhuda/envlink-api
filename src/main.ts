@@ -13,6 +13,7 @@ import LoggerService from './common/logger/logger.service';
 import { join } from 'path';
 import * as hbs from 'hbs';
 import * as yaml from 'yaml';
+import { XenditInitializeService } from './common/xendit/xendit-initialize.service';
 
 async function bootstrap() {
   const isWorker = process.env.WORKER === 'true';
@@ -51,8 +52,8 @@ async function bootstrap() {
     origin: [
       'http://localhost:8000',
       'http://localhost:3000',
-      'https://local.envlink.one',
-      'https://local-nest.utadev.app',
+      'https://staging.envlink.one',
+      'https://demo.envlink.one',
     ],
     credentials: true,
   });
@@ -78,6 +79,8 @@ async function bootstrap() {
 
   const logger = app.get(LoggerService);
   const seeder = app.get(PlanSeeder);
+  const xenditInitializer = app.get(XenditInitializeService);
+  await xenditInitializer.initialize();
   await seeder.seed();
 
   await app.listen(PORT, () => {

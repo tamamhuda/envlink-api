@@ -22,6 +22,7 @@ export function createPaginatedSchema<T extends z.ZodSchema>(zodSchema: T) {
     }),
   });
 }
+
 export class PaginatedQueryDto {
   @IsOptional()
   @Type(() => Number)

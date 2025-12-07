@@ -17,7 +17,7 @@ export function paginatedResult<T>(
     meta: {
       totalItems,
       itemCount: rows.length,
-      itemsPerPage: limit,
+      itemsPerPage: Number(limit),
       totalPages,
       currentPage: Math.min(page, totalPages),
     },

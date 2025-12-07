@@ -47,7 +47,7 @@ export class JwtStrategy extends PassportStrategy(
     );
 
     if (isBlacklist) {
-      throw new UnauthorizedException('Token is revoked');
+      throw new UnauthorizedException('TOKEN_REVOKED');
     }
 
     const sessionInfo = await this.sessionService.validateCurrentSession(

@@ -7,11 +7,14 @@ import { ErrorResponse } from 'src/common/dto/error-response.dto';
 export const getSwaggerDocumentConfig = (
   config: ConfigService<Env>,
 ): Omit<OpenAPIObject, 'paths'> => {
-  const APP_NAME = config.get<Env['APP_NAME']>('APP_NAME') ?? 'nest-app';
+  const APP_NAME = config.getOrThrow<Env['APP_NAME']>('APP_NAME') ?? 'nest-app';
   const APP_DESCRIPTION =
-    config.get<Env['APP_DESCRIPTION']>('APP_DESCRIPTION') ??
+    config.getOrThrow<Env['APP_DESCRIPTION']>('APP_DESCRIPTION') ??
     'nest-js application';
-  const APP_VERSION = config.get<Env['APP_VERSION']>('APP_VERSION') ?? 'v1.0.0';
+  const APP_VERSION =
+    config.getOrThrow<Env['APP_VERSION']>('APP_VERSION') ?? 'v1.0.0';
+  const APP_URL = config.getOrThrow<Env['APP_URL']>('APP_URL');
+  const APP_TAG = config.getOrThrow<Env['APP_TAG']>('APP_TAG');
 
   return (
     new DocumentBuilder()
@@ -19,7 +22,7 @@ export const getSwaggerDocumentConfig = (
       .setDescription(APP_DESCRIPTION)
       .setVersion(APP_VERSION)
       .setOpenAPIVersion('3.1.0')
-      .addServer('https://local-nest.utadev.app', 'Development')
+      .addServer(APP_URL, APP_TAG)
       .addServer('https://api.envlink.one', 'Production')
       // Correct JWT bearer configuration
       .addSecurity(JWT_SECURITY, {

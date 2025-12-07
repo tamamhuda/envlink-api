@@ -10,14 +10,14 @@ export class JwtRefreshGuard extends AuthGuard(JWT_REFRESH_STRATEGY) {
     user: UserInfoDto,
     info: any,
   ): UserInfoDto {
-    if (info instanceof TokenExpiredError)
-      throw new UnauthorizedException('Token expired');
-
-    if (info instanceof JsonWebTokenError)
-      throw new UnauthorizedException('Invalid token');
-
+    if (info instanceof TokenExpiredError) {
+      throw new UnauthorizedException('TOKEN_EXPIRED');
+    }
+    if (info instanceof JsonWebTokenError) {
+      throw new UnauthorizedException('TOKEN_INVALID');
+    }
     if (err || !user) {
-      throw new UnauthorizedException(err.message || 'Invalid Authorization');
+      throw new UnauthorizedException('AUTHORIZATION_FAILED');
     }
     return user;
   }
