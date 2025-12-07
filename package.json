@@ -16,6 +16,7 @@
     "start:prod:docker": "docker-compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up --build",
     "down:prod:docker": "docker-compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml down -v",
     "start:dev:local": "NODE_ENV=local nest start --watch",
+    "start:staging": "NODE_ENV=staging nest start --watch",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
