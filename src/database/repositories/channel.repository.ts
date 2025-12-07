@@ -18,7 +18,7 @@ export class ChannelRepository extends Repository<Channel> {
 
   async findById(userId: string, id: string): Promise<Channel | null> {
     return await this.findOne({
-      where: { id, user: { id } },
+      where: { id, user: { id: userId } },
       relations: ['user'],
     });
   }
@@ -51,6 +51,28 @@ export class ChannelRepository extends Repository<Channel> {
 
   async deleteOne(channel: Channel) {
     await this.remove(channel);
+  }
+
+  async findAllPaginated(
+    userId: string,
+    options: PaginatedOptions,
+    isStarred: boolean = false,
+  ): Promise<PaginatedResult<Channel>> {
+    const { page = 1, limit = 10 } = options;
+
+    const qb = this.createQueryBuilder('channel')
+      .leftJoinAndSelect('channel.user', 'user')
+      .where('channel.user.id = :userId', { userId })
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy('channel.createdAt', 'DESC');
+
+    if (isStarred) {
+      qb.andWhere('channel.isStarred = :isStarred', { isStarred });
+    }
+
+    const [rows, totalItems] = await qb.getManyAndCount();
+    return paginatedResult(rows, totalItems, options);
   }
 
   async findAllItemsById(

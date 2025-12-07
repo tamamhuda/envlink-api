@@ -4,6 +4,7 @@ import { User } from './user.entity';
 
 import { Channel } from './channel.entity';
 import { Analytic } from './analytic.entity';
+import { RedirectType } from 'src/common/enums/redirect-type.enum';
 
 @Entity({ name: 'urls' })
 export class Url extends BaseEntity {
@@ -17,10 +18,50 @@ export class Url extends BaseEntity {
   originalUrl!: string;
 
   @Column({
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  description?: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: RedirectType,
+    default: RedirectType.DIRECT,
+  })
+  redirectType!: RedirectType;
+
+  @Column({
     type: 'boolean',
     default: false,
   })
   isAnonymous!: boolean;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  isPrivate!: boolean;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  isArchived!: boolean;
+
+  @Column({
+    type: 'timestamptz',
+    nullable: true,
+    default: null,
+  })
+  archivedAt?: Date | null;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    unique: true,
+  })
+  alias?: string | null;
 
   @Column({
     type: 'boolean',
@@ -33,14 +74,28 @@ export class Url extends BaseEntity {
     nullable: true,
     default: null,
   })
-  accessCode!: string | null;
+  accessCode?: string | null;
 
   @Column({
-    type: 'timestamp',
+    type: 'timestamptz',
     nullable: true,
     default: null,
   })
-  expiresAt!: Date | null;
+  activeAt?: Date | null;
+
+  @Column({
+    type: 'timestamptz',
+    nullable: true,
+    default: null,
+  })
+  expiresAt?: Date | null;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  expirationRedirect?: string | null;
 
   @Column({
     type: 'int',
@@ -54,25 +109,32 @@ export class Url extends BaseEntity {
   })
   uniqueClicks!: number;
 
+  @Column({
+    type: 'int',
+    default: null,
+  })
+  clickLimit?: number | null;
+
   @Column({ type: 'jsonb', nullable: true })
-  metadata!: {
-    title?: string;
-    url?: string;
-    description?: string;
-    image?: string;
-    favicon?: string;
-    site_name?: string;
-    keywords?: string;
-    type?: string;
-    robots?: string;
-    author?: string;
+  metadata?: {
+    title?: string | null;
+    url?: string | null;
+    description?: string | null;
+    image?: string | null;
+    favicon?: string | null;
+    site_name?: string | null;
+    keywords?: string | null;
+    type?: string | null;
+    robots?: string | null;
+    author?: string | null;
+    [key: string]: any;
   } | null;
 
   @ManyToOne(() => User, (user) => user.urls, {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  user!: User;
+  user?: User;
 
   @ManyToMany(() => Analytic, {
     cascade: ['insert', 'update', 'remove'],

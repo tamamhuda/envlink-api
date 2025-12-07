@@ -42,9 +42,9 @@ export class Analytic extends BaseEntity {
 
   @Column({
     type: 'varchar',
-    default: 'direct',
+    nullable: true,
   })
-  referrer!: string;
+  referrer?: string | null;
 
   @Column({
     type: 'varchar',

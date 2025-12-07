@@ -4,6 +4,7 @@ import { DataSource, FindOptionsWhere } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { PaginatedOptions } from 'src/common/interfaces/paginated.interface';
 import { paginatedResult } from 'src/common/utils/paginate.util';
+import { FilterQuery, FilterQueryDto } from 'src/urls/dto/filter-query.dto';
 
 @Injectable()
 export class UrlRepository extends Repository<Url> {
@@ -17,6 +18,10 @@ export class UrlRepository extends Repository<Url> {
 
   findOneByCode(code: string): Promise<Url | null> {
     return this.findOne({ where: { code }, relations: ['channels', 'user'] });
+  }
+
+  findOneByAlias(alias: string): Promise<Url | null> {
+    return this.findOne({ where: { alias }, relations: ['channels', 'user'] });
   }
 
   async createOne(data: Partial<Url>): Promise<Url> {
@@ -45,15 +50,63 @@ export class UrlRepository extends Repository<Url> {
     });
   }
 
-  async findUrlsPaginated(userId: string, options: PaginatedOptions) {
+  async findUrlsPaginated(
+    userId: string,
+    options: PaginatedOptions,
+    filter: FilterQuery,
+  ) {
     const { page = 1, limit = 10 } = options;
+    const { archived, expired = false, privated, q } = filter;
 
+    console.log('privated : ', privated);
     const qb = this.createQueryBuilder('url')
       .leftJoinAndSelect('url.channels', 'channels')
-      .where('url.userId  = :userId', { userId })
-      .orderBy('url.createdAt', 'DESC')
+      .where('url.userId = :userId', { userId })
       .skip((page - 1) * limit)
       .take(limit);
+
+    // Base filter
+    if (privated !== undefined) {
+      qb.andWhere('url.isPrivate = :privated', { privated });
+    }
+
+    if (archived !== undefined) {
+      qb.andWhere('url.isArchived = :archived', { archived });
+
+      // override global ordering for archived items
+      if (archived) {
+        qb.orderBy('url.archivedAt', 'DESC').addOrderBy(
+          'url.createdAt',
+          'DESC',
+        );
+      }
+    } else {
+      // normal mode
+      qb.orderBy('url.createdAt', 'DESC');
+    }
+
+    if (expired) {
+      qb.andWhere(`url.expiresAt IS NOT NULL AND url.expiresAt < :today`, {
+        today: new Date(),
+      });
+    }
+
+    // Search
+    if (q) {
+      qb.andWhere(
+        `
+        (
+          url.code ILIKE :q
+          OR url.alias ILIKE :q
+          OR url.description ILIKE :q
+          OR url.originalUrl ILIKE :q
+          OR url.metadata->>'title' ILIKE :q
+          OR url.metadata->>'description' ILIKE :q
+        )
+        `,
+        { q: `%${q}%` },
+      );
+    }
 
     const [rows, totalItems] = await qb.getManyAndCount();
 
