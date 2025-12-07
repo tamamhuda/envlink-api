@@ -10,6 +10,7 @@ import {
   Put,
   Query,
   Req,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
 import LoggerService from 'src/common/logger/logger.service';
@@ -47,6 +48,8 @@ import {
 import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
 import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
+import { FilterQueryDto } from './dto/filter-query.dto';
+import { ApiUrlFilterQuery } from './decorators/api-filter-query.decorator';
 
 @ApiBearerAuth(JWT_SECURITY)
 @Controller('urls')
@@ -81,16 +84,16 @@ export class UrlsController {
   }
 
   @SkipThrottle()
-  @Get(':id')
-  @ApiOperation({ operationId: 'GetById', summary: 'Get a URL by id' })
+  @Get(':code')
+  @ApiOperation({ operationId: 'GetByCode', summary: 'Get a URL by code' })
   @ApiOkResponse({
     type: UrlResponse,
     description: 'Get a URL by id successfully',
   })
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(UrlSerializerDto)
-  async getUrlById(@Param('id') id: string): Promise<UrlDto> {
-    return await this.urlsService.getUrlById(id);
+  async getUrlByCode(@Param('code') code: string): Promise<UrlDto> {
+    return await this.urlsService.getUrlByCode(code);
   }
 
   @SkipThrottle()
@@ -104,13 +107,15 @@ export class UrlsController {
     description: 'Get all URLs paginated for a user successfully',
   })
   @ApiPaginationQuery()
+  @ApiUrlFilterQuery()
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(UrlPaginatedSerializerDto)
   async getUrls(
     @AuthenticatedUser() user: UserInfo,
     @Query() pagination: PaginatedQueryDto,
+    @Query(new ValidationPipe({ transform: true })) filter: FilterQueryDto,
   ): Promise<UrlPaginatedDto> {
-    return await this.urlsService.getUrlsPaginated(user.id, pagination);
+    return await this.urlsService.getUrlsPaginated(user.id, pagination, filter);
   }
 
   @SkipThrottle()
@@ -138,7 +143,7 @@ export class UrlsController {
 
   @Delete(':id')
   @ApiOperation({
-    operationId: 'Delete',
+    operationId: 'DeleteById',
     summary: 'Delete a URL',
   })
   @ApiNoContentResponse({

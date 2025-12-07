@@ -9,7 +9,6 @@ export default class UrlMetadataService {
   private static sharedBrowser: Browser | null = null;
   private readonly userAgent: string =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
-  private readonly imageNotFound: string = 'https://www.google.com/blank.html';
 
   constructor(private readonly logger: LoggerService) {}
   /**  Auto-recovering browser launcher */
@@ -66,7 +65,7 @@ export default class UrlMetadataService {
 
     const page = await context.newPage();
 
-    // 🚀 Block unnecessary resources but allow favicons
+    // Block unnecessary resources but allow favicons
     await page.route('**/*', (route) => {
       const req = route.request();
       const type = req.resourceType();
@@ -88,7 +87,7 @@ export default class UrlMetadataService {
     return page;
   }
 
-  private async extractFavicon(page: Page): Promise<string> {
+  private async extractFavicon(page: Page): Promise<string | undefined> {
     const faviconUrl = await page.evaluate(() => {
       const rels = ['icon', 'shortcut icon', 'apple-touch-icon'];
       for (const rel of rels) {
@@ -99,7 +98,7 @@ export default class UrlMetadataService {
       }
       return null;
     });
-    return faviconUrl || this.imageNotFound;
+    return faviconUrl || undefined;
   }
 
   private async extractMetaTags(page: Page, url: string): Promise<UrlMetadata> {
@@ -135,17 +134,14 @@ export default class UrlMetadataService {
     const favicon = await this.extractFavicon(page);
 
     return {
-      title: metaTags['og:title'] || metaTags['twitter:title'] || url,
+      title: metaTags['og:title'] || metaTags['twitter:title'],
       url: metaTags['og:url'] || url,
       description:
         metaTags['og:description'] ||
         metaTags['twitter:description'] ||
         metaTags['description'] ||
         'unknown',
-      image:
-        metaTags['og:image'] ||
-        metaTags['twitter:image:src'] ||
-        this.imageNotFound,
+      image: metaTags['og:image'] || metaTags['twitter:image:src'],
       favicon,
       site_name: metaTags['og:site_name'] || metaTags['og:site'] || 'unknown',
       keywords: metaTags['keywords'] || 'unknown',

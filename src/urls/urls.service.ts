@@ -21,12 +21,18 @@ import { ShortCodeUtil } from 'src/common/utils/short-code.util';
 import { InjectQueue } from '@nestjs/bullmq';
 import { URL_METADATA_QUEUE } from 'src/queue/queue.constans';
 import { Queue } from 'bullmq';
-import { UrlMetadataJob } from 'src/queue/interfaces/url-metadata.interface';
+import {
+  UrlMetadata,
+  UrlMetadataJob,
+} from 'src/queue/interfaces/url-metadata.interface';
 import { Channel } from 'src/database/entities/channel.entity';
 import { In } from 'typeorm';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
 import { PaginatedQueryDto } from 'src/common/dto/paginated.dto';
 import { UrlGeneratorService } from 'nestjs-url-generator';
+import { FilterQueryDto } from './dto/filter-query.dto';
+import { CacheService } from 'src/common/cache/cache.service';
+import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 
 @Injectable()
 export class UrlsService {
@@ -39,6 +45,7 @@ export class UrlsService {
     @InjectQueue(URL_METADATA_QUEUE)
     private readonly urlMetadataQueue: Queue<UrlMetadataJob>,
     private readonly userService: UserService,
+    private readonly cache: CacheService,
   ) {}
 
   async findUrlByIdOrCode(id?: string, code?: string): Promise<Url> {
@@ -59,15 +66,20 @@ export class UrlsService {
   async getUrlsPaginated(
     userId: string,
     pagination: PaginatedQueryDto,
+    filter: FilterQueryDto,
   ): Promise<UrlPaginatedDto> {
     const url = this.urlGenService.generateUrlFromPath({
       relativePath: 'urls',
     });
 
-    return await this.urlRepository.findUrlsPaginated(userId, {
-      ...pagination,
-      url,
-    });
+    return await this.urlRepository.findUrlsPaginated(
+      userId,
+      {
+        ...pagination,
+        url,
+      },
+      filter,
+    );
   }
 
   async getUrlByCode(code: string): Promise<UrlDto> {
@@ -81,19 +93,36 @@ export class UrlsService {
     return url;
   }
 
-  async validateCode(code: string): Promise<void> {
-    const url = await this.urlRepository.findOneByCode(code);
+  async validateAlias(alias: string): Promise<void> {
+    const url = await this.urlRepository.findOneByCode(alias);
     if (url) throw new ConflictException('Code already exists');
   }
 
+  async generateAndValidateCode() {
+    let code = this.shortCodeUtil.generate(6);
+    let url = await this.urlRepository.findOneByCode(code);
+    while (url) {
+      code = this.shortCodeUtil.generate(6);
+      url = await this.urlRepository.findOneByCode(code);
+    }
+    return code;
+  }
+
   async createUrl(
-    body: Partial<ShortenUrlBodyDto>,
+    body: ShortenUrlBodyDto,
     userInfo?: UserInfo,
   ): Promise<UrlDto> {
     return this.urlRepository.manager.transaction(async (manager) => {
-      const { code, isProtected, accessCode, channelIds, ...restOfBody } = body;
-      const alias = code ?? this.shortCodeUtil.generate(6);
-      await this.validateCode(alias);
+      const {
+        alias,
+        isProtected,
+        accessCode,
+        channelIds,
+        originalUrl,
+        ...restOfBody
+      } = body;
+      const code = await this.generateAndValidateCode();
+      if (alias) await this.validateAlias(alias);
 
       const user = userInfo
         ? await this.userService.findUserById(userInfo.id)
@@ -111,12 +140,20 @@ export class UrlsService {
         });
       }
 
+      const metadata = await this.cache.getCache<UrlMetadata>(
+        CachePrefix.URL_METADATA,
+        originalUrl,
+      );
+
       const url = manager.create(Url, {
         ...restOfBody,
-        code: alias,
+        originalUrl,
+        alias,
+        code,
         isProtected,
         isAnonymous: user ? false : true,
         user,
+        metadata,
         accessCode: accessCodeHash,
         channels,
       });
@@ -130,20 +167,24 @@ export class UrlsService {
             where: { id },
             relations: ['channels'],
           });
-          void this.urlMetadataQueue.add(`url-metadata-${code}`, {
-            urlId: id,
-          });
+          if (!metadata) {
+            void this.urlMetadataQueue.add(`url-metadata-${code}`, {
+              urlId: id,
+            });
+          }
           return url;
         });
     });
   }
 
   async updateUrl(id: string, body: UpdateUrlBodyDto): Promise<UrlDto> {
-    const existingUrl = await this.findUrlByIdOrCode(id);
-    const { code, channelsIds, ...rest } = body;
-    if (code) await this.validateCode(code);
-    return await this.urlRepository.updateOne(existingUrl, {
-      code,
+    const existing = await this.findUrlByIdOrCode(id);
+    const { alias, channelsIds, isArchived, ...rest } = body;
+    if (alias) await this.validateAlias(alias);
+    return await this.urlRepository.updateOne(existing, {
+      alias,
+      archivedAt: isArchived ? new Date() : existing.archivedAt,
+      isArchived,
       ...rest,
     });
   }

@@ -9,7 +9,7 @@ import { zodToCamelCase } from 'src/common/utils/case-transform.util';
 export const baseAnalythicSchema = z.object({
   ip_address: z.string(),
   user_agent: z.string(),
-  referrer: z.string(),
+  referrer: z.string().nullable().optional(),
   country_code: z.string(),
   region: z.string(),
   city: z.string(),
