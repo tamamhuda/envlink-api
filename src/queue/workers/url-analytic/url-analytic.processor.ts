@@ -51,7 +51,7 @@ export class UrlAnalyticProcessor extends WorkerHost {
     identityHash: string,
     ipAddress: string,
     userAgent: string,
-    referrer: string,
+    referrer: string | undefined,
     url: Url,
     os: string,
     browser: string,

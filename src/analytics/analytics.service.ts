@@ -86,7 +86,6 @@ export class AnalyticsService {
     const urlLogsDto: UrlAnalyticLogDto[] = urlLogsPaginated.data.map((i) => ({
       ...i,
       countryCode: i.country,
-      urlId: i.url.id,
       channels: i.channels.map((channel) => channel.name),
     }));
 
@@ -143,7 +142,6 @@ export class AnalyticsService {
       return {
         ...i,
         countryCode: i.country,
-        urlId: i.url.id,
         channels: i.channels.map((channel) => channel.name),
       };
     });

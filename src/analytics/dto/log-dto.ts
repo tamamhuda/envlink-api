@@ -3,12 +3,13 @@ import { createPaginatedSchema } from 'src/common/dto/paginated.dto';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { baseSchema } from 'src/common/schemas/base.schema';
 import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { urlSchema } from 'src/urls/dto/url.dto';
 import z from 'zod';
 
 export const urlAnalyticLogSchema = baseSchema.extend({
   ip_address: z.string().ip().nullable(),
   user_agent: z.string().nullable(),
-  referrer: z.string().nullable(),
+  referrer: z.string().nullable().optional(),
   region: z.string().nullable(),
   city: z.string().nullable(),
   country_code: z.string().nullable(),
@@ -18,7 +19,7 @@ export const urlAnalyticLogSchema = baseSchema.extend({
   is_unique: z.boolean().nullable(),
   browser: z.string().nullable(),
   visitor_count: z.number().min(0),
-  url_id: z.string().uuid(),
+  url: urlSchema.omit({ channels: true }),
   channels: z.array(z.string()),
 });
 
