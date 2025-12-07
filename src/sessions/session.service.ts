@@ -68,14 +68,12 @@ export class SessionService {
     const authorizationToken = this.jwtUtil.extractAuthorizationHeader(req);
     const { isRevoked, expiresAt, refreshTokenHash } = session;
 
-    if (!refreshTokenHash) throw new UnauthorizedException('Invalid session');
-
-    if (isRevoked || !expiresAt)
-      throw new UnauthorizedException('Invalid session');
+    if (isRevoked || !expiresAt || !refreshTokenHash)
+      throw new UnauthorizedException('SESSION_INVALID');
 
     if (expiresAt && expiresAt < new Date()) {
       await this.updateSession(session, { isRevoked: true });
-      throw new UnauthorizedException('Session expired');
+      throw new UnauthorizedException('SESSION_EXPIRED');
     }
 
     const isTokenValid = await this.bcryptUtil.verifyToken(
@@ -83,7 +81,7 @@ export class SessionService {
       refreshTokenHash,
     );
 
-    if (!isTokenValid) throw new UnauthorizedException('Invalid session');
+    if (!isTokenValid) throw new UnauthorizedException('SESSION_INVALID');
   }
 
   async validateCurrentSession(
