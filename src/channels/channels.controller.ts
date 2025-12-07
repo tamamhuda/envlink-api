@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
+  ParseBoolPipe,
   Post,
   Put,
   Query,
@@ -14,6 +16,9 @@ import { ChannelsService } from './channels.service';
 import {
   AllChannelResponse,
   ChannelDto,
+  ChannelPaginatedDto,
+  ChannelPaginatedResponse,
+  ChannelPaginatedSerializedDto,
   ChannelResponse,
   ChannelSerializerDto,
 } from './dto/channel.dto';
@@ -30,6 +35,7 @@ import {
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
@@ -41,6 +47,7 @@ import {
   ChannelItemsPaginatedSerializerDto,
 } from './dto/items.dto';
 import { AddItemsBodyDto, AddItemsRequest } from './dto/add-items.dto';
+import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
 
 @Controller('channels')
 @ApiTags('Channels')
@@ -51,18 +58,29 @@ export class ChannelsController {
   @Get()
   @ApiOperation({
     operationId: 'getAll',
-    summary: 'Get all channels',
+    summary: 'Get paginated channels',
   })
   @ApiOkResponse({
-    type: AllChannelResponse,
-    description: 'Get all channels successfully',
+    type: ChannelPaginatedResponse,
+    description: 'Get paginated channels successfully',
+  })
+  @ApiPaginationQuery()
+  @ApiQuery({
+    name: 'starred',
+    type: Boolean,
+    description: 'Get starred channels',
+    required: false,
+    default: false,
   })
   @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto([ChannelSerializerDto])
+  @ZodSerializerDto(ChannelPaginatedSerializedDto)
   async getChannels(
     @AuthenticatedUser() user: UserInfo,
-  ): Promise<ChannelDto[]> {
-    return this.channelsService.getAll(user.id);
+    @Query() query: PaginatedQueryDto,
+    @Query('starred', new DefaultValuePipe(false), ParseBoolPipe)
+    starred: boolean,
+  ): Promise<ChannelPaginatedDto> {
+    return this.channelsService.getAllPaginated(user.id, query, starred);
   }
 
   @Get(':id')

@@ -7,7 +7,7 @@ import { Channel } from 'src/database/entities/channel.entity';
 import { ChannelRepository } from 'src/database/repositories/channel.repository';
 import { UserRepository } from 'src/database/repositories/user.repository';
 import { CreateChannelBodyDto } from './dto/create.dto';
-import { ChannelDto } from './dto/channel.dto';
+import { ChannelDto, ChannelPaginatedDto } from './dto/channel.dto';
 import { UpdateChannelBodyDto } from './dto/update.dto';
 import { PaginatedQuery } from 'src/common/dto/paginated.dto';
 import { UrlGeneratorService } from 'nestjs-url-generator';
@@ -27,8 +27,23 @@ export class ChannelsService {
     return channel;
   }
 
-  async getAll(userId: string): Promise<ChannelDto[]> {
-    return await this.channelRepository.findAll(userId);
+  async getAllPaginated(
+    userId: string,
+    query: PaginatedQuery,
+    starred: boolean = false,
+  ): Promise<ChannelPaginatedDto> {
+    const url = this.urlResolver.generateUrlFromPath({
+      relativePath: `/channels`,
+    });
+
+    return await this.channelRepository.findAllPaginated(
+      userId,
+      {
+        ...query,
+        url,
+      },
+      starred,
+    );
   }
 
   async create(
@@ -44,6 +59,7 @@ export class ChannelsService {
   }
 
   async update(userId: string, id: string, body: UpdateChannelBodyDto) {
+    console.log({ userId, id });
     const channel = await this.getById(userId, id);
     return await this.channelRepository.updateOne(body, channel);
   }
