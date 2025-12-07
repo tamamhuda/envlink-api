@@ -196,7 +196,7 @@ export class PaymentMethodsService {
   ): Promise<PaymentMethodDto[]> {
     return this.paymentMethodRepository.manager.transaction(async (manager) => {
       return await Promise.all(
-        body.map(async ({ paymentMethodId, rank }) => {
+        body.items.map(async ({ paymentMethodId, rank }) => {
           const paymentMethod = await this.getOneByUserAndId(
             userId,
             paymentMethodId,
