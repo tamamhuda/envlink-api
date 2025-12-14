@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -17,12 +18,9 @@ import LoggerService from 'src/common/logger/logger.service';
 import { ShortenUrlBodyDto, ShortenUrlRequest } from './dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
-  UpdateUrlBodyDto,
   UrlDto,
   UrlResponse,
-  AllUrlsResponse,
   UrlSerializerDto,
-  UpdateUrlRequest,
   UrlPaginatedResponse,
   UrlPaginatedSerializerDto,
   UrlPaginatedDto,
@@ -50,6 +48,16 @@ import { UserInfo } from 'src/auth/dto/user-info.dto';
 import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
 import { FilterQueryDto } from './dto/filter-query.dto';
 import { ApiUrlFilterQuery } from './decorators/api-filter-query.decorator';
+import {
+  BulkUpdateUrlsBodyDto,
+  BulkUpdateUrlsRequest,
+} from './dto/bulk-udate.dto';
+import { OkDto, OkResponse } from 'src/common/dto/response.dto';
+import {
+  BulkDeleteUrlsBodyDto,
+  BulkDeleteUrlsRequest,
+} from './dto/bulk-delete.dto';
+import { UpdateUrlBodyDto, UpdateUrlRequest } from './dto/update.dto';
 
 @ApiBearerAuth(JWT_SECURITY)
 @Controller('urls')
@@ -119,7 +127,51 @@ export class UrlsController {
   }
 
   @SkipThrottle()
-  @Put(':id')
+  @Patch('bulk')
+  @ApiBody({
+    type: BulkUpdateUrlsRequest,
+    description: 'Request body to update URLs',
+  })
+  @ApiOperation({
+    operationId: 'BulkUpdate',
+    summary: 'Update URLs',
+  })
+  @ApiOkResponse({
+    type: OkResponse,
+    description: 'Update URLs successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  async bulkUpdateUrls(
+    @AuthenticatedUser() user: UserInfo,
+    @Body() body: BulkUpdateUrlsBodyDto,
+  ): Promise<OkDto> {
+    return await this.urlsService.bulkUpdateUrls(user.id, body);
+  }
+
+  @SkipThrottle()
+  @Delete('bulk')
+  @ApiBody({
+    type: BulkDeleteUrlsRequest,
+    description: 'Request body to delete URLs',
+  })
+  @ApiOperation({
+    operationId: 'BulkDelete',
+    summary: 'Delete URLs',
+  })
+  @ApiOkResponse({
+    type: OkResponse,
+    description: 'Delete URLs successfully',
+  })
+  @HttpCode(HttpStatus.OK)
+  async bulkDeleteUrls(
+    @AuthenticatedUser() user: UserInfo,
+    @Body() body: BulkDeleteUrlsBodyDto,
+  ): Promise<OkDto> {
+    return await this.urlsService.bulkDeleteUrls(user.id, body);
+  }
+
+  @SkipThrottle()
+  @Patch(':id')
   @ApiBody({
     type: UpdateUrlRequest,
     description: 'Request body to update a URL',
@@ -130,7 +182,7 @@ export class UrlsController {
   })
   @ApiOkResponse({
     type: UrlResponse,
-    description: 'Update a URL',
+    description: 'Update a URL successfully',
   })
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(UrlSerializerDto)

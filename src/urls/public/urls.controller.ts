@@ -6,6 +6,9 @@ import {
   HttpStatus,
   Param,
   Post,
+  Req,
+  Res,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UrlsService } from '../urls.service';
@@ -19,14 +22,14 @@ import {
   PublicUrlDto,
   PublicUrlResponse,
   PublicUrlSerializerDto,
-  UnlockUrlBodyDto,
-  UnlockUrlRequest,
-} from '../dto/url.dto';
+} from '../dto/public-url.dto';
 import {
   ApiBody,
   ApiCreatedResponse,
+  ApiFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { UrlAnalyticInterceptor } from 'src/common/interceptors/url-analytic.interceptor';
@@ -34,10 +37,14 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
 import { PolicyScope } from 'src/common/throttle/throttle.constans';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import { Request, Response } from 'express';
+import { UrlAccessGuard } from '../guards/url-access.guard';
+import { UnlockUrlBodyDto, UnlockUrlRequest } from '../dto/unlock.dto';
+import { ConfirmUrlBodyDto, ConfirmUrlRequest } from '../dto/confirm.dto';
 
-@Public()
 @Controller('public/urls')
 @ApiTags('Public URLs')
+@Public()
 export class PublicUrlsController {
   constructor(
     private readonly urlsService: UrlsService,
@@ -48,7 +55,7 @@ export class PublicUrlsController {
   @ThrottleScope(PolicyScope.SHORTEN_PUBLIC)
   @ApiBody({ type: PublicShortenUrlRequest })
   @ApiOperation({
-    operationId: 'Shorten',
+    operationId: 'PublicShorten',
     summary: 'Shorten a URL for public access',
   })
   @ApiCreatedResponse({
@@ -63,42 +70,76 @@ export class PublicUrlsController {
   }
 
   @SkipThrottle()
-  @Get(':code')
+  @Get('/r/:slug')
+  @UseGuards(UrlAccessGuard)
   @UseInterceptors(UrlAnalyticInterceptor)
   @ApiOperation({
-    operationId: 'GetByCode',
-    summary: 'Get a short URL for public access',
+    operationId: 'GetRedirectUrl',
+    summary: 'Redirect to the original URL by code or alias',
+  })
+  @ApiParam({
+    name: 'slug',
+    description: 'Short code or custom alias',
+    example: 'envlink',
   })
   @ApiOkResponse({
     type: PublicUrlResponse,
     description: 'Get a short URL for a public access',
   })
-  @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto(PublicUrlSerializerDto)
-  async getUrl(@Param('code') code: string): Promise<PublicUrlDto> {
-    return await this.urlsService.getUrlByCode(code);
+  @ApiFoundResponse({
+    description: 'Redirect to the original URL successfully',
+  })
+  @HttpCode(HttpStatus.OK || HttpStatus.FOUND)
+  async getRedirectUrl(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('slug') slug: string,
+  ): Promise<void> {
+    return await this.urlsService.getUrlRedirect(req, res, slug);
   }
 
   @SkipThrottle()
-  @Post('unlock/:code')
+  @Post('/r/:slug/unlock')
+  @UseInterceptors(UrlAnalyticInterceptor)
   @ApiOperation({
-    operationId: 'Unlock',
-    summary: 'Unlock a short URL for public access',
+    operationId: 'UnlockRedirect',
+    summary: 'Unlock a short URL for public access redirect',
   })
   @ApiBody({
     type: UnlockUrlRequest,
     description: 'Request body for unlocking a short URL',
   })
-  @ApiOkResponse({
-    type: PublicUrlResponse,
-    description: 'Unlock a short URL for a public access',
-  })
+  @ApiFoundResponse()
   @HttpCode(HttpStatus.OK)
-  @ZodSerializerDto(PublicUrlSerializerDto)
   async unlockUrl(
-    @Param('code') code: string,
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('slug') slug: string,
     @Body() body: UnlockUrlBodyDto,
-  ): Promise<PublicUrlDto> {
-    return await this.urlsService.unlockUrlByCode(code, body);
+  ): Promise<void> {
+    req.eventType = 'CLICK';
+    return await this.urlsService.unlockUrlRedirect(req, res, slug, body);
+  }
+
+  @SkipThrottle()
+  @Post('/r/:slug/confirm')
+  @UseInterceptors(UrlAnalyticInterceptor)
+  @ApiOperation({
+    operationId: 'Confirm Redirect',
+    summary: 'Confirm a short URL for splash redirect',
+  })
+  @ApiBody({
+    type: ConfirmUrlRequest,
+    description: 'Request body for confirming a short URL',
+  })
+  @ApiFoundResponse()
+  @HttpCode(HttpStatus.OK)
+  async confirmRedirect(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('slug') slug: string,
+    @Body() body: ConfirmUrlBodyDto,
+  ): Promise<void> {
+    return await this.urlsService.confirmUrlRedirect(req, res, slug, body);
   }
 }

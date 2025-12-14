@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -6,16 +7,11 @@ import {
 } from '@nestjs/common';
 import { UrlRepository } from 'src/database/repositories/url.repository';
 import LoggerService from 'src/common/logger/logger.service';
-import { PublicShortenUrlBodyDto, ShortenUrlBodyDto } from './dto/shorten.dto';
-import {
-  UnlockUrlBodyDto,
-  UpdateUrlBodyDto,
-  UrlDto,
-  UrlPaginatedDto,
-} from './dto/url.dto';
+import { ShortenUrlBodyDto } from './dto/shorten.dto';
+import { UrlDto, UrlPaginatedDto } from './dto/url.dto';
 import { UserService } from 'src/user/user.service';
 import { Url } from 'src/database/entities/url.entity';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { ShortCodeUtil } from 'src/common/utils/short-code.util';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -33,6 +29,15 @@ import { UrlGeneratorService } from 'nestjs-url-generator';
 import { FilterQueryDto } from './dto/filter-query.dto';
 import { CacheService } from 'src/common/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
+import { BulkUpdateUrlsBodyDto } from './dto/bulk-udate.dto';
+import { OkDto } from 'src/common/dto/response.dto';
+import { BulkDeleteUrlsBodyDto } from './dto/bulk-delete.dto';
+import { RedirectType } from 'src/common/enums/redirect-type.enum';
+import { PublicUrlDto, publicUrlDtoSchema } from './dto/public-url.dto';
+import { UnlockUrlBodyDto } from './dto/unlock.dto';
+import { UpdateUrlBodyDto } from './dto/update.dto';
+import { ConfirmUrlBodyDto } from './dto/confirm.dto';
+import { RedirectTokenUtil } from 'src/common/utils/redirect-token.util';
 
 @Injectable()
 export class UrlsService {
@@ -46,6 +51,7 @@ export class UrlsService {
     private readonly urlMetadataQueue: Queue<UrlMetadataJob>,
     private readonly userService: UserService,
     private readonly cache: CacheService,
+    private readonly redirectTokenUtil: RedirectTokenUtil,
   ) {}
 
   async findUrlByIdOrCode(id?: string, code?: string): Promise<Url> {
@@ -91,6 +97,53 @@ export class UrlsService {
     if (url.expiresAt && url.expiresAt < new Date())
       throw new ForbiddenException('Access denied. This link has expired.');
     return url;
+  }
+
+  async getUrlRedirect(
+    req: Request,
+    res: Response<PublicUrlDto>,
+    _slug: string,
+  ): Promise<void> {
+    const url = req.urlEntity!;
+
+    // DIRECT or CRAWLER
+    if (req.isCrawler || url.redirectType === RedirectType.DIRECT) {
+      req.eventType = 'CLICK';
+      res.redirect(url.originalUrl);
+      return;
+    }
+
+    // SPLASH
+    req.eventType = 'IMPRESSION';
+    const publicUrlDto = publicUrlDtoSchema.parse(url);
+    res.status(200).json(publicUrlDto);
+    return;
+  }
+
+  async bulkUpdateUrls(
+    userId: string,
+    body: BulkUpdateUrlsBodyDto,
+  ): Promise<OkDto> {
+    const { itemIds, data } = body;
+    await this.urlRepository.updateMany(userId, itemIds, data);
+    return {
+      message: `Update ${itemIds.length} URLs successfully`,
+    };
+  }
+
+  async bulkDeleteUrls(
+    userId: string,
+    body: BulkDeleteUrlsBodyDto,
+  ): Promise<OkDto> {
+    const { itemIds } = body;
+    const { affected = null } = await this.urlRepository.deleteMany(
+      userId,
+      itemIds,
+    );
+    if (!affected) throw new NotFoundException('URLs not found');
+    return {
+      message: `Delete ${affected} URLs successfully`,
+    };
   }
 
   async validateAlias(alias: string): Promise<void> {
@@ -194,12 +247,41 @@ export class UrlsService {
     if (result.affected === 0) throw new NotFoundException('Url not found');
   }
 
-  async unlockUrlByCode(code: string, body: UnlockUrlBodyDto): Promise<UrlDto> {
-    const url = await this.findUrlByIdOrCode(code);
+  async unlockUrlRedirect(
+    req: Request,
+    res: Response,
+    slug: string,
+    body: UnlockUrlBodyDto,
+  ): Promise<void> {
+    const url = await this.urlRepository.findOneBySlug(slug);
+    if (!url) throw new NotFoundException('Url not found');
     const isValidate =
       url.accessCode &&
       (await this.bcryptUtil.verifyAccessCode(body.accessCode, url.accessCode));
-    if (!isValidate) throw new ConflictException('Invalid code');
-    return url;
+    if (!isValidate) throw new ConflictException('Invalid access code');
+
+    req.eventType = 'CLICK';
+    res.redirect(url.originalUrl);
+    return;
+  }
+
+  async confirmUrlRedirect(
+    req: Request,
+    res: Response,
+    slug: string,
+    body: ConfirmUrlBodyDto,
+  ): Promise<void> {
+    const { token } = body;
+    const result = this.redirectTokenUtil.verify(token);
+    if (!result || result.isExpired)
+      throw new ForbiddenException('INVALID_REDIRECT_TOKEN');
+
+    if (result.payload.slug !== slug) {
+      throw new ForbiddenException('TOKEN_SLUG_MISMATCH');
+    }
+
+    req.eventType = 'CLICK';
+    res.redirect(result.payload.redirectUrl);
+    return;
   }
 }
