@@ -51,8 +51,6 @@ export class AccountVerifyService {
       },
     });
 
-    console.log(clientUrl);
-
     if (clientUrl) {
       verifyLink = verifyLink.replace(this.BASE_URL, clientUrl);
     }

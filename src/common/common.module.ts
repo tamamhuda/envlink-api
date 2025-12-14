@@ -30,6 +30,7 @@ import { ClientUrlMiddleware } from './middlewares/client-url.middleware';
 import { SnakeCaseTransformInterceptor } from './interceptors/snake-case-transform.interceptor';
 import { GoogleClientUtil } from './utils/google-client.util';
 import { XenditInitializeService } from './xendit/xendit-initialize.service';
+import { RedirectTokenUtil } from './utils/redirect-token.util';
 
 @Global()
 @Module({
@@ -66,6 +67,7 @@ import { XenditInitializeService } from './xendit/xendit-initialize.service';
     XenditUtil,
     TokenUtil,
     GoogleClientUtil,
+    RedirectTokenUtil,
 
     XenditService,
     XenditInitializeService,
@@ -104,6 +106,7 @@ import { XenditInitializeService } from './xendit/xendit-initialize.service';
     XenditUtil,
     TokenUtil,
     GoogleClientUtil,
+    RedirectTokenUtil,
 
     XenditService,
     XenditInitializeService,

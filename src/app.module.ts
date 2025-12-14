@@ -1,6 +1,11 @@
 import { ZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
 import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AccountModule } from './account/account.module';
 import { SessionModule } from './sessions/session.module';
 import { AuthModule } from './auth/auth.module';
@@ -38,6 +43,7 @@ import { BillingAddressModule } from './billing-address/billing-address.module';
 import { OauthModule } from './oauth/oauth.module';
 import { RedisClientModule } from '@quazex/nestjs-ioredis';
 import { ChannelsModule } from './channels/channels.module';
+import { CrawlerDetection } from './urls/middlewares/crawler-detection.middleware';
 
 @Module({
   imports: [
@@ -157,5 +163,9 @@ import { ChannelsModule } from './channels/channels.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(ClientUrlMiddleware).forRoutes('*');
+    consumer.apply(CrawlerDetection).forRoutes({
+      path: '/public/urls/r/:code',
+      method: RequestMethod.ALL,
+    });
   }
 }
