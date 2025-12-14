@@ -7,7 +7,7 @@ import { zodToCamelCase } from 'src/common/utils/case-transform.util';
 import { createPaginatedSchema } from 'src/common/dto/paginated.dto';
 import { RedirectType } from '../../common/enums/redirect-type.enum';
 
-const metadataSchema = z
+export const metadataSchema = z
   .object({
     title: z.string().max(255).nullable().optional(),
     description: z.string().nullable().optional(),
@@ -16,12 +16,6 @@ const metadataSchema = z
     site_name: z.string().max(255).nullable().optional(),
   })
   .catchall(z.any());
-
-const updateMetadataDtoSchema = zodToCamelCase(
-  metadataSchema.partial().refine((data) => Object.keys(data).length > 0, {
-    message: 'At least one field is required',
-  }),
-);
 
 export const urlSchema = baseSchema.extend({
   code: z.string().max(64),
@@ -63,53 +57,6 @@ export const urlSchema = baseSchema.extend({
 });
 
 export const urlDtoSchema = zodToCamelCase(urlSchema);
-
-const publicUrlSchema = urlSchema.omit({
-  id: true,
-  access_code: true,
-  channels: true,
-});
-const publicUrlDtoSchema = zodToCamelCase(publicUrlSchema);
-
-const updateUrlSchema = urlSchema
-  .omit({
-    id: true,
-    created_at: true,
-    updated_at: true,
-    click_count: true,
-    channels: true,
-  })
-  .extend({
-    channels_ids: z.array(z.string().uuid()).optional(),
-  })
-  .partial()
-  .refine((data) => Object.keys(data).length > 0, {
-    message: 'At least one field is required',
-  });
-
-const updateUrlDtoSchema = zodToCamelCase(updateUrlSchema);
-
-const unlockUrlDtoSchema = zodToCamelCase(
-  z.object({
-    access_code: z.string().nonempty(),
-  }),
-);
-
-export class UnlockUrlBodyDto extends createZodDto(unlockUrlDtoSchema) {}
-
-export class UnlockUrlRequest extends UnlockUrlBodyDto {}
-
-export class PublicUrlDto extends createZodDto(publicUrlDtoSchema) {}
-
-export class PublicUrlSerializerDto extends createZodDto(publicUrlSchema) {}
-
-export class PublicUrlResponse extends createResponseDto(publicUrlSchema) {}
-
-export class UpdateUrlBodyDto extends createZodDto(updateUrlDtoSchema) {}
-
-export class UpdateUrlRequest extends createZodDto(updateUrlSchema) {}
-
-export class UpdateMetadataDto extends createZodDto(updateMetadataDtoSchema) {}
 
 export class UrlDto extends createZodDto(urlDtoSchema) {}
 
