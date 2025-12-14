@@ -3,7 +3,8 @@ import { zodToCamelCase } from 'src/common/utils/case-transform.util';
 import z from 'zod';
 
 export const addItemsSchema = z.object({
-  itemsIds: z.array(z.string().uuid()).min(1).max(100),
+  channels_ids: z.array(z.string()).min(1).max(100),
+  items_ids: z.array(z.string()).min(1).max(100),
 });
 
 export const addItemsDto = zodToCamelCase(addItemsSchema);

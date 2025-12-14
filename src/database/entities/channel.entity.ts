@@ -24,11 +24,18 @@ export class Channel extends BaseEntity {
   @ManyToOne(() => User, (user) => user.channels, { onDelete: 'CASCADE' })
   user!: User;
 
-  @ManyToMany(() => Url, {
-    cascade: ['insert', 'update', 'remove'],
-    onDelete: 'CASCADE',
+  @ManyToMany(() => Url, (url) => url.channels)
+  @JoinTable({
+    name: 'urls_channels_channels',
+    joinColumn: {
+      name: 'channelsId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'urlsId',
+      referencedColumnName: 'id',
+    },
   })
-  @JoinTable()
   urls!: Url[];
 
   @ManyToMany(() => Analytic, {

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { PaginatedQuery } from 'src/common/dto/paginated.dto';
 import { UrlGeneratorService } from 'nestjs-url-generator';
 import { ChannelItemsPaginatedDto } from './dto/items.dto';
 import { AddItemsBodyDto } from './dto/add-items.dto';
+import { OkDto } from 'src/common/dto/response.dto';
 
 @Injectable()
 export class ChannelsService {
@@ -85,10 +87,27 @@ export class ChannelsService {
     return await this.channelRepository.findAllItemsById(userId, id, options);
   }
 
-  async addItems(userId: string, id: string, body: AddItemsBodyDto) {
-    const { itemsIds } = body;
-    const channel = await this.getById(userId, id);
-    await this.channelRepository.addItems(channel, itemsIds);
-    return 'All items added successfully';
+  async addItems(userId: string, body: AddItemsBodyDto): Promise<OkDto> {
+    const { channelsIds, itemsIds } = body;
+    const channels = await this.channelRepository.findOwnedChannels(
+      userId,
+      body.channelsIds,
+    );
+
+    if (channels.length !== body.channelsIds.length) {
+      throw new ForbiddenException('Invalid channel ownership');
+    }
+
+    const items = await this.channelRepository.findOwnedItems(userId, itemsIds);
+
+    if (items.length !== itemsIds.length) {
+      throw new ForbiddenException('Invalid item ownership');
+    }
+
+    await this.channelRepository.attachItemsToChannels(channelsIds, itemsIds);
+
+    return {
+      message: `Added ${itemsIds.length} items to ${channelsIds.length} channels successfully`,
+    };
   }
 }

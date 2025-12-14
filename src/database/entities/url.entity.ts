@@ -144,11 +144,6 @@ export class Url extends BaseEntity {
   @JoinTable()
   analytics!: Analytic[];
 
-  @ManyToMany(() => Channel, {
-    cascade: ['insert', 'update', 'remove'],
-    nullable: true,
-    onDelete: 'SET NULL',
-  })
-  @JoinTable()
+  @ManyToMany(() => Channel, (channel) => channel.urls)
   channels!: Channel[];
 }

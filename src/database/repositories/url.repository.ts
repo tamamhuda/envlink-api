@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Url } from '../entities/url.entity';
-import { DataSource, FindOptionsWhere } from 'typeorm';
+import { DataSource, FindOptionsWhere, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { PaginatedOptions } from 'src/common/interfaces/paginated.interface';
 import { paginatedResult } from 'src/common/utils/paginate.util';
@@ -27,6 +27,14 @@ export class UrlRepository extends Repository<Url> {
   async createOne(data: Partial<Url>): Promise<Url> {
     const url = this.create(data);
     return await this.save(url);
+  }
+
+  async findOneBySlug(slug: string): Promise<Url | null> {
+    return this.createQueryBuilder('url')
+      .where('url.code = :slug OR url.alias = :slug', { slug })
+      .leftJoinAndSelect('url.user', 'user')
+      .leftJoinAndSelect('user.channels', 'channels')
+      .getOne();
   }
 
   async findOneByIdOrCode(id?: string, code?: string): Promise<Url | null> {
@@ -58,7 +66,6 @@ export class UrlRepository extends Repository<Url> {
     const { page = 1, limit = 10 } = options;
     const { archived, expired = false, privated, q } = filter;
 
-    console.log('privated : ', privated);
     const qb = this.createQueryBuilder('url')
       .leftJoinAndSelect('url.channels', 'channels')
       .where('url.userId = :userId', { userId })
@@ -116,5 +123,27 @@ export class UrlRepository extends Repository<Url> {
   async updateOne(url: Url, data: Partial<Url>): Promise<Url> {
     const merge = this.merge(url, data);
     return await this.save(merge);
+  }
+
+  async updateMany(
+    userId: string,
+    itemIds: string[],
+    data: Partial<Url>,
+  ): Promise<void> {
+    console.log('Updating many items with data:', data);
+    await this.update(
+      {
+        user: { id: userId },
+        id: In(itemIds),
+      },
+      data,
+    );
+  }
+
+  async deleteMany(userId: string, itemIds: string[]) {
+    return await this.delete({
+      user: { id: userId },
+      id: In(itemIds),
+    });
   }
 }

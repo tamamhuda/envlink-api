@@ -48,6 +48,7 @@ import {
 } from './dto/items.dto';
 import { AddItemsBodyDto, AddItemsRequest } from './dto/add-items.dto';
 import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
+import { OkDto, OkResponse } from 'src/common/dto/response.dto';
 
 @Controller('channels')
 @ApiTags('Channels')
@@ -120,26 +121,25 @@ export class ChannelsController {
     return this.channelsService.getAllItems(user.id, id, pagination);
   }
 
-  @Post(':id/items/add')
+  @Post('items/add')
   @ApiOperation({
     operationId: 'addItems',
     summary: 'Add items to a channel',
   })
   @ApiBody({
     type: AddItemsRequest,
-    description: 'Request body for adding items to a channel',
+    description: 'Request body for adding items to a channels',
   })
   @ApiOkResponse({
-    type: String,
-    description: 'Add items to a channel successfully',
+    type: OkResponse,
+    description: 'Add items to a channels successfully',
   })
   @HttpCode(HttpStatus.OK)
   async addItems(
     @AuthenticatedUser() user: UserInfo,
-    @Param('id') id: string,
     @Body() body: AddItemsBodyDto,
-  ): Promise<string> {
-    return this.channelsService.addItems(user.id, id, body);
+  ): Promise<OkDto> {
+    return this.channelsService.addItems(user.id, body);
   }
 
   @Post()
