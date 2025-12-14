@@ -7,13 +7,12 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { PaginatedQueryDto } from 'src/common/dto/paginated.dto';
 
 export enum TimelineInterval {
   HOUR = 'hour',
   DAY = 'day',
   WEEK = 'week',
+  MONTH = 'month',
 }
 
 export class FromToDateQuery {
@@ -33,5 +32,7 @@ export class TimelineQueryDto extends FromToDateQuery {
   @IsEnum(TimelineInterval)
   interval?: TimelineInterval;
 }
+
+export class TimelineQuery extends TimelineQueryDto {}
 
 export class UrlLogsQueryDto extends FromToDateQuery {}

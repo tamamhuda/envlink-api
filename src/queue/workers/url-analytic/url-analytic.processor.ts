@@ -13,6 +13,7 @@ import ms from 'ms';
 import { Url } from 'src/database/entities/url.entity';
 import { Channel } from 'src/database/entities/channel.entity';
 import { ClientIdentityUtil } from 'src/common/utils/client-identity.util';
+import { Analytic } from 'src/database/entities/analytic.entity';
 
 @Processor(URL_ANALYTIC_QUEUE, { concurrency: 10 })
 export class UrlAnalyticProcessor extends WorkerHost {
@@ -27,7 +28,7 @@ export class UrlAnalyticProcessor extends WorkerHost {
     super();
   }
 
-  private async cacheAnalytic(identityHash: string, analytic: AnalyticDto) {
+  private async cacheAnalytic(identityHash: string, analytic: Analytic) {
     await this.cache.set(
       CachePrefix.URL_ANALYTICS,
       `visitor:${identityHash}`,
@@ -37,7 +38,7 @@ export class UrlAnalyticProcessor extends WorkerHost {
   }
 
   private async getCachedAnalytic(identityHash: string) {
-    return this.cache.getCache<AnalyticDto>(
+    return this.cache.getCache<Analytic>(
       CachePrefix.URL_ANALYTICS,
       `visitor:${identityHash}`,
     );
@@ -58,11 +59,15 @@ export class UrlAnalyticProcessor extends WorkerHost {
     deviceType: string,
     isUnique: boolean,
     channels: Channel[] = [],
-  ): Promise<AnalyticDto> {
-    const { city, region, countryCode, language } =
-      await this.ipUtil.getIpLocation(ipAddress);
+  ): Promise<Analytic> {
+    const {
+      city,
+      region,
+      countryCode: country,
+      language,
+    } = await this.ipUtil.getIpLocation(ipAddress);
 
-    const dto: CreateAnalyticDto = {
+    const dto: Partial<Analytic> = {
       identityHash,
       ipAddress,
       userAgent,
@@ -72,19 +77,26 @@ export class UrlAnalyticProcessor extends WorkerHost {
       browser,
       city,
       region,
-      countryCode,
+      country,
       language,
       isUnique,
     };
 
-    return await this.analyticsService.recordVisit(dto, url, channels);
+    const analytic = await this.analyticsService.recordVisit(
+      dto,
+      url,
+      channels,
+    );
+    await this.analyticsService.incrementVisitorCount(analytic);
+
+    return analytic;
   }
 
   /** ────────────────────────────────
    *  Main Processor
    *  ────────────────────────────────
    */
-  async process(job: Job<UrlAnalyticJob>): Promise<AnalyticDto> {
+  async process(job: Job<UrlAnalyticJob>): Promise<Analytic> {
     const { ipAddress, userAgent, referrer, urlCode } = job.data;
 
     try {
@@ -140,14 +152,13 @@ export class UrlAnalyticProcessor extends WorkerHost {
             url.channels,
           ).then(async (record) => {
             await this.cacheAnalytic(visitHash, record);
+
             return record;
           });
         }
+
         await this.analyticsService.incrementVisitorCount(existing);
-        return {
-          ...existing,
-          countryCode: existing.country,
-        };
+        return existing;
       }
 
       // Within TTL and same hash → no new record

@@ -10,7 +10,11 @@ import {
 } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { Request } from 'express';
-import { TimelineQueryDto, UrlLogsQueryDto } from './dto/query.dto';
+import {
+  TimelineQuery,
+  TimelineQueryDto,
+  UrlLogsQueryDto,
+} from './dto/query.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
   UrlAnalyticLogPaginatedDto,
@@ -26,6 +30,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
 import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
@@ -51,10 +56,13 @@ import {
   UrlAnalyticsSegmentsSerializedDto,
 } from './dto/segments.dto';
 import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
+import { ApiTimelineQuery } from './decorators/api-query.decorator';
+import { JWT_SECURITY } from 'src/config/jwt.config';
 
 @Controller('analytics/urls')
 @SkipThrottle()
 @ApiTags('Analytics')
+@ApiSecurity(JWT_SECURITY)
 export class AnalyticsController {
   constructor(private readonly service: AnalyticsService) {}
 
@@ -122,6 +130,7 @@ export class AnalyticsController {
     operationId: 'getAllUrlTimeline',
     summary: 'Get all timeline of urls',
   })
+  @ApiTimelineQuery()
   @ApiOkResponse({
     type: UrlAnalyticTimelineResponse,
     description: 'Get all timeline of urls successfully',
@@ -180,6 +189,7 @@ export class AnalyticsController {
     operationId: 'getUrlTimelineById',
     summary: 'Get url timeline by id',
   })
+  @ApiTimelineQuery()
   @ApiOkResponse({
     type: UrlAnalyticTimelineResponse,
     description: 'Get url timeline by id successfully',

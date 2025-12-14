@@ -14,10 +14,10 @@ export class UrlAnalyticService {
   ) {}
 
   async recordVisit(
-    data: CreateAnalyticDto,
+    data: Partial<Analytic>,
     url: Url,
     channels: Channel[] = [],
-  ): Promise<AnalyticDto> {
+  ): Promise<Analytic> {
     return this.analyticRepository.manager.transaction(async (manager) => {
       const analytic = manager.create(Analytic, {
         ...data,
@@ -29,17 +29,16 @@ export class UrlAnalyticService {
         clickCount: url.clickCount + 1,
       });
 
-      const { country: countryCode, ...rest } = await manager.save(analytic);
-      return {
-        ...rest,
-        countryCode,
-      };
+      return await manager.save(analytic);
     });
   }
 
   async incrementVisitorCount(analytic: Analytic): Promise<void> {
     await this.analyticRepository.manager.transaction(async (manager) => {
-      const { visitorCount, url } = analytic;
+      const { visitorCount, url, isUnique } = analytic;
+
+      this.logger.log(`Visitor count: ${visitorCount}`);
+      this.logger.log(`Is unique: ${isUnique}`);
 
       await manager.update(Analytic, analytic.id, {
         visitorCount: visitorCount + 1,
@@ -47,9 +46,7 @@ export class UrlAnalyticService {
 
       await manager.update(Url, analytic.url.id, {
         clickCount: url.clickCount + 1,
-        uniqueClicks: analytic.isUnique
-          ? url.uniqueClicks + 1
-          : url.uniqueClicks,
+        uniqueClicks: isUnique ? url.uniqueClicks + 1 : url.uniqueClicks,
       });
     });
   }

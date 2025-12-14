@@ -23,31 +23,41 @@ export class UrlAnalyticInterceptor<T extends UrlDto>
     private readonly urlAnalyticQueue: Queue<UrlAnalyticJob>,
   ) {}
 
+  private normalizedReferrer(request: Request): string | undefined {
+    let referrer = request.headers['referer'];
+    if (referrer && ['http', 'https'].includes(referrer.split(':')[0])) {
+      referrer = new URL(referrer).hostname;
+    }
+    return referrer;
+  }
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<T> {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
-    const ipAddress = this.ipUtil.getClientIp(request);
+    const eventType = request.eventType;
+    const isCrawler = request.isCrawler;
+    const urlCode = request.params.code;
+    const userAgent = request.headers['user-agent'];
+
+    if (isCrawler || !eventType || !urlCode || !userAgent) {
+      return next.handle();
+    }
 
     return next.handle().pipe(
-      tap(({ code: urlCode }: T) => {
-        const userAgent = request.headers['user-agent'];
-        if (userAgent) {
-          let referrer = request.headers['referer'];
-          if (referrer && ['http', 'https'].includes(referrer.split(':')[0])) {
-            referrer = new URL(referrer).hostname;
-          }
-
-          const urlAnalyticJob: UrlAnalyticJob = {
-            ipAddress,
-            userAgent,
-            referrer,
-            urlCode,
-          };
-          void this.urlAnalyticQueue.add(
-            `url-analytic-${urlCode}`,
-            urlAnalyticJob,
-          );
-        }
+      tap(() => {
+        const referrer = this.normalizedReferrer(request);
+        const ipAddress = this.ipUtil.getClientIp(request);
+        const urlAnalyticJob: UrlAnalyticJob = {
+          eventType,
+          ipAddress,
+          userAgent,
+          referrer,
+          urlCode,
+        };
+        void this.urlAnalyticQueue.add(
+          `url-analytic-${urlCode}`,
+          urlAnalyticJob,
+        );
       }),
     );
   }
