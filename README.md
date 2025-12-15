@@ -19,64 +19,89 @@ A fast and reliable URL shortening service built with NestJS, enabling easy link
 ## Project Structure
 
 <pre>
-<img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" />envlink-api
-├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> docs
-├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> requests
-│   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> tests
-├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> src
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> account
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> dto
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> auth
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> dto
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> guards
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> strategies
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> common
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> cache
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> decorators
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> dto
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> enums
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> filters
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> interceptors
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> interfaces
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> logger
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> middlewares
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> schemas
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> throttle
-│   │   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> decorators
-│   │   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> guards
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> utils
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> xendit
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> config
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> database
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> entities
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> repositories
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> seeders
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> health
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> payment-methods
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> dto
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> mapper
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> public
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> queue
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> interfaces
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> workers
-│   │       ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> mail
-│   │       ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> url-analytic
-│   │       └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> url-metadata
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> session
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> dto
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> subscriptions
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> dto
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> transactions
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> dto
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> urls
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> dto
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> public
-│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> user
-│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> dto
-│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> mapper
-│   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> webhooks
-├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> types
-└── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; padding: 2px 5px 2px 0;" /> views
+<img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> envlink-api
+├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> .zed
+├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> docs
+├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> requests
+│   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> tests
+├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> src
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> account
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> analytics
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> decorators
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> auth
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> guards
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> strategies
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> billing-address
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> channels
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> common
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> cache
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> decorators
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> enums
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> filters
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> interceptors
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> interfaces
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> logger
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> middlewares
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> schemas
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> throttle
+│   │   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> decorators
+│   │   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> guards
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> utils
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> xendit
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> config
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> database
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> entities
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> repositories
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> seeders
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> utils
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> health
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> oauth
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> guards
+│   │   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> google-auth
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> strategies
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> payment-methods
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> mapper
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> public
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> queue
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> interfaces
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> workers
+│   │       ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> mail
+│   │       ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> url-analytic
+│   │       └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> url-metadata
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> sessions
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> subscriptions
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> cycles
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> plans
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> public
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> transactions
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> urls
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> decorators
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> guards
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> middlewares
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> public
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> user
+│   │   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+│   │   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> mapper
+│   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> webhooks
+│       └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> dto
+├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> test
+├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> types
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> express
+│   ├── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> ip2location-io-nodejs
+│   └── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> zeptomail
+└── <img src="https://cdn-icons-png.flaticon.com/512/14090/14090367.png" alt="Folder" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; padding: 2px 0;" /> views
 </pre>
 
 ## 🔐 Key Modules & Features
@@ -90,7 +115,7 @@ A fast and reliable URL shortening service built with NestJS, enabling easy link
 ### 👤 Users
 
 - Profile management
-- Avatar uploads (S3-ready)
+- Avatar uploads (R2-ready)
 - Email verification via ZeptoMail templates
 
 ### 🔗 URLs
@@ -181,7 +206,7 @@ EnvLink API gratefully acknowledges the following third-party platforms and serv
 - **[Logtail](https://betterstack.com/logtail)** – Structured logging and observability
 - **[Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/)** – Secure local-to-public tunneling for development
 - **[Xendit](https://xendit.co/)** – Payment gateway and recurring billing integration
-- **[AWS S3](https://aws.amazon.com/s3/)** – Object storage for file and asset management
+- **[Cloudflare R2](https://developers.cloudflare.com/r2/)** – Object storage for file and asset management
 
 ---
 
