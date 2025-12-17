@@ -73,6 +73,13 @@ export class ChannelsController {
     required: false,
     default: false,
   })
+  @ApiQuery({
+    name: 'q',
+    type: String,
+    description: 'Search query',
+    required: false,
+    default: '',
+  })
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(ChannelPaginatedSerializedDto)
   async getChannels(
@@ -80,8 +87,13 @@ export class ChannelsController {
     @Query() query: PaginatedQueryDto,
     @Query('starred', new DefaultValuePipe(false), ParseBoolPipe)
     starred: boolean,
+    @Query('q', new DefaultValuePipe(undefined))
+    q?: string,
   ): Promise<ChannelPaginatedDto> {
-    return this.channelsService.getAllPaginated(user.id, query, starred);
+    return this.channelsService.getAllPaginated(user.id, query, {
+      starred,
+      q,
+    });
   }
 
   @Get(':id')

@@ -39,6 +39,11 @@ export class ChannelRepository extends Repository<Channel> {
       .findOneBy({ id: userId });
     if (!user) return [null, 'User not found'];
 
+    const exist = await this.findOne({
+      where: { user: { id: user.id }, name: data.name },
+    });
+    if (exist) return [null, `You Already Have "${data.name}" Channel`];
+
     const channel = this.create({ ...data, user });
     const savedChannel = await this.save(channel);
     return [savedChannel, null];
@@ -52,13 +57,16 @@ export class ChannelRepository extends Repository<Channel> {
   async deleteOne(channel: Channel) {
     await this.remove(channel);
   }
-
   async findAllPaginated(
     userId: string,
     options: PaginatedOptions,
-    isStarred: boolean = false,
+    filter: {
+      q?: string;
+      starred?: boolean;
+    },
   ): Promise<PaginatedResult<Channel>> {
     const { page = 1, limit = 10 } = options;
+    const { q, starred: isStarred } = filter;
 
     const qb = this.createQueryBuilder('channel')
       .leftJoinAndSelect('channel.user', 'user')
@@ -66,14 +74,20 @@ export class ChannelRepository extends Repository<Channel> {
       .skip((page - 1) * limit)
       .take(limit)
       .orderBy('channel.createdAt', 'DESC');
-
     if (isStarred) {
       qb.andWhere('channel.isStarred = :isStarred', { isStarred });
+    }
+
+    if (q) {
+      qb.andWhere('channel.name ILIKE :q', {
+        q: `%${q}%`,
+      });
     }
 
     const [rows, totalItems] = await qb.getManyAndCount();
     return paginatedResult(rows, totalItems, options);
   }
+
   async findAllItemsById(
     userId: string,
     channelId: string,

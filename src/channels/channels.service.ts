@@ -32,7 +32,10 @@ export class ChannelsService {
   async getAllPaginated(
     userId: string,
     query: PaginatedQuery,
-    starred: boolean = false,
+    filter: {
+      q?: string;
+      starred: boolean;
+    },
   ): Promise<ChannelPaginatedDto> {
     const url = this.urlResolver.generateUrlFromPath({
       relativePath: `/channels`,
@@ -44,7 +47,7 @@ export class ChannelsService {
         ...query,
         url,
       },
-      starred,
+      filter,
     );
   }
 

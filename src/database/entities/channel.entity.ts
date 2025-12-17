@@ -1,10 +1,18 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  Unique,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Url } from './url.entity';
 import { Analytic } from './analytic.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'channels' })
+@Unique('uq_channels_user_name', ['user', 'name'])
 export class Channel extends BaseEntity {
   @Column({ type: 'varchar', length: 64 })
   name!: string;
