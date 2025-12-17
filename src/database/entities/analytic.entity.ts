@@ -9,6 +9,7 @@ import {
 import { BaseEntity } from './base.entity';
 import { Url } from './url.entity';
 import { Channel } from './channel.entity';
+import { AnalyticType } from 'src/common/enums/analytic-type.enum';
 
 @Entity({ name: 'analytics' })
 @Index(['url', 'identityHash'], { unique: true })
@@ -73,6 +74,13 @@ export class Analytic extends BaseEntity {
   language!: string;
 
   @Column({
+    type: 'enum',
+    enum: AnalyticType,
+    default: AnalyticType.CLICK,
+  })
+  type!: AnalyticType;
+
+  @Column({
     type: 'boolean',
     default: false,
   })
@@ -97,12 +105,6 @@ export class Analytic extends BaseEntity {
     nullable: false,
   })
   browser!: string;
-
-  @Column({
-    type: 'integer',
-    default: 1,
-  })
-  visitorCount!: number;
 
   @ManyToOne(() => Url, (url) => url.id, {
     onDelete: 'CASCADE',

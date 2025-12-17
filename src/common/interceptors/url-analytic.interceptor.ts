@@ -34,30 +34,31 @@ export class UrlAnalyticInterceptor<T extends UrlDto>
   intercept(context: ExecutionContext, next: CallHandler): Observable<T> {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
-    const eventType = request.eventType;
-    const isCrawler = request.isCrawler;
-    const urlCode = request.params.code;
+    const slug = request.params.slug;
     const userAgent = request.headers['user-agent'];
 
-    if (isCrawler || !eventType || !urlCode || !userAgent) {
+    if (!slug || !userAgent) {
       return next.handle();
     }
 
     return next.handle().pipe(
       tap(() => {
+        const type = request.eventType;
+        const isCrawler = request.isCrawler;
+
+        if (!type || isCrawler) return;
         const referrer = this.normalizedReferrer(request);
+
         const ipAddress = this.ipUtil.getClientIp(request);
         const urlAnalyticJob: UrlAnalyticJob = {
-          eventType,
+          type,
           ipAddress,
           userAgent,
           referrer,
-          urlCode,
+          slug,
         };
-        void this.urlAnalyticQueue.add(
-          `url-analytic-${urlCode}`,
-          urlAnalyticJob,
-        );
+        console.log(urlAnalyticJob);
+        void this.urlAnalyticQueue.add(`url-analytic-${slug}`, urlAnalyticJob);
       }),
     );
   }

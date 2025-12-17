@@ -1,7 +1,9 @@
+import { AnalyticType } from 'src/common/enums/analytic-type.enum';
+
 export interface UrlAnalyticJob {
-  eventType: 'CLICK' | 'IMPRESSION';
+  type: AnalyticType;
   ipAddress: string;
   userAgent: string;
   referrer?: string;
-  urlCode: string;
+  slug: string;
 }

@@ -1,7 +1,7 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { URL_ANALYTIC_QUEUE } from 'src/queue/queue.constans';
-import { AnalyticDto, CreateAnalyticDto } from 'src/urls/dto/analytic.dto';
+import { AnalyticDto } from 'src/urls/dto/analytic.dto';
 import { UrlAnalyticService } from './url-analytic.service';
 import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic.interface';
 import { UrlsService } from 'src/urls/urls.service';
@@ -14,6 +14,7 @@ import { Url } from 'src/database/entities/url.entity';
 import { Channel } from 'src/database/entities/channel.entity';
 import { ClientIdentityUtil } from 'src/common/utils/client-identity.util';
 import { Analytic } from 'src/database/entities/analytic.entity';
+import { AnalyticType } from 'src/common/enums/analytic-type.enum';
 
 @Processor(URL_ANALYTIC_QUEUE, { concurrency: 10 })
 export class UrlAnalyticProcessor extends WorkerHost {
@@ -59,6 +60,7 @@ export class UrlAnalyticProcessor extends WorkerHost {
     deviceType: string,
     isUnique: boolean,
     channels: Channel[] = [],
+    type: AnalyticType,
   ): Promise<Analytic> {
     const {
       city,
@@ -80,6 +82,7 @@ export class UrlAnalyticProcessor extends WorkerHost {
       country,
       language,
       isUnique,
+      type,
     };
 
     const analytic = await this.analyticsService.recordVisit(
@@ -97,12 +100,13 @@ export class UrlAnalyticProcessor extends WorkerHost {
    *  ────────────────────────────────
    */
   async process(job: Job<UrlAnalyticJob>): Promise<Analytic> {
-    const { ipAddress, userAgent, referrer, urlCode } = job.data;
+    const { ipAddress, userAgent, referrer, slug, type } = job.data;
 
     try {
-      const url = await this.urlService.findUrlByIdOrCode(undefined, urlCode);
+      const url = await this.urlService.getUrlBySlug(slug);
       const { browser, os, deviceType } =
         this.clientIdentityUtil.parseUserAgent(userAgent);
+
       const { identityHash, visitHash } =
         this.clientIdentityUtil.generateHashes(url.code, ipAddress, {
           os,
@@ -110,14 +114,11 @@ export class UrlAnalyticProcessor extends WorkerHost {
           deviceType,
         });
 
-      // Get cached analytic (24h)
-      const cached = await this.getCachedAnalytic(visitHash);
-
-      // Case First-time visit
-      const existing =
+      // 1. Check unique visitor
+      const existingIdentity =
         await this.analyticsService.findAnalyticByIdentityHash(identityHash);
 
-      if (!existing) {
+      if (!existingIdentity && type === AnalyticType.CLICK) {
         return await this.createAnalyticRecord(
           identityHash,
           ipAddress,
@@ -129,39 +130,33 @@ export class UrlAnalyticProcessor extends WorkerHost {
           deviceType,
           true, // isUnique
           url.channels,
+          type,
         );
       }
 
-      // Case Revisit after identity  — same visitor, TTL expired
+      // 2. Revisit logic (TTL-based, always new record)
+      const cached = await this.getCachedAnalytic(visitHash);
+
       if (!cached) {
-        const existing =
-          await this.analyticsService.findAnalyticByIdentityHash(visitHash);
+        const record = await this.createAnalyticRecord(
+          visitHash,
+          ipAddress,
+          userAgent,
+          referrer,
+          url,
+          os,
+          browser,
+          deviceType,
+          false, // non-unique visit
+          url.channels,
+          type,
+        );
 
-        // if visit Hash not exist create new record visit
-        if (!existing) {
-          return await this.createAnalyticRecord(
-            visitHash, // new hash for this session
-            ipAddress,
-            userAgent,
-            referrer,
-            url,
-            os,
-            browser,
-            deviceType,
-            false, // non-unique
-            url.channels,
-          ).then(async (record) => {
-            await this.cacheAnalytic(visitHash, record);
-
-            return record;
-          });
-        }
-
-        await this.analyticsService.incrementVisitorCount(existing);
-        return existing;
+        await this.cacheAnalytic(visitHash, record);
+        return record;
       }
 
-      // Within TTL and same hash → no new record
+      // 3. Same session within TTL → no new record
       return cached;
     } catch (error) {
       throw new Error(error);

@@ -89,8 +89,6 @@ export class AnalyticsService {
       channels: i.channels.map((channel) => channel.name),
     }));
 
-    console.log(JSON.stringify(urlLogsDto, null, 2));
-
     return {
       ...urlLogsPaginated,
       data: urlLogsDto,

@@ -9,20 +9,48 @@ export const visitSchema = z.object({
 });
 
 export const segmentsSchema = z.object({
-  device_visits: z.record(z.string(), visitSchema).nullable(),
-  os_visits: z.record(z.string(), visitSchema).nullable(),
-  browser_visits: z.record(z.string(), visitSchema).nullable().default({}),
+  device_visits: z
+    .array(
+      visitSchema.extend({
+        device: z.string(),
+      }),
+    )
+    .default([]),
+  os_visits: z
+    .array(
+      visitSchema.extend({
+        os: z.string(),
+      }),
+    )
+    .default([]),
+  browser_visits: z
+    .array(
+      visitSchema.extend({
+        browser: z.string(),
+      }),
+    )
+    .default([]),
   country_visits: z
     .array(
       visitSchema.extend({
         country_code: z.string(),
       }),
     )
-    .nullable()
     .default([]),
-  referrer_visits: z.record(z.string(), visitSchema).default({}),
+  referrer_visits: z
+    .array(
+      visitSchema.extend({
+        referrer: z.string(),
+      }),
+    )
+    .default([]),
   region_visits: z
-    .array(visitSchema.extend({ region: z.string() }))
+    .array(
+      visitSchema.extend({
+        region: z.string(),
+        country_code: z.string(),
+      }),
+    )
     .default([]),
   city_visits: z
     .array(visitSchema.extend({ city: z.string(), country_code: z.string() }))

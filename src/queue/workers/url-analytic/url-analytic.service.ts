@@ -35,19 +35,18 @@ export class UrlAnalyticService {
 
   async incrementVisitorCount(analytic: Analytic): Promise<void> {
     await this.analyticRepository.manager.transaction(async (manager) => {
-      const { visitorCount, url, isUnique } = analytic;
+      const { url, isUnique, type } = analytic;
 
-      this.logger.log(`Visitor count: ${visitorCount}`);
-      this.logger.log(`Is unique: ${isUnique}`);
-
-      await manager.update(Analytic, analytic.id, {
-        visitorCount: visitorCount + 1,
-      });
-
-      await manager.update(Url, analytic.url.id, {
-        clickCount: url.clickCount + 1,
-        uniqueClicks: isUnique ? url.uniqueClicks + 1 : url.uniqueClicks,
-      });
+      if (type === 'CLICK') {
+        await manager.update(Url, url.id, {
+          clickCount: url.clickCount + 1,
+          uniqueClicks: isUnique ? url.uniqueClicks + 1 : url.uniqueClicks,
+        });
+      } else if (type === 'IMPRESSION') {
+        await manager.update(Url, url.id, {
+          impressionCount: url.impressionCount + 1,
+        });
+      }
     });
   }
 

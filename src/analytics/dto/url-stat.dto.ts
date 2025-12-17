@@ -12,6 +12,7 @@ export const urlAnalyticStatSchema = z
     url: urlSchema.pick({
       id: true,
       code: true,
+      alias: true,
       original_url: true,
       channels: true,
       metadata: true,

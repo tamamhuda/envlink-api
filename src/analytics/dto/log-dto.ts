@@ -7,8 +7,6 @@ import { urlSchema } from 'src/urls/dto/url.dto';
 import z from 'zod';
 
 export const urlAnalyticLogSchema = baseSchema.extend({
-  ip_address: z.string().ip().nullable(),
-  user_agent: z.string().nullable(),
   referrer: z.string().nullable().optional(),
   region: z.string().nullable(),
   city: z.string().nullable(),
@@ -18,7 +16,6 @@ export const urlAnalyticLogSchema = baseSchema.extend({
   language: z.string().nullable(),
   is_unique: z.boolean().nullable(),
   browser: z.string().nullable(),
-  visitor_count: z.number().min(0),
   url: urlSchema.omit({ channels: true }),
   channels: z.array(z.string()),
 });

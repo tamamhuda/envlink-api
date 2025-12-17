@@ -1,45 +1,53 @@
 type CountryVisit = { countryCode: string; total: number; unique: number };
-type RegionVisit = { region: string; total: number; unique: number };
+type RegionVisit = {
+  region: string;
+  total: number;
+  unique: number;
+  countryCode: string;
+};
 type CityVisit = {
   city: string;
   countryCode: string;
   total: number;
   unique: number;
 };
-export type VisitCount = { total: number; unique: number };
+type DeviceVisit = { device: string; total: number; unique: number };
+type OsVisit = { os: string; total: number; unique: number };
+type BrowserVisit = { browser: string; total: number; unique: number };
+type ReferrerVisit = { referrer: string; total: number; unique: number };
 
 export type Segments = {
-  deviceVisits: Record<string, VisitCount>;
-  osVisits: Record<string, VisitCount>;
-  browserVisits: Record<string, VisitCount>;
+  deviceVisits: DeviceVisit[];
+  osVisits: OsVisit[];
+  browserVisits: BrowserVisit[];
   countryVisits: CountryVisit[];
   regionVisits: RegionVisit[];
   cityVisits: CityVisit[];
-  referrerVisits: Record<string, VisitCount>;
+  referrerVisits: ReferrerVisit[];
 };
 
 export class AnalyticUtil {
   static initSegments(): Segments {
     return {
-      deviceVisits: {},
-      osVisits: {},
-      browserVisits: {},
+      deviceVisits: [],
+      osVisits: [],
+      browserVisits: [],
       countryVisits: [],
       regionVisits: [],
       cityVisits: [],
-      referrerVisits: {},
+      referrerVisits: [],
     };
   }
 
   static mergeRow(bucket: Segments, r: any) {
-    mergeCount(bucket.deviceVisits, r.device, r);
-    mergeCount(bucket.osVisits, r.os, r);
-    mergeCount(bucket.browserVisits, r.browser, r);
-    mergeCount(bucket.referrerVisits, r.referrer, r);
+    mergeArray(bucket.deviceVisits, 'device', r);
+    mergeArray(bucket.osVisits, 'os', r);
+    mergeArray(bucket.browserVisits, 'browser', r);
+    mergeArray(bucket.referrerVisits, 'referrer', r);
 
     mergeArray(bucket.countryVisits, 'countryCode', r);
-    mergeArray(bucket.regionVisits, 'region', r);
-    mergeArray(bucket.cityVisits, 'city', r, ['countryCode']);
+    mergeArray(bucket.regionVisits, 'region', r, ['countryCode']);
+    mergeArray(bucket.cityVisits, 'city', r, ['countryCode', 'region']);
   }
 
   static reduceRows(rows: any[]): Segments {
@@ -50,23 +58,15 @@ export class AnalyticUtil {
 
   static reduceByUrl(rows: any[]): Record<string, Segments> {
     const map: Record<string, Segments> = {};
-
     for (const r of rows) {
       if (!map[r.urlId]) map[r.urlId] = this.initSegments();
       this.mergeRow(map[r.urlId], r);
     }
-
     return map;
   }
 }
 
 /** helpers */
-
-function mergeCount(bucket: Record<string, VisitCount>, key: string, r: any) {
-  if (!bucket[key]) bucket[key] = { total: 0, unique: 0 };
-  bucket[key].total += r.total;
-  bucket[key].unique += r.unique;
-}
 
 function mergeArray(
   bucket: any[],
@@ -75,7 +75,6 @@ function mergeArray(
   extraFields: string[] = [],
 ) {
   const match = bucket.find((x) => x[field] === r[field]);
-
   if (match) {
     match.total += r.total;
     match.unique += r.unique;
