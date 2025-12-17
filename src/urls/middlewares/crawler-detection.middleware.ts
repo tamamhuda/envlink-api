@@ -1,14 +1,28 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 import { Crawler } from 'es6-crawler-detect';
-import { Request } from 'express';
+import ipRangeCheck from 'ip-range-check';
+import { GoodBotsService } from 'src/common/services/good-bot.service';
 
 @Injectable()
 export class CrawlerDetection implements NestMiddleware {
-  use(req: Request, _res: any, next: (error?: any) => void) {
-    const detector = new Crawler();
-    const userAgent = req.headers['user-agent'];
-    req.isCrawler = detector.isCrawler(userAgent);
+  constructor(private readonly goodBotsService: GoodBotsService) {}
 
-    return next();
+  async use(req: Request, _res: Response, next: NextFunction) {
+    const detector = new Crawler();
+    const userAgent = req.headers['user-agent'] || '';
+
+    // UA-based detection
+    let isCrawler = detector.isCrawler(userAgent);
+
+    // IP-based GoodBots detection (strict)
+    if (!isCrawler) {
+      const clientIp = req.ip || req.socket.remoteAddress || '';
+      const goodBotCidrs = await this.goodBotsService.getBotCidrs();
+      isCrawler = ipRangeCheck(clientIp, goodBotCidrs);
+    }
+
+    req.isCrawler = isCrawler;
+    next();
   }
 }

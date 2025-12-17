@@ -41,6 +41,7 @@ import { Request, Response } from 'express';
 import { UrlAccessGuard } from '../guards/url-access.guard';
 import { UnlockUrlBodyDto, UnlockUrlRequest } from '../dto/unlock.dto';
 import { ConfirmUrlBodyDto, ConfirmUrlRequest } from '../dto/confirm.dto';
+import { AnalyticType } from 'src/common/enums/analytic-type.enum';
 
 @Controller('public/urls')
 @ApiTags('Public URLs')
@@ -117,7 +118,6 @@ export class PublicUrlsController {
     @Param('slug') slug: string,
     @Body() body: UnlockUrlBodyDto,
   ): Promise<void> {
-    req.eventType = 'CLICK';
     return await this.urlsService.unlockUrlRedirect(req, res, slug, body);
   }
 

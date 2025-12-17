@@ -115,6 +115,12 @@ export class Url extends BaseEntity {
   })
   clickLimit?: number | null;
 
+  @Column({
+    type: 'int',
+    default: 0,
+  })
+  impressionCount!: number;
+
   @Column({ type: 'jsonb', nullable: true })
   metadata?: {
     title?: string | null;

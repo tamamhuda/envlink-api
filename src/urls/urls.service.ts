@@ -38,6 +38,7 @@ import { UnlockUrlBodyDto } from './dto/unlock.dto';
 import { UpdateUrlBodyDto } from './dto/update.dto';
 import { ConfirmUrlBodyDto } from './dto/confirm.dto';
 import { RedirectTokenUtil } from 'src/common/utils/redirect-token.util';
+import { AnalyticType } from 'src/common/enums/analytic-type.enum';
 
 @Injectable()
 export class UrlsService {
@@ -62,6 +63,12 @@ export class UrlsService {
 
   async getUrlById(id: string): Promise<UrlDto> {
     return await this.findUrlByIdOrCode(id);
+  }
+
+  async getUrlBySlug(slug: string): Promise<Url> {
+    const url = await this.findUrlByIdOrCode(undefined, slug);
+    if (!url) throw new NotFoundException('Url not found');
+    return url;
   }
 
   async getUserUrls(req: Request): Promise<UrlDto[]> {
@@ -108,13 +115,13 @@ export class UrlsService {
 
     // DIRECT or CRAWLER
     if (req.isCrawler || url.redirectType === RedirectType.DIRECT) {
-      req.eventType = 'CLICK';
+      req.eventType = AnalyticType.CLICK;
       res.redirect(url.originalUrl);
       return;
     }
 
     // SPLASH
-    req.eventType = 'IMPRESSION';
+    req.eventType = AnalyticType.IMPRESSION;
     const publicUrlDto = publicUrlDtoSchema.parse(url);
     res.status(200).json(publicUrlDto);
     return;
@@ -253,14 +260,13 @@ export class UrlsService {
     slug: string,
     body: UnlockUrlBodyDto,
   ): Promise<void> {
-    const url = await this.urlRepository.findOneBySlug(slug);
-    if (!url) throw new NotFoundException('Url not found');
+    const url = await this.getUrlBySlug(slug);
     const isValidate =
       url.accessCode &&
       (await this.bcryptUtil.verifyAccessCode(body.accessCode, url.accessCode));
     if (!isValidate) throw new ConflictException('Invalid access code');
 
-    req.eventType = 'CLICK';
+    req.eventType = AnalyticType.CLICK;
     res.redirect(url.originalUrl);
     return;
   }
@@ -280,7 +286,7 @@ export class UrlsService {
       throw new ForbiddenException('TOKEN_SLUG_MISMATCH');
     }
 
-    req.eventType = 'CLICK';
+    req.eventType = AnalyticType.CLICK;
     res.redirect(result.payload.redirectUrl);
     return;
   }
