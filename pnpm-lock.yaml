@@ -113,6 +113,9 @@ importers:
       ioredis:
         specifier: ^5.8.1
         version: 5.8.2
+      ip-range-check:
+        specifier: ^0.2.0
+        version: 0.2.0
       ip2location-io-nodejs:
         specifier: ^1.1.1
         version: 1.1.1
@@ -3186,6 +3189,9 @@ packages:
   ioredis@5.8.2:
     resolution: {integrity: sha512-C6uC+kleiIMmjViJINWk80sOQw5lEzse1ZmvD+S/s8p8CWapftSaC+kocGTx6xrbrJ4WmYQGC08ffHLr6ToR6Q==}
     engines: {node: '>=12.22.0'}
+
+  ip-range-check@0.2.0:
+    resolution: {integrity: sha512-oaM3l/3gHbLlt/tCWLvt0mj1qUaI+STuRFnUvARGCujK9vvU61+2JsDpmkMzR4VsJhuFXWWgeKKVnwwoFfzCqw==}
 
   ip2location-io-nodejs@1.1.1:
     resolution: {integrity: sha512-MPFjx3hFteeQooUbiwfOL8etBGpKmgWLcphfJXc2nKhYLoruozhNPtO3ej8BGauMQNypMMOLhnxt10Sevjdojg==}
@@ -8502,6 +8508,10 @@ snapshots:
       standard-as-callback: 2.1.0
     transitivePeerDependencies:
       - supports-color
+
+  ip-range-check@0.2.0:
+    dependencies:
+      ipaddr.js: 1.9.1
 
   ip2location-io-nodejs@1.1.1:
     dependencies:
