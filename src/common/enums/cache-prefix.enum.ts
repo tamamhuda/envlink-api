@@ -9,4 +9,5 @@ export enum CachePrefix {
   THROTTLE = 'THROTTLE',
   TOKENS = 'TOKENS',
   PAYMENT_METHODS = 'PAYMENT_METHODS',
+  CIDRS = 'CIDRS',
 }
