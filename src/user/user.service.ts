@@ -31,6 +31,14 @@ export class UserService {
     private readonly xenditService: XenditService,
   ) {}
 
+  async findByEmail(email: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
   async validateUniqueUser(
     email?: string,
     username?: string,
