@@ -1,4 +1,4 @@
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import { channelSchema } from './channel.dto';
 import { createZodDto } from 'nestjs-zod';
 

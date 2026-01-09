@@ -1,5 +1,5 @@
 import { billingAddressSchema } from './billing-address.dto';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import { createZodDto } from 'nestjs-zod';
 
 export const createBillingAddressSchema = billingAddressSchema.omit({

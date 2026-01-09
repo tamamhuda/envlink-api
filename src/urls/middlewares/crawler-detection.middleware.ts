@@ -2,7 +2,7 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { Crawler } from 'es6-crawler-detect';
 import ipRangeCheck from 'ip-range-check';
-import { GoodBotsService } from 'src/common/services/good-bot.service';
+import { GoodBotsService } from 'src/infrastructure/integrations/good-bot.service';
 
 @Injectable()
 export class CrawlerDetection implements NestMiddleware {

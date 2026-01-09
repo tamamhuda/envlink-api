@@ -12,7 +12,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -28,7 +28,7 @@ import {
 import { ZodSerializerDto } from 'nestjs-zod';
 import { Request } from 'express';
 import { JWT_SECURITY } from 'src/config/jwt.config';
-import { TransactionStatus } from 'src/common/enums/trasaction-status.enum';
+import { TransactionStatus } from 'src/common/enums/transaction-status.enum';
 
 @Controller('transactions')
 @ApiBearerAuth(JWT_SECURITY)

@@ -15,35 +15,40 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getDatabaseConfig } from './config/database.config';
 import { ENV_PATH, envValidate } from './config/env.config';
-import CatchEverythingFilter from './common/filters/catch-everything.filter';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import LoggingInterceptor from './common/interceptors/logging.interceptor';
-import { CacheInterceptor } from './common/interceptors/cache.interceptor';
+
+import LoggingInterceptor from './infrastructure/interceptors/logging.interceptor';
 import { HealthModule } from 'src/health/health.module';
-import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-import { InvalidateCacheInterceptor } from './common/interceptors/invalidate-cache.interceptor';
+
 import { UrlGeneratorModule } from 'nestjs-url-generator';
 import { UrlsModule } from './urls/urls.module';
 import { QueueModule } from './queue/queue.module';
-import { CommonModule } from './common/common.module';
-import { CacheModule } from '@nestjs/cache-manager';
+
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { getCacheConfig, getRedisConfig } from './config/cache.config';
-import { ThrottleInterceptor } from './common/interceptors/throttle.interceptor';
-import { ThrottleGuard } from './common/throttle/guards/throttle.guard';
+
 import { JwtAuthGuard } from './auth/guards/jwt.guard';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { getSignedUrlConfig } from './config/signed-url.config';
-import { ClientUrlMiddleware } from './common/middlewares/client-url.middleware';
-import { SnakeCaseTransformInterceptor } from './common/interceptors/snake-case-transform.interceptor';
+
 import { AnalyticsModule } from './analytics/analytics.module';
 import { BillingAddressModule } from './billing-address/billing-address.module';
 import { OauthModule } from './oauth/oauth.module';
 import { RedisClientModule } from '@quazex/nestjs-ioredis';
 import { ChannelsModule } from './channels/channels.module';
 import { CrawlerDetection } from './urls/middlewares/crawler-detection.middleware';
+import { InfrastructureModule } from './infrastructure/infrastructure.module';
+import { SecurityModule } from './security/security.module';
+import { SnakeCaseTransformInterceptor } from './infrastructure/interceptors/snake-case-transform.interceptor';
+import { ClientUrlMiddleware } from './infrastructure/middlewares/client-url.middleware';
+import CatchEverythingFilter from './infrastructure/filters/catch-everything.filter';
+import { HttpExceptionFilter } from './infrastructure/filters/http-exception.filter';
+import { InvalidateCacheInterceptor } from './infrastructure/interceptors/invalidate-cache.interceptor';
+import { ThrottleInterceptor } from './infrastructure/interceptors/throttle.interceptor';
+import { TransformInterceptor } from './infrastructure/interceptors/transform.interceptor';
+import { ThrottleGuard } from './infrastructure/internal-services/throttle/guards/throttle.guard';
 
 @Module({
   imports: [
@@ -96,7 +101,6 @@ import { CrawlerDetection } from './urls/middlewares/crawler-detection.middlewar
     HealthModule,
     UrlsModule,
     QueueModule,
-    CommonModule,
     SubscriptionsModule,
     WebhooksModule,
     PaymentMethodsModule,
@@ -105,6 +109,8 @@ import { CrawlerDetection } from './urls/middlewares/crawler-detection.middlewar
     BillingAddressModule,
     OauthModule,
     ChannelsModule,
+    InfrastructureModule.forRoot(),
+    SecurityModule.forRoot(),
   ],
 
   providers: [

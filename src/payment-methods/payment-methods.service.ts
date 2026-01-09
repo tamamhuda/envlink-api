@@ -17,17 +17,17 @@ import { UserService } from 'src/user/user.service';
 import { PaymentMethodDto } from './dto/payment-method.dto';
 import { PaymentMethodsMapper } from './mapper/payment-methods.mapper';
 import { SortPaymentMethodsBodyDto } from './dto/sort-payment-methods.dto';
-import { XenditService } from 'src/common/xendit/xendit.service';
+import { XenditService } from 'src/infrastructure/integrations/xendit/xendit.service';
 import { UrlGeneratorService } from 'nestjs-url-generator';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import {
   PaymentMethodActionDto,
   requestPaymentMethodParamsSchema,
 } from './dto/request-payment-method.dto';
 import { ValidatePaymentMethodBodyDto } from './dto/validate-payment-method.dto';
-import { TokenUtil } from 'src/common/utils/token.util';
 import { CreatePaymentMethodBodyDto } from './dto/create-payment-method.dto';
 import { ZodValidationException } from 'nestjs-zod';
+import { TokenService } from 'src/security/services/token.service';
 
 @Injectable()
 export class PaymentMethodsService {
@@ -38,7 +38,7 @@ export class PaymentMethodsService {
     private readonly xenditService: XenditService,
     private readonly urlGenService: UrlGeneratorService,
     private readonly logger: LoggerService,
-    private readonly tokenUtil: TokenUtil,
+    private readonly tokenService: TokenService,
   ) {}
 
   async createOrUpdatePaymentMethod(
@@ -223,7 +223,7 @@ export class PaymentMethodsService {
       action: 'ADD_PAYMENT_METHOD' | 'VALIDATE_PAYMENT_METHOD',
       method: 'GET' | 'POST',
     ): PaymentMethodActionDto => {
-      const token = this.tokenUtil.create(id, email, 99);
+      const token = this.tokenService.create(id, email, 99);
 
       let query: Record<string, string> = {
         token,
@@ -268,7 +268,7 @@ export class PaymentMethodsService {
     body: ValidatePaymentMethodBodyDto,
     token: string,
   ): Promise<OkDto> {
-    const userId = this.tokenUtil.verify(token)?.sub;
+    const userId = this.tokenService.verify(token)?.sub;
 
     if (!userId) throw new ForbiddenException('Invalid token');
     return await this.validatePaymentMethod(body, userId);
@@ -302,7 +302,7 @@ export class PaymentMethodsService {
   }
 
   async getAllPaymentMethodsOptions(token: string) {
-    const userId = this.tokenUtil.verify(token)?.sub;
+    const userId = this.tokenService.verify(token)?.sub;
 
     if (!userId) throw new ForbiddenException('Invalid token');
 
@@ -381,7 +381,7 @@ export class PaymentMethodsService {
     token: string,
     body: CreatePaymentMethodBodyDto,
   ): Promise<PaymentMethodActionDto> {
-    const userId = this.tokenUtil.verify(token)?.sub;
+    const userId = this.tokenService.verify(token)?.sub;
     if (!userId) throw new ForbiddenException('Invalid Resource');
     return await this.createPaymentMethod(userId, body);
   }

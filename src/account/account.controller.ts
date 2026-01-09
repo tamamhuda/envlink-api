@@ -16,12 +16,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
-import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
-import { Request } from 'express';
-import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
-import { PolicyScope } from 'src/common/throttle/throttle.constans';
 import { JWT_SECURITY } from 'src/config/jwt.config';
 import {
   ChangePasswordBodyDto,
@@ -33,9 +27,15 @@ import {
   UserInfoSerializerDto,
 } from 'src/auth/dto/user-info.dto';
 import { AccountVerifyService } from './account-verify.service';
-import { ClientUrl } from 'src/common/decorators/client-url.decorator';
+import { ClientUrl } from 'src/infrastructure/internal-services/request/decorators/client-url.decorator';
 import { ZodSerializerDto } from 'nestjs-zod';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
+import { InvalidateCache } from 'src/infrastructure/cache/decorators/invalidate-cache.decorator';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
+import { ThrottleScope } from 'src/infrastructure/internal-services/throttle/decorators/throttle-scope.decorator';
+import { PolicyScope } from 'src/infrastructure/internal-services/throttle/throttle.constants';
+import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
+import { Request } from 'express';
 
 @Controller('account')
 @ApiBearerAuth(JWT_SECURITY)

@@ -5,18 +5,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UrlGeneratorService } from 'nestjs-url-generator';
-import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
+import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constants';
 import { InjectQueue } from '@nestjs/bullmq';
 import { SendMailVerifyJob } from 'src/queue/interfaces/mail-verify.interface';
 import { Queue } from 'bullmq';
-import { TokenUtil } from 'src/common/utils/token.util';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/env.config';
 import { AccountRepository } from 'src/database/repositories/account.repository';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
 import { Account } from 'src/database/entities/account.entity';
-import { CacheService } from 'src/common/cache/cache.service';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
+import { TokenService } from 'src/security/services/token.service';
 
 @Injectable()
 export class AccountVerifyService {
@@ -26,7 +26,7 @@ export class AccountVerifyService {
     private readonly urlGenService: UrlGeneratorService,
     @InjectQueue(SEND_MAIL_VERIFY_QUEUE)
     private readonly mailVerifyQueue: Queue<SendMailVerifyJob>,
-    private readonly tokenUtil: TokenUtil,
+    private readonly tokenService: TokenService,
     private readonly cache: CacheService,
     private readonly configService: ConfigService<Env>,
   ) {
@@ -42,7 +42,7 @@ export class AccountVerifyService {
     clientUrl?: string,
   ): Promise<void> {
     const TTL_MINUTE = 5;
-    const token = this.tokenUtil.create(id, email, TTL_MINUTE);
+    const token = this.tokenService.create(id, email, TTL_MINUTE);
 
     let verifyLink = this.urlGenService.generateUrlFromPath({
       relativePath: 'auth/verify',
@@ -101,7 +101,7 @@ export class AccountVerifyService {
   }
 
   async verify(token: string): Promise<Account> {
-    const payload = this.tokenUtil.verify(token);
+    const payload = this.tokenService.verify(token);
     if (!payload) throw new ForbiddenException('Invalid token');
     const { email, sub, isExpired } = payload;
     if (isExpired) throw new ForbiddenException('Token expired');

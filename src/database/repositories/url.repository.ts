@@ -3,8 +3,8 @@ import { Url } from '../entities/url.entity';
 import { DataSource, FindOptionsWhere, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { PaginatedOptions } from 'src/common/interfaces/paginated.interface';
-import { paginatedResult } from 'src/common/utils/paginate.util';
 import { FilterQuery, FilterQueryDto } from 'src/urls/dto/filter-query.dto';
+import { paginatedResult } from 'src/common/helpers/paginate.helper';
 
 @Injectable()
 export class UrlRepository extends Repository<Url> {

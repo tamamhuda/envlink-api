@@ -15,17 +15,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JWT_SECURITY } from 'src/config/jwt.config';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
 
 import { ZodSerializerDto } from 'nestjs-zod';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import {
   SubscriptionCycleDto,
   AllSubscriptionCyclesResponse,
   SubscriptionCycleResponse,
   SubscriptionCycleSerializerDto,
 } from '../dto/subscription-cycle.dto';
-import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
+import { AuthenticatedUser } from 'src/security/decorators/authenticated-user.dto';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
 import { SubscriptionsCyclesService } from './cycles.service';
 

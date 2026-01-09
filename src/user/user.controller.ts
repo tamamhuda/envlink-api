@@ -26,30 +26,26 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JWT_SECURITY } from 'src/config/jwt.config';
-import { Cached } from 'src/common/decorators/cached.decorator';
+import { Cached } from 'src/infrastructure/cache/decorators/cached.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
-import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
 import { UpdateUserBodyDto, UpdateUserRequest } from './dto/update.dto';
 import { ZodSerializerDto, ZodValidationPipe } from 'nestjs-zod';
 import { ImageUploadDto } from './dto/image-upload.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { AwsS3Util } from 'src/common/utils/aws-s3.util';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
-import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
-import { PolicyScope } from 'src/common/throttle/throttle.constans';
-import { ClientUrl } from 'src/common/decorators/client-url.decorator';
 import multer from 'multer';
 import { Request } from 'express';
+import { ClientUrl } from 'src/infrastructure/internal-services/request/decorators/client-url.decorator';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
+import { ThrottleScope } from 'src/infrastructure/internal-services/throttle/decorators/throttle-scope.decorator';
+import { PolicyScope } from 'src/infrastructure/internal-services/throttle/throttle.constants';
+import { InvalidateCache } from 'src/infrastructure/cache/decorators/invalidate-cache.decorator';
 
 @Controller('user')
 @ApiBearerAuth(JWT_SECURITY)
 @ApiTags('User')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly awsS3Util: AwsS3Util,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @SkipThrottle()
   @Get('me')

@@ -3,7 +3,7 @@ import { createResponseDto } from 'src/common/dto/response.dto';
 import { baseSchema } from 'src/common/schemas/base.schema';
 import * as z from 'zod';
 import { channelSchema } from '../../channels/dto/channel.dto';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import { createPaginatedSchema } from 'src/common/dto/paginated.dto';
 import { RedirectType } from '../../common/enums/redirect-type.enum';
 

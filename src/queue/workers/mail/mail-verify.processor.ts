@@ -1,9 +1,9 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job, Worker } from 'bullmq';
-import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constans';
+import { SEND_MAIL_VERIFY_QUEUE } from 'src/queue/queue.constants';
 import { MailVerifyService } from './mail-verify.service';
 import { SendMailVerifyJob } from 'src/queue/interfaces/mail-verify.interface';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 
 @Processor(SEND_MAIL_VERIFY_QUEUE, {
   concurrency: 5,

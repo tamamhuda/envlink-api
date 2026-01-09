@@ -3,18 +3,17 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { WinstonModule } from 'nest-winston';
-import { instance as loggerInstance } from './common/logger/logger.instance';
+import { instance as loggerInstance } from './infrastructure/logger/logger.instance';
 import { ConfigService } from '@nestjs/config';
 import { Env } from './config/env.config';
 import { getSwaggerDocumentConfig } from './config/swagger.config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { PlanSeeder } from './database/seeders/plan.seeder';
-import LoggerService from './common/logger/logger.service';
+import LoggerService from './infrastructure/logger/logger.service';
 import { join } from 'path';
 import * as hbs from 'hbs';
 import * as yaml from 'yaml';
-import { XenditInitializeService } from './common/xendit/xendit-initialize.service';
-
+import { XenditInitializeService } from './infrastructure/integrations/xendit/xendit-initialize.service';
 async function bootstrap() {
   const isWorker = process.env.WORKER === 'true';
 

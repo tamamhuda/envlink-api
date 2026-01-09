@@ -1,7 +1,7 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job, Worker } from 'bullmq';
-import { SEND_MAIL_RESET_PASSWORD_QUEUE } from 'src/queue/queue.constans';
-import LoggerService from 'src/common/logger/logger.service';
+import { SEND_MAIL_RESET_PASSWORD_QUEUE } from 'src/queue/queue.constants';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { MailResetPasswordService } from './mail-reset-password.service';
 import { SendMailResetPasswordJob } from 'src/queue/interfaces/mail-reset-password.interface';
 

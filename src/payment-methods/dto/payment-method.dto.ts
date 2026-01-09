@@ -2,7 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { PaymentMethodType } from 'src/common/enums/payment-method-type.enum';
 import { baseSchema } from 'src/common/schemas/base.schema';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import * as z from 'zod';
 
 export const cardSchema = z.object({

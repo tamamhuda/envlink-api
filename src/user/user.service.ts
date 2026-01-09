@@ -12,22 +12,22 @@ import { UserRepository } from 'src/database/repositories/user.repository';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
 import { UserInfoDto } from 'src/auth/dto/user-info.dto';
 
-import LoggerService from 'src/common/logger/logger.service';
-import { AwsS3Util } from 'src/common/utils/aws-s3.util';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import Subscription from 'src/database/entities/subscription.entity';
 import Plan from 'src/database/entities/plan.entity';
 import { PlanEnum } from 'src/common/enums/plans.enum';
-import { XenditService } from 'src/common/xendit/xendit.service';
+import { XenditService } from 'src/infrastructure/integrations/xendit/xendit.service';
 import { Request } from 'express';
+import { S3Service } from 'src/infrastructure/aws/s3.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly logger: LoggerService,
-    private readonly awsS3Util: AwsS3Util,
+    private readonly s3Service: S3Service,
     private readonly xenditService: XenditService,
   ) {}
 
@@ -221,8 +221,8 @@ export class UserService {
     imageKey: string,
   ): Promise<string> {
     try {
-      const key = await this.awsS3Util.uploadFile(file, imageKey);
-      return await this.awsS3Util.getFileUrl(key);
+      const key = await this.s3Service.uploadFile(file, imageKey);
+      return await this.s3Service.getFileUrl(key);
     } catch (error) {
       if (error instanceof Error)
         throw new InternalServerErrorException(error.message);

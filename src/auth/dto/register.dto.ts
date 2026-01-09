@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
-import z from 'zod';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
+import { z } from 'zod';
 
 const registerSchema = z
   .object({

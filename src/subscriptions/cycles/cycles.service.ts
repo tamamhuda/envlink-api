@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { SubscriptionCycleRepository } from 'src/database/repositories/subscription-cycle.repository';
 import { SubscriptionCycleDto } from '../dto/subscription-cycle.dto';
 import { SubscriptionCycle } from 'src/database/entities/subscription-cycle.entity';

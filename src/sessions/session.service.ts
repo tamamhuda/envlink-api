@@ -7,27 +7,27 @@ import { Request } from 'express';
 import { Account } from 'src/database/entities/account.entity';
 import Session from 'src/database/entities/session.entity';
 import { SessionRepository } from 'src/database/repositories/session.repository';
-import { BcryptUtil } from 'src/common/utils/bcrypt.util';
-import { JwtUtil } from 'src/common/utils/jwt.util';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { SessionInfoDto } from './dto/session.dto';
 import { TokensDto } from 'src/auth/dto/token.dto';
-import { IpUtil } from 'src/common/utils/ip.util';
+
 import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { UserMapper } from 'src/user/mapper/user.mapper';
-import { CacheService } from 'src/common/cache/cache.service';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
-import { ClientIdentityUtil } from 'src/common/utils/client-identity.util';
+import { BcryptService } from 'src/security/services/bcrypt.service';
+import { IpService } from 'src/infrastructure/internal-services/request/ip.service';
+import { ClientIdentityService } from 'src/infrastructure/internal-services/request/client-identity.service';
+import { JwtService } from 'src/security/services/jwt.service';
 
 @Injectable()
 export class SessionService {
-  private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
-
   constructor(
-    private readonly ipUtil: IpUtil,
-    private readonly clientIdentityUtil: ClientIdentityUtil,
+    private readonly bcryptService: BcryptService,
+    private readonly ipService: IpService,
+    private readonly clientIdentityService: ClientIdentityService,
     private readonly sessionRepository: SessionRepository,
-    private readonly jwtUtil: JwtUtil,
+    private readonly jwtService: JwtService,
     private readonly userMapper: UserMapper,
     private readonly logger: LoggerService,
     private readonly cache: CacheService,
@@ -65,7 +65,7 @@ export class SessionService {
   }
 
   async validateSessionTokens(session: Session, req: Request) {
-    const authorizationToken = this.jwtUtil.extractAuthorizationHeader(req);
+    const authorizationToken = this.jwtService.extractAuthorizationHeader(req);
     const { isRevoked, expiresAt, refreshTokenHash } = session;
 
     if (isRevoked || !expiresAt || !refreshTokenHash)
@@ -76,7 +76,7 @@ export class SessionService {
       throw new UnauthorizedException('SESSION_EXPIRED');
     }
 
-    const isTokenValid = await this.bcryptUtil.verifyToken(
+    const isTokenValid = await this.bcryptService.verifyToken(
       authorizationToken,
       refreshTokenHash,
     );
@@ -106,9 +106,11 @@ export class SessionService {
       await manager.save(account);
 
       // Step 2: Create session (tokens null for now)
-      const ipLocation = await this.ipUtil.getFormattedLocation(req);
+      const ipLocation = await this.ipService.getFormattedLocation(req);
       const { browser, os, deviceType } =
-        this.clientIdentityUtil.parseUserAgent(req.headers['user-agent'] || '');
+        this.clientIdentityService.parseUserAgent(
+          req.headers['user-agent'] || '',
+        );
       let session = manager.create(Session, {
         user: account.user,
         account,
@@ -121,7 +123,7 @@ export class SessionService {
       session = await manager.save(session);
 
       // Step 3: Sign tokens with session.id
-      const tokens = await this.jwtUtil.signTokens(
+      const tokens = await this.jwtService.signTokens(
         account.user.id,
         account.user.role,
         session.id,
@@ -129,9 +131,9 @@ export class SessionService {
       const { refreshToken } = tokens;
 
       // Step 4: Update session with refresh token
-      const refreshTokenHash = await this.bcryptUtil.hashToken(refreshToken);
+      const refreshTokenHash = await this.bcryptService.hashToken(refreshToken);
       const expiresAt =
-        await this.jwtUtil.extractRefreshExpiresAt(refreshToken);
+        await this.jwtService.extractRefreshExpiresAt(refreshToken);
       session.refreshTokenHash = refreshTokenHash;
       session.expiresAt = expiresAt;
       await manager.save(session);
@@ -142,7 +144,7 @@ export class SessionService {
 
   async revokeCurrentSession(req: Request) {
     const { sessionId, jti, ttl } =
-      await this.jwtUtil.extractJwtPayloadFromHeader(req, 'access');
+      await this.jwtService.extractJwtPayloadFromHeader(req, 'access');
     await this.cache.set<boolean>(
       CachePrefix.TOKENS,
       `BLACKLIST:${jti}`,
@@ -162,7 +164,7 @@ export class SessionService {
   }
 
   async revokeAllSessions(req: Request, keepCurrent: boolean = false) {
-    const sessionId = await this.jwtUtil.extractSessionIdFromHeader(req);
+    const sessionId = await this.jwtService.extractSessionIdFromHeader(req);
     await this.sessionRepository.revokeAll(req.user.id, {
       keepCurrent,
       currentSessionId: sessionId,
@@ -173,7 +175,7 @@ export class SessionService {
     req: Request,
     isActive: boolean = true,
   ): Promise<SessionInfoDto[]> {
-    const sessionId = await this.jwtUtil.extractSessionIdFromHeader(req);
+    const sessionId = await this.jwtService.extractSessionIdFromHeader(req);
     let sessionsDto: SessionInfoDto[] = [];
     const sessions = await this.sessionRepository.findManyByUserId(
       req.user.id,

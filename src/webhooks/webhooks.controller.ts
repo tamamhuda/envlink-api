@@ -5,12 +5,12 @@ import {
   RecurringCycleCallback,
   RecurringPlanCallback,
 } from 'src/common/interfaces/xendit.interface';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
-import { Public } from 'src/common/decorators/public.decorator';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
+import { Public } from 'src/security/decorators/public.decorator';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OkDto, OkResponse } from 'src/common/dto/response.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { WebhookRequest } from './dto/webhook.dto';
 
 @Controller('webhooks')

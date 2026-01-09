@@ -1,7 +1,7 @@
 import * as z from 'zod';
 import { cardSchema } from './payment-method.dto';
 import { createZodDto } from 'nestjs-zod';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 
 const requiredCardSchema = cardSchema
   .omit({

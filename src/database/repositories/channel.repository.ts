@@ -6,9 +6,10 @@ import {
   PaginatedOptions,
   PaginatedResult,
 } from 'src/common/interfaces/paginated.interface';
-import { paginatedResult } from 'src/common/utils/paginate.util';
+
 import { Url } from '../entities/url.entity';
 import { User } from '../entities/user.entity';
+import { paginatedResult } from 'src/common/helpers/paginate.helper';
 
 @Injectable()
 export class ChannelRepository extends Repository<Channel> {

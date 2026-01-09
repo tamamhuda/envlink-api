@@ -1,8 +1,9 @@
 import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+
 import z from 'zod';
 import { urlAnalyticStatSchema } from './url-stat.dto';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 
 export const urlOverviewSchema = z.object({
   total_visits: z.number().min(0).default(0),

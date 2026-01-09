@@ -8,14 +8,14 @@ import { SubscriptionEndReason } from 'src/common/enums/subscription-end-reason.
 import { SubscriptionHistoryStatus } from 'src/common/enums/subscription-history-status.enum';
 import { SubscriptionHistoryType } from 'src/common/enums/subscription-history-type.enum';
 import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
-import { TransactionStatus } from 'src/common/enums/trasaction-status.enum';
+import { TransactionStatus } from 'src/common/enums/transaction-status.enum';
 import {
   RecurringCycleAttempt,
   RecurringCycleCallback,
   RecurringCycleData,
   RecurringPlanCallback,
 } from 'src/common/interfaces/xendit.interface';
-import { XenditService } from 'src/common/xendit/xendit.service';
+import { XenditService } from 'src/infrastructure/integrations/xendit/xendit.service';
 import { PaymentMethod } from 'src/database/entities/payment-method.entity';
 import { SubscriptionCycle } from 'src/database/entities/subscription-cycle.entity';
 import Subscription from 'src/database/entities/subscription.entity';
@@ -24,11 +24,11 @@ import { User } from 'src/database/entities/user.entity';
 import { SubscriptionHistoryRepository } from 'src/database/repositories/subscription-history.repository';
 import { SubscriptionRepository } from 'src/database/repositories/subscription.repository';
 import { SubscriptionsService } from './subscriptions.service';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { SubscriptionHistory } from 'src/database/entities/subscription-history.entity';
 import { UserService } from 'src/user/user.service';
 
-import { SEND_MAIL_SUBSCRIPTION_QUEUE } from 'src/queue/queue.constans';
+import { SEND_MAIL_SUBSCRIPTION_QUEUE } from 'src/queue/queue.constants';
 import { SendMailSubscriptionJob } from 'src/queue/interfaces/mail-subscription.interface';
 import { SubscriptionsCyclesService } from './cycles/cycles.service';
 import { Queue } from 'bullmq';

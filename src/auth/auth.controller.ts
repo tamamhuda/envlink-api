@@ -32,7 +32,7 @@ import {
   TokensResponse,
   TokensSerializerDto,
 } from './dto/token.dto';
-import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
+import { InvalidateCache } from 'src/infrastructure/cache/decorators/invalidate-cache.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
@@ -40,15 +40,11 @@ import {
   UserInfoResponse,
   UserInfoSerializerDto,
 } from './dto/user-info.dto';
-import LoggerService from 'src/common/logger/logger.service';
-import { PolicyScope } from 'src/common/throttle/throttle.constans';
-import { Public } from 'src/common/decorators/public.decorator';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
-import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { JWT_REFRESH_SECURITY } from 'src/config/jwt.config';
-import { ClientUrl } from 'src/common/decorators/client-url.decorator';
+import { ClientUrl } from 'src/infrastructure/internal-services/request/decorators/client-url.decorator';
 import { LoginRequest } from './dto/login.dto';
-import { TurnstileGuard } from 'src/common/guards/turnstile.guard';
+import { TurnstileGuard } from 'src/security/guards/turnstile.guard';
 import { OkDto, OkResponse } from 'src/common/dto/response.dto';
 import {
   ResetPasswordBodyDto,
@@ -58,6 +54,10 @@ import {
   ForgotPasswordBodyDto,
   ForgotPasswordRequest,
 } from './dto/forgot-password.dto';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
+import { ThrottleScope } from 'src/infrastructure/internal-services/throttle/decorators/throttle-scope.decorator';
+import { PolicyScope } from 'src/infrastructure/internal-services/throttle/throttle.constants';
+import { Public } from 'src/security/decorators/public.decorator';
 
 @Controller('auth')
 @Public()

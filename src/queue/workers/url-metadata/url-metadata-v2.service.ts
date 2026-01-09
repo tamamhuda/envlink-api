@@ -2,7 +2,7 @@ import { chromium, errors } from 'playwright';
 import type { Browser, BrowserContext, Page, Route, Request } from 'playwright';
 import { Injectable } from '@nestjs/common';
 import { UrlMetadata } from 'src/queue/interfaces/url-metadata.interface';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 
 interface ScraperOptions {
   enableJavaScript?: boolean;

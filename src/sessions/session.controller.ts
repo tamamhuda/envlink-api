@@ -29,12 +29,13 @@ import {
   SessionInfoSerializerDto,
 } from './dto/session.dto';
 import { JWT_SECURITY } from 'src/config/jwt.config';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
+
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
-import { Cached } from 'src/common/decorators/cached.decorator';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import { Cached } from 'src/infrastructure/cache/decorators/cached.decorator';
+import { InvalidateCache } from 'src/infrastructure/cache/decorators/invalidate-cache.decorator';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
 
 @SkipThrottle()
 @Controller('sessions')

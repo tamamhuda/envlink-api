@@ -22,7 +22,7 @@ import {
   ChannelResponse,
   ChannelSerializerDto,
 } from './dto/channel.dto';
-import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
+import { AuthenticatedUser } from 'src/security/decorators/authenticated-user.dto';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
 import {
   PaginatedQuery,
@@ -47,8 +47,8 @@ import {
   ChannelItemsPaginatedSerializerDto,
 } from './dto/items.dto';
 import { AddItemsBodyDto, AddItemsRequest } from './dto/add-items.dto';
-import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
 import { OkDto, OkResponse } from 'src/common/dto/response.dto';
+import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
 
 @Controller('channels')
 @ApiTags('Channels')

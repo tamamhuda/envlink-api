@@ -1,7 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { PlanEnum } from 'src/common/enums/plans.enum';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import * as z from 'zod';
 
 export const planSchema = z.object({

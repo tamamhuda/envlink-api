@@ -1,43 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { AccountService } from 'src/account/account.service';
-import { BcryptUtil } from 'src/common/utils/bcrypt.util';
-import { JwtUtil } from 'src/common/utils/jwt.util';
-import LoggerService from 'src/common/logger/logger.service';
+
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { SessionService } from 'src/sessions/session.service';
 import { UserService } from 'src/user/user.service';
 import { AuthenticatedDto } from './dto/authenticated.dto';
 import { RegisterBodyDto } from './dto/register.dto';
 import { TokensDto } from './dto/token.dto';
 import { UserInfoDto } from './dto/user-info.dto';
-import { IpUtil } from 'src/common/utils/ip.util';
+
 import { AccountVerifyService } from 'src/account/account-verify.service';
 import { UserMapper } from 'src/user/mapper/user.mapper';
-import { CacheService } from 'src/common/cache/cache.service';
 import { OkDto } from 'src/common/dto/response.dto';
-import { Queue } from 'bullmq';
-import { SEND_MAIL_RESET_PASSWORD_QUEUE } from 'src/queue/queue.constans';
-import { InjectQueue } from '@nestjs/bullmq';
-import { SendMailResetPasswordJob } from 'src/queue/interfaces/mail-reset-password.interface';
 import { AccountResetPasswordService } from 'src/account/account-reset-password.service';
 import { ForgotPasswordBodyDto } from './dto/forgot-password.dto';
+import { BcryptService } from 'src/security/services/bcrypt.service';
+import { JwtService } from 'src/security/services/jwt.service';
+import { IpService } from 'src/infrastructure/internal-services/request/ip.service';
 
 @Injectable()
 export class AuthService {
-  private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
-
   constructor(
+    private readonly bcryptService: BcryptService,
     private readonly userService: UserService,
     private readonly accountService: AccountService,
     private readonly sessionService: SessionService,
-    private readonly jwtUtil: JwtUtil,
+    private readonly jwtService: JwtService,
     private readonly userMapper: UserMapper,
-    private readonly ipUtil: IpUtil,
+    private readonly ipService: IpService,
     private readonly logger: LoggerService,
     private readonly accountVerifyService: AccountVerifyService,
     private readonly accountResetPasswordService: AccountResetPasswordService,
-    @InjectQueue(SEND_MAIL_RESET_PASSWORD_QUEUE)
-    private readonly mailResetPasswordQueue: Queue<SendMailResetPasswordJob>,
   ) {}
 
   async register(
@@ -47,7 +41,7 @@ export class AuthService {
   ): Promise<AuthenticatedDto> {
     const { password, ...userDto } = registerBody;
 
-    const passwordHash = await this.bcryptUtil.hashPassword(password);
+    const passwordHash = await this.bcryptService.hashPassword(password);
 
     const { user, account, session } =
       await this.userService.createUserWithAccountAndSession(
@@ -61,15 +55,16 @@ export class AuthService {
 
     await this.accountVerifyService.send(id, email, fullName, clientUrl);
 
-    const { accessToken, refreshToken } = await this.jwtUtil.signTokens(
+    const { accessToken, refreshToken } = await this.jwtService.signTokens(
       id,
       role,
       session.id,
     );
 
-    const refreshTokenHash = await this.bcryptUtil.hashToken(refreshToken);
-    const expiresAt = await this.jwtUtil.extractRefreshExpiresAt(refreshToken);
-    const ipLocation = await this.ipUtil.getFormattedLocation(req);
+    const refreshTokenHash = await this.bcryptService.hashToken(refreshToken);
+    const expiresAt =
+      await this.jwtService.extractRefreshExpiresAt(refreshToken);
+    const ipLocation = await this.ipService.getFormattedLocation(req);
     await this.sessionService.updateSession(session, {
       refreshTokenHash,
       expiresAt,
@@ -106,19 +101,19 @@ export class AuthService {
   }
 
   async refresh(user: UserInfoDto, req: Request): Promise<TokensDto> {
-    const { sessionId } = await this.jwtUtil.extractJwtPayloadFromHeader(
+    const { sessionId } = await this.jwtService.extractJwtPayloadFromHeader(
       req,
       'refresh',
     );
 
     const session = await this.sessionService.findSessionById(sessionId);
 
-    const { accessToken, refreshToken } = await this.jwtUtil.signTokens(
+    const { accessToken, refreshToken } = await this.jwtService.signTokens(
       user.id,
       user.role,
       session.id,
     );
-    const refreshTokenHash = await this.bcryptUtil.hashToken(refreshToken);
+    const refreshTokenHash = await this.bcryptService.hashToken(refreshToken);
 
     await this.sessionService.updateSession(session, {
       refreshTokenHash,

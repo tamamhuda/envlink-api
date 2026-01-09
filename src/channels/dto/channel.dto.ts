@@ -1,7 +1,7 @@
 import { baseSchema } from 'src/common/schemas/base.schema';
 import * as z from 'zod';
 import { urlSchema } from '../../urls/dto/url.dto';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { createPaginatedSchema } from 'src/common/dto/paginated.dto';

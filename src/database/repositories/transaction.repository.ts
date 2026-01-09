@@ -8,7 +8,7 @@ import {
   MoreThanOrEqual,
   Repository,
 } from 'typeorm';
-import { TransactionStatus } from 'src/common/enums/trasaction-status.enum';
+import { TransactionStatus } from 'src/common/enums/transaction-status.enum';
 
 @Injectable()
 export class TransactionRepository extends Repository<Transaction> {

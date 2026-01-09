@@ -10,12 +10,12 @@ import { Profile } from 'passport-google-oauth20';
 import { AccountService } from 'src/account/account.service';
 import { AuthenticatedDto } from 'src/auth/dto/authenticated.dto';
 import { TokensDto } from 'src/auth/dto/token.dto';
-import { CacheService } from 'src/common/cache/cache.service';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { GoogleProfile } from 'src/common/interfaces/google-profile.interface';
-import { GoogleClientUtil } from 'src/common/utils/google-client.util';
 import { Account } from 'src/database/entities/account.entity';
 import { UserMapper } from 'src/user/mapper/user.mapper';
+import { GoogleClientService } from 'src/infrastructure/integrations/google-client.service';
 
 @Injectable()
 export class OauthService {
@@ -23,7 +23,7 @@ export class OauthService {
     private readonly accountService: AccountService,
     private readonly cache: CacheService,
     private readonly userMapper: UserMapper,
-    private readonly googleClient: GoogleClientUtil,
+    private readonly googleClient: GoogleClientService,
   ) {}
 
   private async mapToAuthenticatedDto(

@@ -2,7 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { createPaginatedSchema } from 'src/common/dto/paginated.dto';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { baseSchema } from 'src/common/schemas/base.schema';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import { urlSchema } from 'src/urls/dto/url.dto';
 import z from 'zod';
 

@@ -3,14 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { PaymentType } from 'src/common/enums/payment-type.enum';
 import { SubscriptionEndReason } from 'src/common/enums/subscription-end-reason.enum';
 import { MailSubscriptionTemplateInfo } from 'src/common/interfaces/mail.interface';
-import LoggerService from 'src/common/logger/logger.service';
-import { MailUtil } from 'src/common/utils/mail.util';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { Env } from 'src/config/env.config';
 import { SubscriptionCycle } from 'src/database/entities/subscription-cycle.entity';
 import Subscription from 'src/database/entities/subscription.entity';
 import { SubscriptionCycleRepository } from 'src/database/repositories/subscription-cycle.repository';
 import { SubscriptionRepository } from 'src/database/repositories/subscription.repository';
 import { TransactionRepository } from 'src/database/repositories/transaction.repository';
+import { MailService } from 'src/infrastructure/mail/mail.service';
 import { SubscriptionEventType } from 'src/queue/interfaces/mail-subscription.interface';
 import { CcBccItem, EmailAddress } from 'zeptomail/types';
 
@@ -19,7 +19,7 @@ export class MailSubscriptionService {
   private readonly APP_NAME: string;
 
   constructor(
-    private readonly mailUtil: MailUtil,
+    private readonly mailService: MailService,
     private readonly config: ConfigService<Env>,
     private readonly logger: LoggerService,
     private readonly cycleRepository: SubscriptionCycleRepository,
@@ -78,7 +78,7 @@ export class MailSubscriptionService {
         throw new Error(`Unknown event`);
     }
 
-    await this.mailUtil.sendTemplateEmail(
+    await this.mailService.sendTemplateEmail(
       to,
       'SUBSCRIPTION',
       data,

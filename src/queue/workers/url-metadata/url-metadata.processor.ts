@@ -4,11 +4,11 @@ import {
   UrlMetadata,
   UrlMetadataJob,
 } from 'src/queue/interfaces/url-metadata.interface';
-import { URL_METADATA_QUEUE } from 'src/queue/queue.constans';
+import { URL_METADATA_QUEUE } from 'src/queue/queue.constants';
 import UrlMetadataService from './url-metadata.service';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { UrlsService } from 'src/urls/urls.service';
-import { CacheService } from 'src/common/cache/cache.service';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import ms from 'ms';
 

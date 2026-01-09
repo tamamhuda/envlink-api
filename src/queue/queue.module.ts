@@ -8,7 +8,7 @@ import {
   SEND_MAIL_VERIFY_QUEUE,
   URL_ANALYTIC_QUEUE,
   URL_METADATA_QUEUE,
-} from './queue.constans';
+} from './queue.constants';
 import { MailVerifyProcessor } from './workers/mail/mail-verify.processor';
 import { MailVerifyService } from './workers/mail/mail-verify.service';
 import { UrlsModule } from 'src/urls/urls.module';
