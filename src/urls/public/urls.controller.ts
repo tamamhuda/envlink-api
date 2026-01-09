@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UrlsService } from '../urls.service';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import {
   PublicShortenUrlBodyDto,
   PublicShortenUrlRequest,
@@ -32,17 +32,17 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { UrlAnalyticInterceptor } from 'src/common/interceptors/url-analytic.interceptor';
-import { Public } from 'src/common/decorators/public.decorator';
-import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.decorator';
-import { PolicyScope } from 'src/common/throttle/throttle.constans';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import { UrlAnalyticInterceptor } from 'src/infrastructure/interceptors/url-analytic.interceptor';
+import { Public } from 'src/security/decorators/public.decorator';
+import { ThrottleScope } from 'src/infrastructure/internal-services/throttle/decorators/throttle-scope.decorator';
+import { PolicyScope } from 'src/infrastructure/internal-services/throttle/throttle.constants';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
 import { Request, Response } from 'express';
 import { UrlAccessGuard } from '../guards/url-access.guard';
 import { UnlockUrlBodyDto, UnlockUrlRequest } from '../dto/unlock.dto';
 import { ConfirmUrlBodyDto, ConfirmUrlRequest } from '../dto/confirm.dto';
 import { AnalyticType } from 'src/common/enums/analytic-type.enum';
-import { TurnstileGuard } from 'src/common/guards/turnstile.guard';
+import { TurnstileGuard } from 'src/security/guards/turnstile.guard';
 
 @Controller('public/urls')
 @ApiTags('Public URLs')

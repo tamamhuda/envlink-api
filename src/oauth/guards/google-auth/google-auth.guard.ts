@@ -7,8 +7,8 @@ import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
-import { GoogleClientUtil } from 'src/common/utils/google-client.util';
 import { getGoogleOauthConfig } from 'src/config/google-oauth.config';
+import { GoogleClientService } from 'src/infrastructure/integrations/google-client.service';
 import { URLSearchParams } from 'url';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class GoogleAuthGuard extends AuthGuard('google') {
   private readonly googleConfig: ReturnType<typeof getGoogleOauthConfig>;
   constructor(
     config: ConfigService,
-    private readonly client: GoogleClientUtil,
+    private readonly client: GoogleClientService,
   ) {
     super();
     this.googleConfig = getGoogleOauthConfig(config);

@@ -1,6 +1,6 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
-import LoggerService from 'src/common/logger/logger.service';
-import { SEND_MAIL_SUBSCRIPTION_QUEUE } from 'src/queue/queue.constans';
+import LoggerService from 'src/infrastructure/logger/logger.service';
+import { SEND_MAIL_SUBSCRIPTION_QUEUE } from 'src/queue/queue.constants';
 import { Job } from 'bullmq';
 import { SendMailSubscriptionJob } from 'src/queue/interfaces/mail-subscription.interface';
 import { MailSubscriptionService } from './mail-subscription.service';

@@ -4,7 +4,7 @@ import { SubscriptionInterval } from 'src/common/enums/Period.enum';
 import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
 import { baseSchema } from 'src/common/schemas/base.schema';
 import * as z from 'zod';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import { planSchema } from './plan.dto';
 
 export const subscriptionInfoSchema = baseSchema.extend({

@@ -1,6 +1,6 @@
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
-import { userBaseSchema } from './user.dto';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import { createZodDto } from 'nestjs-zod';
+import { userBaseSchema } from './user.dto';
 
 const updateSchema = userBaseSchema
   .pick({

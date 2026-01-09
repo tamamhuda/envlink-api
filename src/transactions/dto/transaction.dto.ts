@@ -1,9 +1,9 @@
 import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { PaymentType } from 'src/common/enums/payment-type.enum';
-import { TransactionStatus } from 'src/common/enums/trasaction-status.enum';
+import { TransactionStatus } from 'src/common/enums/transaction-status.enum';
 import { baseSchema } from 'src/common/schemas/base.schema';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 
 import * as z from 'zod';
 

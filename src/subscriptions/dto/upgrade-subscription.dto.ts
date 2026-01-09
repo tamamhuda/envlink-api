@@ -2,7 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { SubscriptionInterval } from 'src/common/enums/Period.enum';
 import { PlanEnum } from 'src/common/enums/plans.enum';
 import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import * as z from 'zod';
 
 export const upgradeSubscriptionDtoSchema = zodToCamelCase(

@@ -4,17 +4,17 @@ import {
   MailSubscriptionTemplateInfo,
   MailVerifyTemplateInfo,
 } from 'src/common/interfaces/mail.interface';
-import { MailUtil } from 'src/common/utils/mail.util';
 import { Env } from 'src/config/env.config';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { CcBccItem } from 'zeptomail/types';
+import { MailService } from 'src/infrastructure/mail/mail.service';
 
 @Injectable()
 export class MailVerifyService {
   private readonly APP_NAME: string;
 
   constructor(
-    private readonly mailUtil: MailUtil,
+    private readonly mailService: MailService,
     private readonly config: ConfigService<Env>,
     private readonly logger: LoggerService,
   ) {
@@ -40,7 +40,7 @@ export class MailVerifyService {
       },
     ];
 
-    await this.mailUtil.sendTemplateEmail(
+    await this.mailService.sendTemplateEmail(
       to,
       'VERIFY_EMAIL',
       mergeInfo,

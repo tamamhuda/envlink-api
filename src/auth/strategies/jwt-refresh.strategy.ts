@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/env.config';
 import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { Request } from 'express';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { SessionService } from 'src/sessions/session.service';
 
 @Injectable()

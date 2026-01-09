@@ -1,5 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import * as z from 'zod';
 
 const changePasswordSchema = zodToCamelCase(

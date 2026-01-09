@@ -1,4 +1,4 @@
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { SubscriptionsService } from './subscriptions.service';
 import { Injectable } from '@nestjs/common';
 import { SubscriptionHistoryRepository } from 'src/database/repositories/subscription-history.repository';

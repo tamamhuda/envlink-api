@@ -3,21 +3,21 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { SEND_MAIL_RESET_PASSWORD_QUEUE } from 'src/queue/queue.constans';
+import { SEND_MAIL_RESET_PASSWORD_QUEUE } from 'src/queue/queue.constants';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { TokenUtil } from 'src/common/utils/token.util';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/config/env.config';
 import { AccountRepository } from 'src/database/repositories/account.repository';
 import { Account } from 'src/database/entities/account.entity';
-import { CacheService } from 'src/common/cache/cache.service';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { SendMailResetPasswordJob } from 'src/queue/interfaces/mail-reset-password.interface';
-import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { Url } from 'src/database/entities/url.entity';
 import { User } from 'src/database/entities/user.entity';
 import ms, { StringValue } from 'ms';
+import { TokenService } from 'src/security/services/token.service';
+import { BcryptService } from 'src/security/services/bcrypt.service';
 
 @Injectable()
 export class AccountResetPasswordService {
@@ -26,10 +26,10 @@ export class AccountResetPasswordService {
     private readonly accountRepository: AccountRepository,
     @InjectQueue(SEND_MAIL_RESET_PASSWORD_QUEUE)
     private readonly mailResetQueue: Queue<SendMailResetPasswordJob>,
-    private readonly tokenUtil: TokenUtil,
+    private readonly tokenService: TokenService,
     private readonly cache: CacheService,
     private readonly configService: ConfigService<Env>,
-    private readonly bcryptUtil: BcryptUtil,
+    private readonly bcryptService: BcryptService,
   ) {
     const APP_URL = this.configService.getOrThrow('APP_URL');
     const API_PREFIX = this.configService.getOrThrow('API_PREFIX');
@@ -44,7 +44,7 @@ export class AccountResetPasswordService {
 
     const TTL_MINUTES = 15;
     const exp = Math.floor(Date.now() / 1000) + TTL_MINUTES * 60;
-    const token = this.tokenUtil.create(user.id, email, TTL_MINUTES);
+    const token = this.tokenService.create(user.id, email, TTL_MINUTES);
 
     let resetPasswordLink = resetPasswordUrl.endsWith('/')
       ? resetPasswordUrl
@@ -67,7 +67,7 @@ export class AccountResetPasswordService {
   }
 
   async resetPassword(token: string, password: string): Promise<Account[]> {
-    const payload = this.tokenUtil.verify(token);
+    const payload = this.tokenService.verify(token);
 
     if (!payload) throw new ForbiddenException();
     const { email, sub, isExpired, exp } = payload;
@@ -83,7 +83,7 @@ export class AccountResetPasswordService {
 
     const accounts = await this.findAccountsByEmail(email);
     await this.accountRepository.updateMany(accounts, {
-      passwordHash: await this.bcryptUtil.hashPassword(password),
+      passwordHash: await this.bcryptService.hashPassword(password),
     });
 
     await this.cache.set(

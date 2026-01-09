@@ -1,7 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import { userBaseSchema } from 'src/user/dto/user.dto';
 import * as z from 'zod';
 

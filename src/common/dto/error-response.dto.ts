@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import * as z from 'zod';
-import { ErrorApiResponse } from '../interfaces/api-response.intercace';
+import { ErrorApiResponse } from '../../common/interfaces/api-response.intercace';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
 function createErrorResponseSchema<T extends StatusCodes>(statusCode: T) {

@@ -4,7 +4,7 @@ import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
 import { PlanEnum } from 'src/common/enums/plans.enum';
 import { createZodDto } from 'nestjs-zod';
 import { baseSchema } from 'src/common/schemas/base.schema';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import { planSchema } from './plan.dto';
 
 export const upgradeOptionsSchema = z.object({

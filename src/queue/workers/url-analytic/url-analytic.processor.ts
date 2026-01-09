@@ -1,26 +1,26 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { URL_ANALYTIC_QUEUE } from 'src/queue/queue.constans';
+import { URL_ANALYTIC_QUEUE } from 'src/queue/queue.constants';
 import { AnalyticDto } from 'src/urls/dto/analytic.dto';
 import { UrlAnalyticService } from './url-analytic.service';
 import { UrlAnalyticJob } from 'src/queue/interfaces/url-analytic.interface';
 import { UrlsService } from 'src/urls/urls.service';
-import { IpUtil } from 'src/common/utils/ip.util';
-import LoggerService from 'src/common/logger/logger.service';
-import { CacheService } from 'src/common/cache/cache.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import ms from 'ms';
 import { Url } from 'src/database/entities/url.entity';
 import { Channel } from 'src/database/entities/channel.entity';
-import { ClientIdentityUtil } from 'src/common/utils/client-identity.util';
 import { Analytic } from 'src/database/entities/analytic.entity';
 import { AnalyticType } from 'src/common/enums/analytic-type.enum';
+import { IpService } from 'src/infrastructure/internal-services/request/ip.service';
+import { ClientIdentityService } from 'src/infrastructure/internal-services/request/client-identity.service';
 
 @Processor(URL_ANALYTIC_QUEUE, { concurrency: 10 })
 export class UrlAnalyticProcessor extends WorkerHost {
   constructor(
-    private readonly clientIdentityUtil: ClientIdentityUtil,
-    private readonly ipUtil: IpUtil,
+    private readonly clientIdentityService: ClientIdentityService,
+    private readonly ipService: IpService,
     private readonly urlService: UrlsService,
     private readonly analyticsService: UrlAnalyticService,
     private readonly logger: LoggerService,
@@ -67,7 +67,7 @@ export class UrlAnalyticProcessor extends WorkerHost {
       region,
       countryCode: country,
       language,
-    } = await this.ipUtil.getIpLocation(ipAddress);
+    } = await this.ipService.getIpLocation(ipAddress);
 
     const dto: Partial<Analytic> = {
       identityHash,
@@ -105,10 +105,10 @@ export class UrlAnalyticProcessor extends WorkerHost {
     try {
       const url = await this.urlService.getUrlBySlug(slug);
       const { browser, os, deviceType } =
-        this.clientIdentityUtil.parseUserAgent(userAgent);
+        this.clientIdentityService.parseUserAgent(userAgent);
 
       const { identityHash, visitHash } =
-        this.clientIdentityUtil.generateHashes(url.code, ipAddress, {
+        this.clientIdentityService.generateHashes(url.code, ipAddress, {
           os,
           browser,
           deviceType,

@@ -9,14 +9,14 @@ import Subscription from 'src/database/entities/subscription.entity';
 import Plan from 'src/database/entities/plan.entity';
 import { UpgradeStrategy } from 'src/common/enums/upgrade-strategy.enum';
 import { SubscriptionStatus } from 'src/common/enums/subscription-status.enum';
-import { XenditService } from 'src/common/xendit/xendit.service';
+import { XenditService } from 'src/infrastructure/integrations/xendit/xendit.service';
 import { SubscriptionInfoDto } from './dto/subscription.dto';
 import {
   RecurringPaymentMethod,
   RecurringPlanData,
 } from 'src/common/interfaces/xendit.interface';
 import { User } from 'src/database/entities/user.entity';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { PlanRepository } from 'src/database/repositories/plan.reposiotry';
 import { PlanEnum } from 'src/common/enums/plans.enum';
 import {

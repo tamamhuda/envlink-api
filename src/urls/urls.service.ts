@@ -6,16 +6,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UrlRepository } from 'src/database/repositories/url.repository';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
+
 import { ShortenUrlBodyDto } from './dto/shorten.dto';
 import { UrlDto, UrlPaginatedDto } from './dto/url.dto';
 import { UserService } from 'src/user/user.service';
 import { Url } from 'src/database/entities/url.entity';
 import { Request, Response } from 'express';
-import { BcryptUtil } from 'src/common/utils/bcrypt.util';
-import { ShortCodeUtil } from 'src/common/utils/short-code.util';
+
 import { InjectQueue } from '@nestjs/bullmq';
-import { URL_METADATA_QUEUE } from 'src/queue/queue.constans';
+import { URL_METADATA_QUEUE } from 'src/queue/queue.constants';
 import { Queue } from 'bullmq';
 import {
   UrlMetadata,
@@ -27,7 +27,6 @@ import { UserInfo } from 'src/auth/dto/user-info.dto';
 import { PaginatedQueryDto } from 'src/common/dto/paginated.dto';
 import { UrlGeneratorService } from 'nestjs-url-generator';
 import { FilterQueryDto } from './dto/filter-query.dto';
-import { CacheService } from 'src/common/cache/cache.service';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
 import { BulkUpdateUrlsBodyDto } from './dto/bulk-udate.dto';
 import { OkDto } from 'src/common/dto/response.dto';
@@ -37,14 +36,16 @@ import { PublicUrlDto, publicUrlDtoSchema } from './dto/public-url.dto';
 import { UnlockUrlBodyDto } from './dto/unlock.dto';
 import { UpdateUrlBodyDto } from './dto/update.dto';
 import { ConfirmUrlBodyDto } from './dto/confirm.dto';
-import { RedirectTokenUtil } from 'src/common/utils/redirect-token.util';
 import { AnalyticType } from 'src/common/enums/analytic-type.enum';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
+import { BcryptService } from 'src/security/services/bcrypt.service';
+import { RedirectTokenService } from 'src/security/services/redirect-token.service';
+import { generateShortCode } from 'src/common/helpers/short-code.helper';
 
 @Injectable()
 export class UrlsService {
-  private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
-  private readonly shortCodeUtil: ShortCodeUtil = new ShortCodeUtil();
   constructor(
+    private readonly bcryptService: BcryptService,
     private readonly urlRepository: UrlRepository,
     private readonly urlGenService: UrlGeneratorService,
     private readonly logger: LoggerService,
@@ -52,7 +53,7 @@ export class UrlsService {
     private readonly urlMetadataQueue: Queue<UrlMetadataJob>,
     private readonly userService: UserService,
     private readonly cache: CacheService,
-    private readonly redirectTokenUtil: RedirectTokenUtil,
+    private readonly redirectTokenService: RedirectTokenService,
   ) {}
 
   async findUrlByIdOrCode(id?: string, code?: string): Promise<Url> {
@@ -159,10 +160,10 @@ export class UrlsService {
   }
 
   async generateAndValidateCode() {
-    let code = this.shortCodeUtil.generate(6);
+    let code = generateShortCode(6);
     let url = await this.urlRepository.findOneByCode(code);
     while (url) {
-      code = this.shortCodeUtil.generate(6);
+      code = generateShortCode(6);
       url = await this.urlRepository.findOneByCode(code);
     }
     return code;
@@ -190,7 +191,7 @@ export class UrlsService {
 
       const accessCodeHash =
         isProtected && accessCode
-          ? await this.bcryptUtil.hashAccessCode(accessCode)
+          ? await this.bcryptService.hashAccessCode(accessCode)
           : undefined;
 
       let channels: Channel[] = [];
@@ -263,7 +264,10 @@ export class UrlsService {
     const url = await this.getUrlBySlug(slug);
     const isValidate =
       url.accessCode &&
-      (await this.bcryptUtil.verifyAccessCode(body.accessCode, url.accessCode));
+      (await this.bcryptService.verifyAccessCode(
+        body.accessCode,
+        url.accessCode,
+      ));
     if (!isValidate) throw new ConflictException('Invalid access code');
 
     req.eventType = AnalyticType.CLICK;
@@ -278,7 +282,7 @@ export class UrlsService {
     body: ConfirmUrlBodyDto,
   ): Promise<void> {
     const { token } = body;
-    const result = this.redirectTokenUtil.verify(token);
+    const result = this.redirectTokenService.verify(token);
     if (!result || result.isExpired)
       throw new ForbiddenException('INVALID_REDIRECT_TOKEN');
 

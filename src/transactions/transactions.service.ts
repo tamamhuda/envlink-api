@@ -6,8 +6,8 @@ import {
 import { TransactionRepository } from 'src/database/repositories/transaction.repository';
 import { TransactionDto, transactionStatusSchema } from './dto/transaction.dto';
 import { Transaction } from 'src/database/entities/transaction.entity';
-import { TransactionStatus } from 'src/common/enums/trasaction-status.enum';
-import LoggerService from 'src/common/logger/logger.service';
+import { TransactionStatus } from 'src/common/enums/transaction-status.enum';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 
 @Injectable()
 export class TransactionsService {

@@ -12,9 +12,9 @@ import {
   PaginatedOptions,
   PaginatedResult,
 } from 'src/common/interfaces/paginated.interface';
-import { paginatedResult } from 'src/common/utils/paginate.util';
 import { UrlLogsQueryDto, TimelineQueryDto } from 'src/analytics/dto/query.dto';
 import { AnalyticUtil } from '../utils/analytic.util';
+import { paginatedResult } from 'src/common/helpers/paginate.helper';
 
 @Injectable()
 export class AnalyticRepository extends Repository<Analytic> {

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { PlanRepository } from 'src/database/repositories/plan.reposiotry';
 import { PlanEnum } from 'src/common/enums/plans.enum';
 

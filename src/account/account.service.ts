@@ -7,12 +7,11 @@ import {
 import { Account } from 'src/database/entities/account.entity';
 import { ProviderEnum } from 'src/common/enums/provider.enum';
 import { AccountRepository } from 'src/database/repositories/account.repository';
-import { BcryptUtil } from 'src/common/utils/bcrypt.util';
 import { SessionService } from 'src/sessions/session.service';
 import { Request } from 'express';
 import { ChangePasswordBodyDto } from 'src/auth/dto/change-password.dto';
 import { UserInfoDto } from 'src/auth/dto/user-info.dto';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { Profile } from 'passport-google-oauth20';
 import { User } from 'src/database/entities/user.entity';
 import { TokensDto } from 'src/auth/dto/token.dto';
@@ -20,13 +19,14 @@ import { EntityManager } from 'typeorm';
 import Plan from 'src/database/entities/plan.entity';
 import { PlanEnum } from 'src/common/enums/plans.enum';
 import Subscription from 'src/database/entities/subscription.entity';
-import { XenditService } from 'src/common/xendit/xendit.service';
+import { XenditService } from 'src/infrastructure/integrations/xendit/xendit.service';
 import { GoogleProfile } from 'src/common/interfaces/google-profile.interface';
+import { BcryptService } from 'src/security/services/bcrypt.service';
 
 @Injectable()
 export class AccountService {
-  private readonly bcryptUtil: BcryptUtil = new BcryptUtil();
   constructor(
+    private readonly bcryptService: BcryptService,
     private readonly accountRepository: AccountRepository,
     private readonly sessionService: SessionService,
     private readonly xenditService: XenditService,
@@ -95,7 +95,7 @@ export class AccountService {
       ProviderEnum.LOCAL,
     );
 
-    const isPasswordValid = await this.bcryptUtil.comparePassword(
+    const isPasswordValid = await this.bcryptService.comparePassword(
       passowrd,
       account.passwordHash as string,
     );
@@ -122,7 +122,7 @@ export class AccountService {
       oldPassword,
     );
 
-    const passwordHash = await this.bcryptUtil.hashPassword(newPassword);
+    const passwordHash = await this.bcryptService.hashPassword(newPassword);
 
     await this.update(existingAccount, {
       passwordHash,

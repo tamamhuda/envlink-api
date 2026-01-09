@@ -14,7 +14,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UrlsService } from './urls.service';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { ShortenUrlBodyDto, ShortenUrlRequest } from './dto/shorten.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
@@ -36,16 +36,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { ThrottlePlan } from 'src/common/throttle/decorators/throttle-plan.decorator';
-import { JWT_SECURITY } from 'src/config/jwt.config';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+
 import {
   PaginatedQuery,
   PaginatedQueryDto,
 } from 'src/common/dto/paginated.dto';
-import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
-import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
+
 import { FilterQueryDto } from './dto/filter-query.dto';
 import { ApiUrlFilterQuery } from './decorators/api-filter-query.decorator';
 import {
@@ -58,6 +55,11 @@ import {
   BulkDeleteUrlsRequest,
 } from './dto/bulk-delete.dto';
 import { UpdateUrlBodyDto, UpdateUrlRequest } from './dto/update.dto';
+import { JWT_SECURITY } from 'src/config/jwt.config';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
+import { ThrottlePlan } from 'src/infrastructure/internal-services/throttle/decorators/throttle-plan.decorator';
+import { ApiPaginationQuery } from 'src/common/decorators/api-pagination.decorator';
+import { AuthenticatedUser } from 'src/security/decorators/authenticated-user.dto';
 
 @ApiBearerAuth(JWT_SECURITY)
 @Controller('urls')

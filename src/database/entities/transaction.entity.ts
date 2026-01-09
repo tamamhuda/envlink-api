@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { User } from './user.entity';
-import { TransactionStatus } from 'src/common/enums/trasaction-status.enum';
+import { TransactionStatus } from 'src/common/enums/transaction-status.enum';
 import { SubscriptionCycle } from './subscription-cycle.entity';
 import { PaymentMethod } from './payment-method.entity';
 import { PaymentType } from 'src/common/enums/payment-type.enum';

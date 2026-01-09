@@ -4,10 +4,11 @@ import {
   HealthCheckService,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
-import { CacheHealthIndicator } from 'src/common/cache/cache-health.indicator';
-import { IpHealthIndicator } from './ip-health.indicator';
-import { Public } from 'src/common/decorators/public.decorator';
+
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CacheHealthIndicator } from 'src/infrastructure/cache/cache-health.indicator';
+import { Public } from 'src/security/decorators/public.decorator';
+import { IpHealthIndicator } from './ip-health.indicator';
 
 @Public()
 @Controller('health')

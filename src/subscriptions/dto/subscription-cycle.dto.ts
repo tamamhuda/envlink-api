@@ -2,7 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { createResponseDto } from 'src/common/dto/response.dto';
 import { RecurringCycleStatus } from 'src/common/enums/recurring-cycle-status.enum';
 import { baseSchema } from 'src/common/schemas/base.schema';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 import * as z from 'zod';
 
 export const subscriptionCycleSchema = baseSchema.extend({

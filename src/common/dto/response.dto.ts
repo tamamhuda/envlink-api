@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import * as z from 'zod';
-import { ApiResponse } from '../interfaces/api-response.intercace';
+import { ApiResponse } from '../../common/interfaces/api-response.intercace';
 import { HttpStatus } from '@nestjs/common';
 
 const okResponseSchema = z.object({

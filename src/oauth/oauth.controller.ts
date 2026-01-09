@@ -9,15 +9,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { OauthService } from './oauth.service';
-import { Public } from 'src/common/decorators/public.decorator';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+
 import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 import { Request, Response } from 'express';
 import {
   ExchangeCodeBodyDto,
   ExchangeCodeRequest,
 } from './dto/exchange-code.dto';
-import { CacheService } from 'src/common/cache/cache.service';
+
 import {
   ApiBody,
   ApiOkResponse,
@@ -37,6 +36,9 @@ import {
   GoogleCredential,
   GoogleCredentialRequest,
 } from './dto/google-credential.dto';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
+import { Public } from 'src/security/decorators/public.decorator';
 
 @Controller('oauth')
 @Public()

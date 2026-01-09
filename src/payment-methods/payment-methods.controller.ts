@@ -19,7 +19,7 @@ import {
   PaymentMethodSerializerDto,
 } from './dto/payment-method.dto';
 import { Request } from 'express';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
 import {
   ApiBody,
   ApiOkResponse,
@@ -38,9 +38,9 @@ import {
   AllPaymentMethodActionResponse,
   PaymentMethodActionResponse,
 } from './dto/request-payment-method.dto';
-import LoggerService from 'src/common/logger/logger.service';
+import LoggerService from 'src/infrastructure/logger/logger.service';
 import { UserInfo } from 'src/auth/dto/user-info.dto';
-import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.dto';
+import { AuthenticatedUser } from 'src/security/decorators/authenticated-user.dto';
 import {
   CreatePaymentMethodBodyDto,
   CreatePaymentMethodRequest,
@@ -50,9 +50,9 @@ import {
   ValidatePaymentMethodBodyDto,
   ValidatePaymentMethodRequest,
 } from './dto/validate-payment-method.dto';
-import { Cached } from 'src/common/decorators/cached.decorator';
+import { Cached } from 'src/infrastructure/cache/decorators/cached.decorator';
 import { CachePrefix } from 'src/common/enums/cache-prefix.enum';
-import { InvalidateCache } from 'src/common/decorators/invalidate-cache.decorator';
+import { InvalidateCache } from 'src/infrastructure/cache/decorators/invalidate-cache.decorator';
 
 @SkipThrottle()
 @Controller('payment-methods')

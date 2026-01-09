@@ -13,11 +13,11 @@ import {
   PlanSerializerDto,
 } from '../dto/plan.dto';
 import { SubscriptionsPlansService } from '../plans/plans.service';
-import { Public } from 'src/common/decorators/public.decorator';
+import { Public } from 'src/security/decorators/public.decorator';
 import { PlanEnum } from 'src/common/enums/plans.enum';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SkipThrottle } from 'src/common/throttle/decorators/skip-throttle.decorator';
+import { SkipThrottle } from 'src/infrastructure/internal-services/throttle/decorators/skip-throttle.decorator';
 
 @Controller('public/subscriptions/plans')
 @ApiTags('Public Subscriptions Plans')

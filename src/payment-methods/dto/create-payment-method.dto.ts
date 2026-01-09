@@ -1,6 +1,6 @@
 import * as z from 'zod';
 import { createZodDto } from 'nestjs-zod';
-import { zodToCamelCase } from 'src/common/utils/case-transform.util';
+import { zodToCamelCase } from 'src/common/helpers/case-transform.helper';
 
 const requiredEwalletSchema = z.object({
   channel_code: z.enum(['DANA', 'SHOPEEPAY']),
