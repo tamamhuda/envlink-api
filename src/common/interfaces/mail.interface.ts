@@ -25,3 +25,12 @@ export interface MailSubscriptionTemplateInfo {
   app_name: string;
   [key: string]: string;
 }
+
+export interface MailResetPasswordTemplateInfo {
+  APP_NAME: string;
+  GIVEN_NAME: string;
+  RESET_PASSWORD_URL: string;
+  DURATION: string;
+  CURRENT_YEAR: string;
+  [key: string]: string;
+}

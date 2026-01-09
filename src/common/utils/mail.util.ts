@@ -22,7 +22,7 @@ export class MailUtil {
 
   async sendTemplateEmail(
     to: CcBccItem[],
-    template: 'VERIFY_EMAIL' | 'SUBSCRIPTION',
+    template: 'VERIFY_EMAIL' | 'SUBSCRIPTION' | 'RESET_PASSWORD',
     merge_info: Record<string, string>,
     subject: string,
   ) {

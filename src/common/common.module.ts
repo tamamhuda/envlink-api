@@ -32,6 +32,8 @@ import { GoogleClientUtil } from './utils/google-client.util';
 import { XenditInitializeService } from './xendit/xendit-initialize.service';
 import { RedirectTokenUtil } from './utils/redirect-token.util';
 import { GoodBotsService } from './services/good-bot.service';
+import { TurnstileService } from './services/turnstile.service';
+import { BcryptUtil } from './utils/bcrypt.util';
 
 @Global()
 @Module({
@@ -69,10 +71,12 @@ import { GoodBotsService } from './services/good-bot.service';
     TokenUtil,
     GoogleClientUtil,
     RedirectTokenUtil,
+    BcryptUtil,
 
     XenditService,
     XenditInitializeService,
     GoodBotsService,
+    TurnstileService,
 
     ClientUrlMiddleware,
   ],
@@ -109,10 +113,12 @@ import { GoodBotsService } from './services/good-bot.service';
     TokenUtil,
     GoogleClientUtil,
     RedirectTokenUtil,
+    BcryptUtil,
 
     XenditService,
     XenditInitializeService,
     GoodBotsService,
+    TurnstileService,
 
     ClientUrlMiddleware,
   ],
