@@ -43,18 +43,25 @@ export const shortenUrlSchema = zodToCamelCase(
   ),
 );
 
-export const publicShortenUrlSchema = zodToCamelCase(
-  baseShortenUrlSchema.pick({
+export const publicShortenUrlSchema = baseShortenUrlSchema
+  .pick({
     original_url: true,
-  }),
-);
+  })
+  .extend({
+    captcha_token: z.string().optional(),
+  });
 
-export class ShortenUrlBodyDto extends createZodDto(shortenUrlSchema) {}
+export const publicShortenUrlDto = zodToCamelCase(publicShortenUrlSchema);
+export const shortenUrlDto = zodToCamelCase(shortenUrlSchema);
 
-export class ShortenUrlRequest extends ShortenUrlBodyDto {}
+export class ShortenUrlBodyDto extends createZodDto(shortenUrlDto) {}
+
+export class ShortenUrlRequest extends createZodDto(shortenUrlSchema) {}
 
 export class PublicShortenUrlBodyDto extends createZodDto(
-  publicShortenUrlSchema,
+  publicShortenUrlDto,
 ) {}
 
-export class PublicShortenUrlRequest extends PublicShortenUrlBodyDto {}
+export class PublicShortenUrlRequest extends createZodDto(
+  publicShortenUrlSchema,
+) {}

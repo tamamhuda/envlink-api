@@ -42,6 +42,7 @@ import { UrlAccessGuard } from '../guards/url-access.guard';
 import { UnlockUrlBodyDto, UnlockUrlRequest } from '../dto/unlock.dto';
 import { ConfirmUrlBodyDto, ConfirmUrlRequest } from '../dto/confirm.dto';
 import { AnalyticType } from 'src/common/enums/analytic-type.enum';
+import { TurnstileGuard } from 'src/common/guards/turnstile.guard';
 
 @Controller('public/urls')
 @ApiTags('Public URLs')
@@ -53,6 +54,7 @@ export class PublicUrlsController {
   ) {}
 
   @Post('shorten')
+  @UseGuards(TurnstileGuard)
   @ThrottleScope(PolicyScope.SHORTEN_PUBLIC)
   @ApiBody({ type: PublicShortenUrlRequest })
   @ApiOperation({
