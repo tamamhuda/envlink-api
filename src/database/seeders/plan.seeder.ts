@@ -13,8 +13,8 @@ export class PlanSeeder {
     const plans: Partial<Plan>[] = [
       {
         name: PlanEnum.FREE,
-        limit: 100,
-        resetInterval: '24h',
+        limit: 25,
+        resetInterval: '30d',
         cost: 0,
         chargeOnSuccess: false,
         price: 0,
@@ -25,8 +25,8 @@ export class PlanSeeder {
       },
       {
         name: PlanEnum.STARTER,
-        limit: 1000,
-        resetInterval: '24h',
+        limit: 300,
+        resetInterval: '30d',
         cost: 5,
         chargeOnSuccess: true,
         price: 75000,
@@ -42,7 +42,7 @@ export class PlanSeeder {
       },
       {
         name: PlanEnum.PRO,
-        limit: 5000,
+        limit: 50,
         resetInterval: '24h',
         cost: 15,
         chargeOnSuccess: true,

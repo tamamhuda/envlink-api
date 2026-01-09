@@ -4,7 +4,9 @@ import { User } from './user.entity';
 
 @Entity({ name: 'billing_address' })
 export class BillingAddress extends BaseEntity {
-  @ManyToOne(() => User, (user) => user.billingAddresses)
+  @ManyToOne(() => User, (user) => user.billingAddresses, {
+    onDelete: 'CASCADE',
+  })
   user!: User;
 
   @Column({ type: 'varchar', length: 100, nullable: true })

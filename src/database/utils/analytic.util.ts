@@ -67,7 +67,6 @@ export class AnalyticUtil {
 }
 
 /** helpers */
-
 function mergeArray(
   bucket: any[],
   field: string,
