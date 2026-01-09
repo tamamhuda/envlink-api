@@ -55,6 +55,8 @@ export class AccountVerifyService {
       verifyLink = verifyLink.replace(this.BASE_URL, clientUrl);
     }
 
+    console.log(`Verify link: ${verifyLink}`);
+
     await this.mailVerifyQueue.add('EmailVerification', {
       email,
       firstName: name.split(' ')[0],

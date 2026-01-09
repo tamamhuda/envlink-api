@@ -104,4 +104,12 @@ export class AccountRepository extends Repository<Account> {
     const merge = this.merge(account, data);
     return await this.save(merge);
   }
+
+  async updateMany(
+    accounts: Account[],
+    data: Partial<Account>,
+  ): Promise<Account[]> {
+    const merges = accounts.map((account) => this.merge(account, data));
+    return await this.save(merges);
+  }
 }
