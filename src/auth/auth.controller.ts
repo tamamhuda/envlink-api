@@ -48,6 +48,16 @@ import { ThrottleScope } from 'src/common/throttle/decorators/throttle-scope.dec
 import { JWT_REFRESH_SECURITY } from 'src/config/jwt.config';
 import { ClientUrl } from 'src/common/decorators/client-url.decorator';
 import { LoginRequest } from './dto/login.dto';
+import { TurnstileGuard } from 'src/common/guards/turnstile.guard';
+import { OkDto, OkResponse } from 'src/common/dto/response.dto';
+import {
+  ResetPasswordBodyDto,
+  ResetPasswordRequest,
+} from './dto/reset-password.dto';
+import {
+  ForgotPasswordBodyDto,
+  ForgotPasswordRequest,
+} from './dto/forgot-password.dto';
 
 @Controller('auth')
 @Public()
@@ -60,6 +70,7 @@ export class AuthController {
 
   @Post('register')
   @ThrottleScope(PolicyScope.REGISTER)
+  @UseGuards(TurnstileGuard)
   @ApiOperation({
     operationId: 'Register',
     summary: 'Register a new account',
@@ -92,6 +103,7 @@ export class AuthController {
   @Post('login')
   @SkipThrottle()
   @UseGuards(LocalAuthGuard)
+  @UseGuards(TurnstileGuard)
   @ApiOperation({ operationId: 'Login', summary: 'Login an account' })
   @ApiOkResponse({
     type: AuthenticatedResponse,
@@ -136,5 +148,40 @@ export class AuthController {
   @ZodSerializerDto(UserInfoSerializerDto)
   async verify(@Query('token') token: string): Promise<UserInfoDto> {
     return await this.authService.verify(token);
+  }
+
+  @Post('forgot-password')
+  @ThrottleScope(PolicyScope.FORGOT_PASSWORD)
+  @UseGuards(TurnstileGuard)
+  @ApiOperation({ operationId: 'ForgotPassword', summary: 'Forgot password' })
+  @ApiBody({
+    type: ForgotPasswordRequest,
+    description: 'Request Body for forgot password',
+    required: true,
+  })
+  @ApiOkResponse({
+    type: OkResponse,
+    description: 'Forgot password successful',
+  })
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() body: ForgotPasswordBodyDto): Promise<OkDto> {
+    return this.authService.forgotPassword(body);
+  }
+
+  @Post('reset-password')
+  @SkipThrottle()
+  @ApiOperation({ operationId: 'ResetPassword', summary: 'Reset password ' })
+  @ApiBody({
+    type: ResetPasswordRequest,
+    description: 'Request Body for resetting password',
+    required: true,
+  })
+  @ApiOkResponse({
+    type: OkResponse,
+    description: 'Reset password successful',
+  })
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() body: ResetPasswordBodyDto): Promise<OkDto> {
+    return await this.authService.resetPassword(body.token, body.password);
   }
 }

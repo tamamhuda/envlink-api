@@ -14,6 +14,13 @@ import { IpUtil } from 'src/common/utils/ip.util';
 import { AccountVerifyService } from 'src/account/account-verify.service';
 import { UserMapper } from 'src/user/mapper/user.mapper';
 import { CacheService } from 'src/common/cache/cache.service';
+import { OkDto } from 'src/common/dto/response.dto';
+import { Queue } from 'bullmq';
+import { SEND_MAIL_RESET_PASSWORD_QUEUE } from 'src/queue/queue.constans';
+import { InjectQueue } from '@nestjs/bullmq';
+import { SendMailResetPasswordJob } from 'src/queue/interfaces/mail-reset-password.interface';
+import { AccountResetPasswordService } from 'src/account/account-reset-password.service';
+import { ForgotPasswordBodyDto } from './dto/forgot-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +35,9 @@ export class AuthService {
     private readonly ipUtil: IpUtil,
     private readonly logger: LoggerService,
     private readonly accountVerifyService: AccountVerifyService,
+    private readonly accountResetPasswordService: AccountResetPasswordService,
+    @InjectQueue(SEND_MAIL_RESET_PASSWORD_QUEUE)
+    private readonly mailResetPasswordQueue: Queue<SendMailResetPasswordJob>,
   ) {}
 
   async register(
@@ -125,5 +135,22 @@ export class AuthService {
     const account = await this.accountVerifyService.verify(token);
 
     return this.userMapper.mapToUserInfoDto(account, account.user);
+  }
+
+  async forgotPassword(body: ForgotPasswordBodyDto): Promise<OkDto> {
+    const { resetUrl, email } = body;
+    await this.accountResetPasswordService.send(email, resetUrl);
+
+    return {
+      message: 'If the email is valid, a password reset email will be sent.',
+    };
+  }
+
+  async resetPassword(token: string, password: string): Promise<OkDto> {
+    await this.accountResetPasswordService.resetPassword(token, password);
+
+    return {
+      message: 'Password reset successfully.',
+    };
   }
 }
