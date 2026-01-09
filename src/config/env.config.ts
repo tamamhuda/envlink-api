@@ -45,9 +45,9 @@ const envSchema = z
     AWS_S3_REGION: z.string().nonempty(''),
     AWS_S3_ENDPOINT: z.string().nonempty(''),
 
-    MAILTRAP_TOKEN: z.string().nonempty(),
-    TEMPLATE_ID_VERIFY_EMAIL: z.string().nonempty(),
-    MAIL_SENDER: z.string().nonempty('no-reply@envlink.one'),
+    // MAILTRAP_TOKEN: z.string().nonempty(),
+    // TEMPLATE_ID_VERIFY_EMAIL: z.string().nonempty(),
+    // MAIL_SENDER: z.string().nonempty('no-reply@envlink.one'),
 
     IP2_API_KEY: z.string().nonempty(),
 
@@ -58,6 +58,7 @@ const envSchema = z
     ZEPTOMAIL_TOKEN: z.string().nonempty(),
     TEMPLATE_KEY_VERIFY_EMAIL: z.string().nonempty(),
     TEMPLATE_KEY_SUBSCRIPTION: z.string().nonempty(),
+    TEMPLATE_KEY_RESET_PASSWORD: z.string().nonempty(),
     SENDER_ADDRESS: z.string().nonempty(),
     SENDER_NOTIFICATION: z.string().nonempty(),
     ZEPTO_API_URL: z.string().nonempty('api.zeptomail.com'),
@@ -65,6 +66,12 @@ const envSchema = z
     GOOGLE_CLIENT_ID: z.string().nonempty(),
     GOOGLE_CLIENT_SECRET: z.string().nonempty(),
     GOOGLE_CALLBACK_URL: z.string().nonempty(),
+
+    TURNSTILE_SECRET_KEY: z.string().nonempty().default(''),
+    TURNSTILE_ENABLED: z
+      .string()
+      .default('false')
+      .transform((value) => value === 'true'),
   })
   .required();
 

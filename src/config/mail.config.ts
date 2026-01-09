@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Env } from './env.config';
 
 export type TemplateOption = Record<
-  'VERIFY_EMAIL' | 'SUBSCRIPTION',
+  'VERIFY_EMAIL' | 'SUBSCRIPTION' | 'RESET_PASSWORD',
   Record<'KEY' | 'SENDER' | 'NAME', string>
 >;
 
@@ -22,6 +22,11 @@ export const templateOption = (config: ConfigService<Env>) => ({
     KEY: config.getOrThrow('TEMPLATE_KEY_SUBSCRIPTION'),
     NAME: 'Envlink Subscription',
     SENDER: config.getOrThrow('SENDER_NOTIFICATION'),
+  },
+  RESET_PASSWORD: {
+    KEY: config.getOrThrow('TEMPLATE_KEY_RESET_PASSWORD'),
+    NAME: 'Envlink Password Reset',
+    SENDER: config.getOrThrow('SENDER_ADDRESS'),
   },
 });
 
