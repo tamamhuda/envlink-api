@@ -3,6 +3,7 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getRedisConfig } from 'src/config/cache.config';
 import {
+  SEND_MAIL_RESET_PASSWORD_QUEUE,
   SEND_MAIL_SUBSCRIPTION_QUEUE,
   SEND_MAIL_VERIFY_QUEUE,
   URL_ANALYTIC_QUEUE,
@@ -20,6 +21,8 @@ import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { MailSubscriptionService } from './workers/mail/mail-subscription.service';
 import { MailSubscriptionProcessor } from './workers/mail/mail-subscription.processor';
+import { MailResetPasswordService } from './workers/mail/mail-reset-password.service';
+import { MailResetPasswordProcessor } from './workers/mail/mail-reset-password.processor';
 
 @Global()
 @Module({
@@ -47,6 +50,7 @@ import { MailSubscriptionProcessor } from './workers/mail/mail-subscription.proc
 
     BullModule.registerQueue({ name: SEND_MAIL_VERIFY_QUEUE }),
     BullModule.registerQueue({ name: SEND_MAIL_SUBSCRIPTION_QUEUE }),
+    BullModule.registerQueue({ name: SEND_MAIL_RESET_PASSWORD_QUEUE }),
     BullModule.registerQueue({ name: URL_ANALYTIC_QUEUE }),
     BullModule.registerQueue({ name: URL_METADATA_QUEUE }),
 
@@ -57,6 +61,10 @@ import { MailSubscriptionProcessor } from './workers/mail/mail-subscription.proc
       },
       {
         name: SEND_MAIL_SUBSCRIPTION_QUEUE,
+        adapter: BullMQAdapter,
+      },
+      {
+        name: SEND_MAIL_RESET_PASSWORD_QUEUE,
         adapter: BullMQAdapter,
       },
       {
@@ -79,6 +87,8 @@ import { MailSubscriptionProcessor } from './workers/mail/mail-subscription.proc
     MailVerifyService,
     MailSubscriptionProcessor,
     MailSubscriptionService,
+    MailResetPasswordProcessor,
+    MailResetPasswordService,
     UrlAnalyticService,
     UrlAnalyticProcessor,
     UrlMetadataProcessor,

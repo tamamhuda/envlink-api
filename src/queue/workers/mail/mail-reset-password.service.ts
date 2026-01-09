@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  MailResetPasswordTemplateInfo,
   MailSubscriptionTemplateInfo,
   MailVerifyTemplateInfo,
 } from 'src/common/interfaces/mail.interface';
@@ -10,7 +11,7 @@ import LoggerService from 'src/common/logger/logger.service';
 import { CcBccItem } from 'zeptomail/types';
 
 @Injectable()
-export class MailVerifyService {
+export class MailResetPasswordService {
   private readonly APP_NAME: string;
 
   constructor(
@@ -18,16 +19,20 @@ export class MailVerifyService {
     private readonly config: ConfigService<Env>,
     private readonly logger: LoggerService,
   ) {
-    const app: string = this.config.getOrThrow('APP_NAME');
-    this.APP_NAME = app.charAt(0).toUpperCase() + app.slice(1).toLowerCase();
+    this.APP_NAME = this.config.getOrThrow('APP_NAME');
   }
 
-  async sendVerifyEmail(email: string, givenName: string, verifyUrl: string) {
-    const mergeInfo: MailVerifyTemplateInfo = {
+  async send(
+    email: string,
+    givenName: string,
+    resetPasswordUrl: string,
+    ttlMinutes: number,
+  ) {
+    const mergeInfo: MailResetPasswordTemplateInfo = {
       APP_NAME: this.APP_NAME,
       GIVEN_NAME: givenName,
-      VERIFY_URL: verifyUrl,
-      DURATION: '5 minutes',
+      RESET_PASSWORD_URL: resetPasswordUrl,
+      DURATION: `${ttlMinutes} minutes`,
       CURRENT_YEAR: new Date().getFullYear().toString(),
     };
 
@@ -42,9 +47,9 @@ export class MailVerifyService {
 
     await this.mailUtil.sendTemplateEmail(
       to,
-      'VERIFY_EMAIL',
+      'RESET_PASSWORD',
       mergeInfo,
-      'Email Verification',
+      'Reset Password',
     );
   }
 }
